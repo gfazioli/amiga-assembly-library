@@ -1,8 +1,8 @@
 'use client';
 
 import { TextAnimate } from '@gfazioli/mantine-text-animate';
-import { IconBrandGithub, IconExternalLink } from '@tabler/icons-react';
 import { Anchor, Button, Center, Code, Paper, Text, Title } from '@mantine/core';
+import { IconBrandGithub, IconExternalLink } from '@tabler/icons-react';
 import pack from '../../package.json';
 import { ProductHunt } from '../ProductHunt/ProductHunt';
 import classes from './Welcome.module.css';
@@ -14,7 +14,7 @@ export function Welcome() {
         <ProductHunt />
       </Center>
       <Title maw="90vw" mx="auto" className={classes.title} ta="center">
-        Welcome to Mantine Next.js +
+        Amiga
         <TextAnimate
           animate="in"
           by="character"
@@ -29,7 +29,7 @@ export function Welcome() {
           }}
           gradient={{ from: 'pink', to: 'yellow' }}
         >
-          Nextra template
+          Assembly Library
         </TextAnimate>
       </Title>
 
