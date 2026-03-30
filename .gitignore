@@ -134,3 +134,7 @@ dist
 .pnp.*
 
 .DS_Store
+next-env.d.ts
+
+# Claude Code local settings
+.claude/settings.local.json

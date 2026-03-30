@@ -1,8 +1,18 @@
 'use client';
 
-import { IconBrandGithub } from '@tabler/icons-react';
+import { IconBrandGithub, IconPackage } from '@tabler/icons-react';
 import { MDXRemote } from 'nextra/mdx-remote';
-import { Alert, Badge, Button, Group, Loader, Paper, Skeleton, Stack, Text } from '@mantine/core';
+import {
+  Alert,
+  Badge,
+  Button,
+  Group,
+  Loader,
+  Skeleton,
+  Stack,
+  Text,
+  Timeline,
+} from '@mantine/core';
 import config from '@/config';
 import { useMDXComponents } from '@/mdx-components';
 import { useReleaseNotes, type Release } from './use-release-notes';
@@ -34,34 +44,24 @@ export function ReleaseNotes() {
     );
   }
 
-  if (!data) {
-    return null;
-  }
-
-  if (data.length === 0) {
-    return null;
-  }
-
   return (
     <Stack mt={24}>
-      {data.map((release: Release) => (
-        <Paper
-          id={release.tag_name}
-          key={release.id}
-          withBorder
-          p={24}
-          radius={12}
-          shadow="sm"
-          className="x:tracking-tight x:target:animate-[fade-in_1.5s]"
-        >
-          <Group justify="space-between">
-            <Badge size="xl">{release.tag_name}</Badge>
-            <Text>{release.created_at}</Text>
-          </Group>
-
-          <MDXRemote compiledSource={release.body} components={components} />
-        </Paper>
-      ))}
+      <Timeline active={1} bulletSize={32} lineWidth={4}>
+        {data.map((release: Release) => (
+          <Timeline.Item
+            id={release.tag_name}
+            className="x:tracking-tight x:target:animate-[fade-in_1.5s]"
+            key={release.id}
+            bullet={<IconPackage size={20} />}
+            title={<Badge size="xl">{release.tag_name}</Badge>}
+          >
+            <Text size="sm" fw={800} mb={16}>
+              {release.created_at}
+            </Text>
+            <MDXRemote compiledSource={release.body} components={components} />
+          </Timeline.Item>
+        ))}
+      </Timeline>
       <Button
         color="orange"
         component="a"
