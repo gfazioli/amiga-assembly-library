@@ -1,0 +1,409 @@
+import { Callout } from 'nextra/components'
+
+# UpdateResident
+
+**UpdateResident** (Ver.4.15) is a full-featured utility for comparing and updating Amiga system resident modules (libraries, devices, datatypes, etc.) between directories. It provides a dual-pane ListView interface where you can scan a source directory (e.g., a floppy disk or download), compare its contents against a system directory (e.g., `LIBS:`), and selectively update files.
+
+The program demonstrates many advanced Assembly Library features including the REI interface system, localization via catalogs, AsmRequest dialogs with DataType images, iconify/de-iconify via AppMenuItems, font selection, and settings persistence.
+
+## Key Features
+
+- **Dual ListView comparison** -- Side-by-side display of source and destination directories with resident module version info
+- **Resident module scanning** -- Reads `RTC_MATCHWORD` headers to extract version and ID strings from binary files
+- **Selective update** -- Copy individual or multiple files from source to destination
+- **Iconify support** -- Minimizes to a Workbench Tools menu item via `AddAppMenuItem()`
+- **Localization** -- Full catalog-based localization for all UI strings
+- **Font selection** -- User-selectable window font via ASL FontRequester
+- **Settings persistence** -- Save/load window position and font preferences to `ENVARC:`
+- **Configurable via ToolTypes** -- INTERFACE, SETTINGS, DESTDRAWER, AUTORESCAN, FOLLOW
+
+## Source Files
+
+### UPDATERE.H -- Header and Definitions
+
+Contains catalog message IDs, gadget name definitions, menu structure definitions, and the `UpDateData` structure that holds all application state.
+
+```h
+/**************************************************************************************
+** CATALOG .CD/CT Define
+***************************************************************************************
+*/
+/* Window Titles */
+
+#define MSG_WINDOWEFFECT    1
+#define STRING_LEN  200             /* elements in the LISTVIEW */
+
+/**************************************************************************************
+** Catalog defines
+***************************************************************************************
+*/
+#define MSG_UCONTINUE       1
+#define MSG_CONTINUE        2
+#define MSG_CANCEL          3
+#define MSG_WARNING         4
+#define MSG_UPDATING        5
+#define MSG_ABOUT           6
+#define MSG_SETCOMMENT      7
+
+#define MSG_UPDATEINFO      100
+#define MSG_UPDATEINFOGAD   101
+#define MSG_WBINFO          102
+#define MSG_FILEERROR       103
+#define MSG_SETCOMERR       104
+#define MSG_SETCOMMENTINFO  105
+#define MSG_SETCOMMENTGAD   106
+#define MSG_DELETEINFO      107
+#define MSG_DELETEINFOGAD   108
+#define MSG_DELETEINFOERR   109
+
+#define MSG_DATAREL         200
+#define MSG_DATARELGAD      201
+#define MSG_COPYS           300
+#define MSG_COPYSGAD        301
+#define MSG_SETCOMS         350
+#define MSG_SETCOMSGAD      351
+
+#define MSG_SELECT          400
+#define MSG_CHECK           401
+#define MSG_CHANGEDIR       402
+#define MSG_CHANGE          403
+
+/**********************************************
+** Gadget name defines
+***********************************************/
+
+#define BUT_SCAN        "b01"
+#define BUT_SCAN_CODE   0x1001
+#define BUT_SYSTEMLIST  "b02"
+#define BUT_INFOWB      "b03"
+#define BUT_INFOWB_CODE 0x1003
+#define BUT_UPDATE      "upd"
+#define BUT_UPDATE_CODE 0x1004
+#define BUT_QUIT        "quit"
+#define BUT_QUIT_CODE   0x10ff
+#define BUT_COMPARETO   "b05"
+#define BUT_COMPARETO_CODE 0x1005
+#define BUT_RESCAN      "b06"
+#define BUT_RESCAN_CODE 0x1006
+#define STR_COMPARETO   "str1"
+#define STR_COMPARETO_CODE 0x1201
+#define LV_SOURCEFILES  "lv1"
+#define LV_SOURCEFILES_CODE 0x4001
+#define LV_DESTFILES    "lv2"
+#define LV_DESTFILES_CODE 0x4002
+
+/**********************************************
+** Menu, Item, and SubItem name defines
+***********************************************/
+#define CMENU_PROJECT       0
+
+#define CITEM_SCAN          0
+#define CITEM_RESCAN        1
+#define CITEM_SETCOMMENT    3
+#define CITEM_DELETE        4
+#define CITEM_UPDATE        5
+#define CITEM_ICONIFY       7
+#define CITEM_ABOUT         8
+#define CITEM_QUIT          10
+
+#define CMENU_SPECIALINFO   1
+#define CITEM_INFOWB        0
+#define CITEM_SYSTEMLIST    1
+
+#define CMENU_DEFAULTDRAWER 2
+#define CITEM_LIBRARIES     0
+#define CITEM_DEVICES       1
+#define CITEM_DATATYPES     2
+#define CITEM_GADGETS       3
+#define CITEM_IMAGES        4
+#define CITEM_CODECS        5
+#define CITEM_CLASSES       6
+
+#define CMENU_SETTINGS      3
+#define CITEM_AUTORESCAN    0
+#define CITEM_FOLLOW        1
+#define CITEM_SETFONTS      3
+#define CITEM_LOADSETTINGS  5
+#define CITEM_SAVESETTINGS  6
+
+/**************************************************************************************
+** MENU #define for .rei file
+***************************************************************************************
+*/
+
+#define MENU_PROJECT     1
+#define ITEM_SCAN        1
+#define ITEM_RESCAN      2
+#define ITEM_SETCOM      3
+#define ITEM_DELETE      4
+#define ITEM_UPDATE      5
+#define ITEM_ICONIFY     6
+#define ITEM_ABOUT       7
+#define ITEM_QUIT        8
+
+#define MENU_SPECIALINFO 2
+#define ITEM_INFOWB      21
+
+#define MENU_DEFDRAWER   3
+#define ITEM_LIBS        31
+#define ITEM_DEVS        32
+#define ITEM_DATA        33
+#define ITEM_GADS        34
+#define ITEM_IMGS        35
+#define ITEM_CODS        36
+#define ITEM_CLAS        37
+
+#define MENU_SETTINGS    4
+#define ITEM_AUTORESCAN  41
+#define ITEM_FOLLOW      42
+#define ITEM_SETFONT     43
+#define ITEM_LOADSETS    44
+#define ITEM_SAVESETS    45
+
+#define ITEM_VOID        0
+
+
+/**************************************************************************************
+** General data structure stored in rei_UserData
+***************************************************************************************
+*/
+struct UpDateData {
+    struct  Interface *udd_i;           /* Interface address */
+    char    udd_DestDrawer[108];        /* max length for the comparison path */
+    char    udd_InitDrawer[108];        /* tracks the last selected drawer */
+    char    Error[100];                 /* file open error string */
+    ULONG   NError;                     /* error number */
+
+    struct List *freelist;              /* LISTVIEW lists */
+    struct List *freelist2;
+
+    struct AsmGadget *LastLV;           /* Last released LISTVIEW */
+    struct AsmGadget *NoFocusLV;        /* The other (unselected) one */
+    STRPTR CurrentDrawer;               /* Where to ask WBInfo */
+
+    struct FileRequester *fr;           /* File Requester */
+    struct FileRequester *frDrawer;     /* drawer change requester */
+    struct WBArg *frargs;
+
+    struct AsmRequest *areq;            /* My AsmRequest... */
+    Object *dto01;                      /* Loaded objects list... */
+    Object *dto02;
+    Object *dto03;
+    Object *dto04;
+
+    struct TextAttr TextPrefs;          /* New Prefs available from $Ver:4.1 */
+    char   udd_TextName[30];            /* font name follows */
+
+    ULONG  LeftTag;                     /* Special Tag list for window position */
+    ULONG  LeftValue;
+    ULONG  TopTag;
+    ULONG  TopValue;
+    ULONG  WidthTag;
+    ULONG  WidthValue;
+    ULONG  HeightTag;
+    ULONG  HeightValue;
+    ULONG  TagDone;
+    char   autorescan;
+    char   follow;
+};
+```
+
+### UPDATERE.C -- Main Program (excerpt)
+
+The main C source is a large (~1100 line) program. Below are the key sections demonstrating Assembly Library usage.
+
+**Initialization and main event loop:**
+
+```c
+/**************************************************************************************
+** UPDATE RESIDENT
+**------------------------------------------------------------------------------------
+**; HISTORY
+**;--------+--------+-----------+-----------------------------------------------------
+**; Author | Rel    | Date      | Comment
+**;--------+--------+-----------+-----------------------------------------------------
+**; =jon=  | 4.1    | 18-Aug-95 | Added Localization
+**; =jon=  | 4.11   | 20-Sep-95 | New About, Add follow function
+**; =jon=  | 4.12   | 18-Nov-95 | Add HighLight of the ListView
+**; =jon=  | 4.13   | 19-Nov-95 | Add new ToolTypes and drop file icon...
+**; =jon=  | 4.14   | 21-Nov-95 | Fix many graphics bugs, now it's very good
+**; =jon=  | 4.15   | 30-Jan-96 | Rev code, fixed bug on first update
+***************************************************************************************
+*/
+
+VOID main(int argc, char **argv)
+{
+struct  WBStartup *wbs;
+struct  WBArg *wbarg;
+struct  REI *mainrei;
+struct  REIMessage *rmsg;
+BOOL    fine = TRUE;
+
+    if (AssemblyBase = OpenLibs())
+    {
+        GetDefToolsTypes(argc, argv,"SETTINGS","ENVARC:UpDateRes.Prefs",settings);
+
+        if(mainrei = OpenAndInitI("main",argc, argv))
+        {
+            LockREI(mainrei,NULL);
+            SetAsmGadgetAttrs(mainrei,NULL,BUT_SYSTEMLIST,GA_Disabled,TRUE,TAG_DONE);
+            SetInterface(mainrei, TRUE);
+            UnlockREI(mainrei,NULL);
+
+            while (fine)
+            {
+                if (rmsg = WaitREIMsg(mainrei,0x5F))
+                {
+                    switch(rmsg->rim_Class)
+                    {
+                        case IDCMP_MENUPICK:
+                            switch(rmsg->rim_Code)
+                            {
+                                case ITEM_SCAN:
+                                    LockREI(mainrei,NULL);
+                                    Check(mainrei);
+                                    UnlockREI(mainrei,NULL);
+                                    break;
+
+                                case ITEM_UPDATE:
+                                    LockREI(mainrei,NULL);
+                                    UpDate(mainrei);
+                                    UnlockREI(mainrei,NULL);
+                                    break;
+
+                                case ITEM_ICONIFY:
+                                    mainrei = Iconify(mainrei);
+                                    break;
+
+                                case ITEM_QUIT:
+                                    fine = FALSE;
+                                    break;
+                                /* ... more menu items ... */
+                            }
+                            break;
+
+                        case IDCMP_CLOSEWINDOW:
+                            fine = FALSE;
+                            break;
+
+                        case IDCMP_GADGETUP:
+                            switch(((struct Gadget *)rmsg->rim_IAddress)->GadgetID)
+                            {
+                                case BUT_SCAN_CODE:
+                                    LockREI(mainrei,NULL);
+                                    Check(mainrei);
+                                    UnlockREI(mainrei,NULL);
+                                    break;
+                                /* ... more gadget handlers ... */
+                            }
+                            break;
+                    }
+                }
+            }
+        CloseAll(mainrei);
+        }
+    CloseLibrary(AssemblyBase);
+    }
+}
+```
+
+**Iconify support -- minimizes to Workbench Tools menu:**
+
+```c
+struct REI *Iconify(struct REI *mainrei)
+{
+struct  UpDateData *udd = mainrei->rei_UserData;
+struct  MsgPort      *myport=NULL;
+struct  AppMenuItem *appitem=NULL;
+struct  AppMessage   *appmsg=NULL;
+BOOL    fine = TRUE;
+
+    if(myport = CreateMsgPort())
+    {
+        if(appitem = AddAppMenuItemA(0x22, NULL,
+                           "UpDateResident 4.15",
+                            myport,NULL))
+        {
+            StoreTag(mainrei, TRUE);
+            CloseREI(mainrei,NULL);
+            WaitPort(myport);
+            while((appmsg=(struct AppMessage *)GetMsg(myport)) && (fine))
+            {
+                if(appmsg->am_ID == 0x22)
+                    fine = FALSE;
+                ReplyMsg((struct Message *)appmsg);
+            }
+            RemoveAppMenuItem(appitem);
+            while(appmsg=(struct AppMessage *)GetMsg(myport))
+                ReplyMsg((struct Message *)appmsg);
+            mainrei=OpenREI(NULL,"main",REIT_WindowTAG,&udd->LeftTag,TAG_DONE);
+        }
+    DeleteMsgPort(myport);
+    }
+return(mainrei);
+}
+```
+
+### UPDATERE.ASM -- Assembly Support Module
+
+The assembly module provides performance-critical helper functions written in 68000 assembly:
+
+```asm
+***************************************************************************************
+**
+** UpDateResident.4.11.asm --- compile to DLIB:UpDataRes.Lib
+**
+** Rev. (8-Sep-1995)
+**
+***************************************************************************************
+
+    opt NOCHKBIT
+
+    include DevPac:system
+
+    incdir  include_I:
+    include assembly/assembly_lib.i
+
+    XDEF    _Filling
+    XDEF    _SoFill
+    XDEF    _RecoverFilename
+    XDEF    _NodeNumber
+    XDEF    _ObtainError
+    XDEF    _LoadNewDTObjectA
+    XDEF    _LoadNewDTObject
+    XDEF    _CopyTextAttr
+    XDEF    _ShowIInfo          ;$VER.4.11
+    XDEF    _MakeFontName       ;$VER.4.11
+
+    XREF    _AssemblyBase
+```
+
+Key functions provided:
+
+| Function | Purpose |
+|----------|---------|
+| `Filling()` | Scans a loaded segment list for `RTC_MATCHWORD`, extracts version and ID string into a formatted buffer for the ListView |
+| `SoFill()` | Formats an error message into a ListView-compatible string buffer |
+| `RecoverFilename()` | Extracts the filename portion from a padded ListView string |
+| `NodeNumber()` | Returns the Nth node from an Exec List |
+| `ObtainError()` | Calls `IoErr()` and `Fault()` to get a human-readable DOS error string |
+| `LoadNewDTObject()` | Loads a DataType object, searching current directory then `sys:Classes/Images/` |
+| `CopyTextAttr()` | Copies a `TextAttr` structure including the font name string |
+| `ShowIInfo()` | Hook callback that calls `InterfaceInfo()` on double-click |
+| `MakeFontName()` | Fixes up the font name pointer in a saved `UpDateData` structure |
+
+<Callout type="info">
+  The `Filling()` function is particularly interesting -- it walks through AmigaOS hunk segments searching for `RTC_MATCHWORD` (the Resident structure magic value), then extracts the version number using Assembly Library's `ValueToStringDec()` function and copies the ID string. This is how the program displays version information for each file in the ListView.
+</Callout>
+
+## How It Works
+
+1. **Initialization** -- Opens the Assembly Library and reads ToolType configuration (INTERFACE, SETTINGS, DESTDRAWER, AUTORESCAN, FOLLOW). Loads the REI interface and opens the main window with saved position/font preferences.
+
+2. **Scanning** -- When the user clicks "Scan", an ASL FileRequester (with multi-select) lets them choose files. Each selected file is `Load()`ed into memory, then `Filling()` scans its hunk data for `RTC_MATCHWORD` to extract version info.
+
+3. **Comparison** -- The source ListView shows files with their version info. The destination ListView shows the same filenames found in the comparison directory (e.g., `LIBS:`), also with version info. This makes it easy to see which files are newer.
+
+4. **Update** -- Selected files can be copied from source to destination, with confirmation dialogs using `AsmRequest` with DataType images.
+
+5. **Iconify** -- The window can be minimized to a Workbench Tools menu item. When reactivated, the window is re-opened with saved position using `REIT_WindowTAG`.

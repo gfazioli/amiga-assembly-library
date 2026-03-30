@@ -41,27 +41,30 @@ The function iterates through the chunk list using `TestAIFFChunk()` to validate
 The original 68020 assembly implementation:
 
 ```asm
-****************************************************************************
-* Rel.3.1 * Last save: Apr 11 1994 =JON=
+; Rel.3.1 - Apr 11 1994 --- FindAIFFChunk()
 _LVOFindAIFFChunk
-	move.l	a1,-(sp)
-	lea	"FORM",a1
-	cmp.l	(a0),a1
-	bne.s	FIFF_NoINIT
-	addq.l	#8,a0
-	addq.l	#4,a0
+        move.l  a1,-(sp)
+        lea     "FORM",a1
+        cmp.l   (a0),a1
+        bne.s   FIFF_NoINIT
+        addq.l  #8,a0
+        addq.l  #4,a0
+
 FIFF_NoINIT
-	move.l	d0,d1
+        move.l  d0,d1
+
 FIFF_CheckLoop
-	bsr.s	_LVOTestAIFFChunk
-	beq.s	FIFFChunk_Exit
-	cmp.l	(a0),d1
-	beq.s	FIFF_FindIt
-	bsr.s	_LVONextIFFChunk
-	bra.s	FIFF_CheckLoop
+        bsr.s   _LVOTestAIFFChunk
+        beq.s   FIFFChunk_Exit
+        cmp.l   (a0),d1
+        beq.s   FIFF_FindIt
+        bsr.s   _LVONextIFFChunk
+        bra.s   FIFF_CheckLoop
+
 FIFF_FindIt
-	movem.l	(a0),d0-d1
+        movem.l (a0),d0-d1
+
 FIFFChunk_Exit
-	move.l	(sp)+,a1
-	rts
+        move.l  (sp)+,a1
+        rts
 ```

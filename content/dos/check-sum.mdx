@@ -42,48 +42,46 @@ This command does not modify any registers; it returns A0 and D0 intact.
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (15-Feb-1995) Make Up --- CheckSum(buffer,type) (a0,d0)
-***************************************************************************************
+; (15-Feb-1995) --- CheckSum(buffer,type) (a0,d0)
 _LVOCheckSum
-	movem.l	d0-d1/a0-a1,-(sp)
-	tst.l	d0
-	beq.s	CKSBoot
-	moveq	#0,d0
-	moveq	#$7F,d1
-	lea	BB_SIZE(a0),a1		; CheckSum pointer
-	move.l	d0,(a1)			; Clear it
-CKSLoop	sub.l	(a0)+,d0
-	dbf	d1,CKSLoop
-	move.l	d0,(a1)			; Set!!
-CKSExit	movem.l	(sp)+,d0-d1/a0-a1
-	rts
-CKSBoot	move.l	d0,BB_CHKSUM(a0)	; Clear Old CheckSum
-	moveq	#1,d1
-	lea	BB_CHKSUM(a0),a1	; Save CheckSum pointer
-CKSBLp	add.l	(a0)+,d0
-	bcc.s	CKSJump
-	addq.l	#1,d0
-CKSJump	dbf	d1,CKSBLp
-	not.l	d0
-	move.l	d0,(a1)
-	movem.l	(sp)+,d0-d1/a0-a1
-	rts
+        movem.l d0-d1/a0-a1,-(sp)
+        tst.l   d0
+        beq.s   CKSBoot
+        moveq   #0,d0
+        moveq   #$7F,d1
+        lea     BB_SIZE(a0),a1           ; CheckSum pointer
+        move.l  d0,(a1)                  ; Clear it
+CKSLoop sub.l   (a0)+,d0
+        dbf     d1,CKSLoop
+        move.l  d0,(a1)                  ; Set!!
+CKSExit movem.l (sp)+,d0-d1/a0-a1
+        rts
+CKSBoot move.l  d0,BB_CHKSUM(a0)        ; Clear Old CheckSum
+        moveq   #1,d1
+        lea     BB_CHKSUM(a0),a1         ; Save CheckSum pointer
+CKSBLp  add.l   (a0)+,d0
+        bcc.s   CKSJump
+        addq.l  #1,d0
+CKSJump dbf     d1,CKSBLp
+        not.l   d0
+        move.l  d0,(a1)
+        movem.l (sp)+,d0-d1/a0-a1
+        rts
 
 ; Old Algo by =STID=
 ;
 ;CheckSumBoot
-;	lea	4(a0),a1
-;	clr.l	(a1)
-;	move.w	#$00ff,d1
-;	moveq	#0,d0
+;        lea     4(a0),a1
+;        clr.l   (a1)
+;        move.w  #$00ff,d1
+;        moveq   #0,d0
 ;CheckSumBootLoop
-;	add.l	(a0)+,d0
-;	bcc.s	CheckSumBootJump
-;	addq.l	#1,d0
+;        add.l   (a0)+,d0
+;        bcc.s   CheckSumBootJump
+;        addq.l  #1,d0
 ;CheckSumBootJump
-;	dbf	d1,CheckSumBootLoop
-;	not.l	d0
-;	move.l	d0,(a1)
-;	bra.s	CheckSumExit
+;        dbf     d1,CheckSumBootLoop
+;        not.l   d0
+;        move.l  d0,(a1)
+;        bra.s   CheckSumExit
 ```

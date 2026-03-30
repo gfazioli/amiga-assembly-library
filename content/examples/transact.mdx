@@ -1,0 +1,443 @@
+import { Callout } from 'nextra/components'
+
+# DataType Transactions
+
+This section contains a series of progressive example programs demonstrating the AmigaOS 3.x DataTypes system. These examples range from simple file type identification to full DataType object display with scrollbar interaction. They do not use the Assembly Library directly, but illustrate the DataType concepts that the library builds upon.
+
+<Callout type="info">
+  The TRANSACT directory README describes these as DataType transaction examples, progressing from basic queries to full object rendering with scroll bars. The original Italian comments have been translated to English.
+</Callout>
+
+## ESEMPIO_.C -- AppMenuItem Example
+
+A standalone example (not DataType-related) showing how to add multiple items to the Workbench Tools menu using `AddAppMenuItemA()`. Demonstrates the AppMenuItem message loop pattern used by several Assembly Library programs.
+
+```c
+#include <exec/types.h>
+#include <workbench/workbench.h>
+#include <workbench/startup.h>
+#include <exec/libraries.h>
+#include <dos/dostags.h>
+#include <stdio.h>
+#include <clib/dos_protos.h>
+#include <clib/exec_protos.h>
+#include <clib/wb_protos.h>
+
+void cleanexit(char *msg);
+
+#define NUM_ITEMS 4
+
+struct Library *WorkbenchBase = NULL;
+struct MsgPort      *myport=NULL;
+struct AppMenuItem *appitem[NUM_ITEMS]= {NULL, NULL, NULL, NULL};
+struct AppMessage   *appmsg=NULL;
+
+void main(int argc, char **argv)
+{
+  BOOL finished = FALSE;
+  int i;
+  char *items[NUM_ITEMS] = {"first", "second", "third","quit"};
+
+  /* Open libraries and allocate the message port */
+  WorkbenchBase = OpenLibrary("workbench.library",37);
+  if (!WorkbenchBase) cleanexit("Cannot open workbench.library\n");
+  myport = CreateMsgPort();
+  if(! myport) cleanexit("Cannot create message port\n");
+
+  /* Add the items from the `items` array to the menu, and assign the index */
+  /* in the array as the ID */
+  for (i=0; i<NUM_ITEMS; i++)
+  {
+    appitem[i] = AddAppMenuItemA(i,NULL,items[i],myport,NULL);
+    if(! appitem[i]) cleanexit("Cannot add all AppItems\n");
+  }
+
+  do
+  {
+    WaitPort(myport);
+    while((appmsg=(struct AppMessage *)GetMsg(myport)))
+    {
+      /* if the "quit" item was selected, exit the program */
+      if (appmsg->am_ID == 3)
+        finished = TRUE;
+      else
+      {
+        printf("item = %s ",items[appmsg->am_ID]);
+        printf("selected with %ld icons selected\n",appmsg->am_NumArgs);
+      }
+      ReplyMsg((struct Message *)appmsg);
+    }
+  } while (! finished);
+  cleanexit(NULL);
+}
+
+void cleanexit(char *msg)
+{
+  int i;
+
+  if (msg) printf(msg);
+  for (i=0; i<NUM_ITEMS; i++)
+    if (appitem[i]) RemoveAppMenuItem(appitem[i]);
+  if (myport)
+  {
+    while(appmsg=(struct AppMessage *)GetMsg(myport))
+      ReplyMsg((struct Message *)appmsg);
+    DeleteMsgPort(myport);
+  }
+  if (WorkbenchBase) CloseLibrary(WorkbenchBase);
+}
+```
+
+---
+
+## DT2.C -- DataType File Identification
+
+The simplest DataType example. Given a filename as argument, it identifies the file type by obtaining a `DataType` descriptor and printing the file's description, base name, type, group, and four-character ID.
+
+```c
+#include <datatypes/datatypes.h>
+#include <datatypes/datatypesclass.h>
+#include <libraries/dos.h>
+
+struct Library *DataTypesBase;
+BPTR lock;
+
+struct DataTypeHeader *dth;
+struct DataType *dtn;
+STRPTR tdesc;
+STRPTR gdesc;
+UWORD ttype;
+char *id;
+
+int main(int argc, char *argv[])
+{
+    if (lock=Lock(argv[1],ACCESS_READ)) {
+        if (DataTypesBase=OpenLibrary("datatypes.library",0)) {
+            if (dtn=ObtainDataTypeA(DTST_FILE,(APTR)lock,NULL)) {
+                dth=dtn->dtn_Header;
+                ttype=dth->dth_Flags & DTF_TYPE_MASK;
+                tdesc=GetDTString(ttype+DTMSG_TYPE_OFFSET);
+                gdesc=GetDTString(dth->dth_GroupID);
+                id=&(dth->dth_ID);
+
+                printf("       File: %s\n",argv[1]);
+                printf("Description: %s\n",dth->dth_Name);
+                printf("   BaseName: %s\n",dth->dth_BaseName);
+                printf("       Type: %d - %s\n",ttype,tdesc);
+                printf("      Group: %s\n",gdesc);
+                printf("         ID: %c%c%c%c\n",id[0],id[1],id[2],id[3]);
+
+                ReleaseDataType(dtn);
+            }
+            CloseLibrary(DataTypesBase);
+        }
+        UnLock(lock);
+    }
+    return(0);
+}
+```
+
+**Usage:** `DT2 <filename>` -- prints DataType information about the file.
+
+---
+
+## DT3B.C -- DataType Object Display with Scroll Bars
+
+A more advanced example that loads a DataType object into a window with vertical and horizontal proportional gadget scrollbars. It demonstrates:
+
+- Creating a DataType object with `NewDTObject()` and adding it to a window
+- Creating `propgclass` scrollbar gadgets with ICA mapping to the DataType
+- Handling `IDCMP_IDCMPUPDATE` messages for DataType notifications (busy pointer, errors, sync, title, scroll position)
+
+```c
+#include <datatypes/datatypes.h>
+#include <datatypes/datatypesclass.h>
+#include <intuition/intuition.h>
+#include <intuition/classusr.h>
+#include <intuition/icclass.h>
+#include <intuition/gadgetclass.h>
+#include <utility/tagitem.h>
+
+#include <stdio.h>
+#include <clib/intuition_protos.h>
+#include <clib/utility_protos.h>
+#include <clib/exec_protos.h>
+#include <clib/datatypes_protos.h>
+
+#define PROPH   (w->BorderTop -2)
+#define PROPW   (PROPH*2)
+
+struct Library *DataTypesBase;
+struct Window *w;
+Object *dto,*pvo,*pho;
+struct IntuiMessage *imsg;
+struct TagItem *tstate,*tags,*tag;
+ULONG tidata,errnum,sigr;
+BOOL done=FALSE;
+
+struct TagItem VertMapping[]= {
+    {PGA_Top,       DTA_TopVert},
+    {PGA_Visible,   DTA_VisibleVert},
+    {PGA_Total,     DTA_TotalVert},
+    {TAG_DONE,      NULL}
+};
+
+struct TagItem HorizMapping[]= {
+    {PGA_Top,       DTA_TopHoriz},
+    {PGA_Visible,   DTA_VisibleHoriz},
+    {PGA_Total,     DTA_TotalHoriz},
+    {TAG_DONE,      NULL}
+};
+
+void DoJob(void);
+
+int main(int argc, char *argv[])
+{
+    if (DataTypesBase=OpenLibrary("datatypes.library",0)) {
+        if (w=OpenWindowTags(NULL,
+                        WA_IDCMP,           IDCMP_CLOSEWINDOW|IDCMP_IDCMPUPDATE,
+                        WA_Title,           "dt3b - DataTypes example",
+                        WA_CloseGadget, TRUE,
+                        WA_DepthGadget, TRUE,
+                        WA_DragBar,         TRUE,
+                        WA_NoCareRefresh,   TRUE,
+                        WA_AutoAdjust,      TRUE,
+                        WA_MinWidth,        50,
+                        WA_MinHeight,       50,
+                        WA_Width,           500,
+                        WA_Height,          250,
+                        TAG_DONE    )) {
+
+         if (dto=NewDTObject(argv[1],
+                     GA_Left,    w->BorderLeft,
+                     GA_Top,     w->BorderTop,
+                     GA_Width,   w->Width - w->BorderLeft - w->BorderRight - PROPW,
+                     GA_Height,  w->Height - w->BorderTop - w->BorderBottom - PROPH,
+                     ICA_TARGET, ICTARGET_IDCMP,
+                     TAG_DONE )) {
+
+            /* Create vertical scrollbar */
+            if (pvo=NewObject(NULL,"propgclass",
+                        GA_Left,       w->Width-w->BorderRight-PROPW,
+                        GA_Top,        w->BorderTop,
+                        GA_Height,     w->Height - w->BorderTop - w->BorderBottom - PROPH,
+                        GA_Width,      PROPW,
+                        PGA_NewLook,   TRUE,
+                        ICA_TARGET,    dto,
+                        ICA_MAP,       VertMapping,
+                        TAG_DONE )) {
+               /* Create horizontal scrollbar */
+               if (pho=NewObject(NULL,"propgclass",
+                            GA_Left,       w->BorderLeft,
+                            GA_Top,        w->Height - w->BorderBottom - PROPH,
+                            GA_Height,     PROPH,
+                            GA_Width,      w->Width - w->BorderLeft - w->BorderRight - PROPW,
+                            PGA_NewLook,   TRUE,
+                            PGA_Freedom,   FREEHORIZ,
+                            ICA_TARGET,    dto,
+                            ICA_MAP,       HorizMapping,
+                            TAG_DONE )) {
+
+                  AddGadget(w,pvo,-1);
+                  AddGadget(w,pho,-1);
+                  AddDTObject(w,NULL,dto,-1);
+
+                  RefreshDTObjects(dto,w,NULL,NULL);
+                  RefreshGadgets(pvo,w,NULL);
+
+                  DoJob();
+
+                  RemoveGadget(w,pvo);
+                  RemoveGadget(w,pho);
+                  DisposeObject(pho);
+                  }
+               DisposeObject(pvo);
+               RemoveDTObject(w,dto);
+            }
+            DisposeDTObject(dto);
+         }
+            CloseWindow(w);
+        }
+        CloseLibrary(DataTypesBase);
+    }
+    return(0);
+}
+
+
+void DoJob(void)
+{
+   while (!done) {
+      sigr=Wait((1<<w->UserPort->mp_SigBit) | SIGBREAKF_CTRL_C);
+
+      if (sigr & SIGBREAKF_CTRL_C)
+         done=TRUE;
+
+      while (imsg=(struct IntuiMessage *)GetMsg(w->UserPort)) {
+         switch (imsg->Class) {
+
+            case IDCMP_IDCMPUPDATE:
+               tstate=tags=(struct TagItem *)imsg->IAddress;
+               while (tag=NextTagItem(&tstate)) {
+                  tidata=tag->ti_Data;
+                  switch (tag->ti_Tag) {
+                     case DTA_Busy:
+                        if (tidata)
+                           SetWindowPointer(w,WA_BusyPointer,TRUE,TAG_DONE);
+                        else
+                           SetWindowPointer(w,WA_Pointer,NULL,TAG_DONE);
+                        break;
+                     case DTA_Sync:
+                        RefreshDTObjects(dto,w,NULL,NULL);
+                        break;
+                     case DTA_Title:
+                        SetWindowTitles(w,(STRPTR)tag->ti_Data,(STRPTR)~0);
+                        break;
+                     case DTA_TopVert:
+                        SetGadgetAttrs(pvo,w,NULL,PGA_Top,tag->ti_Data,TAG_DONE);
+                        break;
+                     case DTA_TotalVert:
+                        SetGadgetAttrs(pvo,w,NULL,PGA_Total,tag->ti_Data,TAG_DONE);
+                        break;
+                     case DTA_VisibleVert:
+                        SetGadgetAttrs(pvo,w,NULL,PGA_Visible,tag->ti_Data,TAG_DONE);
+                        break;
+                     case DTA_TopHoriz:
+                        SetGadgetAttrs(pho,w,NULL,PGA_Top,tag->ti_Data,TAG_DONE);
+                        break;
+                     case DTA_TotalHoriz:
+                        SetGadgetAttrs(pho,w,NULL,PGA_Total,tag->ti_Data,TAG_DONE);
+                        break;
+                     case DTA_VisibleHoriz:
+                        SetGadgetAttrs(pho,w,NULL,PGA_Visible,tag->ti_Data,TAG_DONE);
+                        break;
+                     /* ... handle other tags ... */
+                  }
+               }
+               break;
+
+            case IDCMP_CLOSEWINDOW:
+               done=TRUE;
+               break;
+         }
+         ReplyMsg(imsg);
+      }
+   }
+}
+```
+
+**Usage:** `DT3B <filename>` -- opens a window displaying the file with scroll bars.
+
+---
+
+## DT4C.C -- DataType Method Query
+
+Queries and displays the available methods and trigger methods for a DataType object. This is useful for discovering what operations a particular DataType supports.
+
+```c
+#include <datatypes/datatypes.h>
+#include <datatypes/datatypesclass.h>
+#include <utility/tagitem.h>
+#include <stdio.h>
+
+#include <clib/exec_protos.h>
+#include <clib/datatypes_protos.h>
+
+void DoQuery(char *name);
+
+struct Library *DataTypesBase;
+Object *dto;
+
+int main(int argc, char *argv[])
+{
+    if (DataTypesBase=OpenLibrary("datatypes.library",0)) {
+        if (dto=NewDTObject(argv[1],TAG_DONE)) {
+            DoQuery(argv[1]);
+            DisposeDTObject(dto);
+        }
+        CloseLibrary(DataTypesBase);
+    }
+    return 0;
+}
+
+
+void DoQuery(char *name)
+{
+    ULONG *n;
+    struct DTMethod *m;
+
+    printf("Available methods for %s.\n",name);
+
+    printf("\nMethods:\n");
+    if (GetDTAttrs(dto,DTA_Methods,&n,TAG_DONE)) {
+        while (*n!=(~0))
+            printf("%08x        ",*n++);
+        printf("\n");
+    }
+
+    printf("\nTrigger Methods:\n");
+    if (GetDTAttrs(dto,DTA_TriggerMethods,&m,TAG_DONE))
+        if (m) {
+            while (m->dtm_Label) {
+                printf("Label %-20.20s Command %-20.20s Method %08x\n",
+                    m->dtm_Label, m->dtm_Command, m->dtm_Method);
+                m++;
+            }
+        }
+        else
+            printf("None.\n");
+}
+```
+
+**Usage:** `DT4C <filename>` -- lists all methods the DataType object supports.
+
+---
+
+## DT5.C -- DataType IFF Write (Format Conversion)
+
+The simplest format conversion example. Loads a DataType object from one file and writes it out as IFF to another file using `DTM_WRITE`. This effectively converts any supported format to IFF.
+
+```c
+#include <datatypes/datatypes.h>
+#include <datatypes/datatypesclass.h>
+#include <utility/tagitem.h>
+#include <stdio.h>
+
+#include <clib/exec_protos.h>
+#include <clib/datatypes_protos.h>
+
+struct Library *DataTypesBase;
+Object *dto;
+
+int main(int argc, char *argv[])
+{
+    long r=-1;
+    BPTR fh;
+
+    if (DataTypesBase=OpenLibrary("datatypes.library",0)) {
+        if (dto=NewDTObject(argv[1],TAG_DONE)) {
+            if (fh=Open(argv[2],MODE_NEWFILE)) {
+                r=DoDTMethod(dto,NULL,NULL,DTM_WRITE,NULL,fh,DTWM_IFF,NULL);
+                Close(fh);
+            }
+            printf("Results: %ld\n",r);
+            DisposeDTObject(dto);
+        }
+        CloseLibrary(DataTypesBase);
+    }
+    return 0;
+}
+```
+
+**Usage:** `DT5 <inputfile> <outputfile>` -- converts the input file to IFF format.
+
+---
+
+## Summary
+
+| Program | Description |
+|---------|-------------|
+| **ESEMPIO_.C** | AppMenuItem example -- adds multiple items to the Workbench Tools menu |
+| **DT2.C** | File identification -- prints DataType info (description, type, group, ID) |
+| **DT3B.C** | Object display -- renders a DataType object in a window with scroll bars |
+| **DT4C.C** | Method query -- lists available methods and trigger methods for a DataType |
+| **DT5.C** | Format conversion -- converts any file to IFF using `DTM_WRITE` |

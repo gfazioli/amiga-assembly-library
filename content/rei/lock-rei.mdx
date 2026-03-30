@@ -37,40 +37,38 @@ This function ensures that the REI to be blocked is not already blocked. If both
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (25-Jan-1995) =Jon= ** rei = LockREI(rei, name) (a0/a1)
-***************************************************************************************
+; (25-Jan-1995) --- rei = LockREI(rei, name) (a0/a1)
 _LVOLockREI
-	movem.l	a5-a6,-(sp)
-	move.l	a0,d0			* Was a REI address passed???
-	bne.s	LRmain			* Yes, then go...
-	move.l	a1,d0			* Was a name passed, then???
-	bne.s	LRname			* Perfect, go...
-	bsr.s	_LVOActiveREI		* Ok, get the Active one...
-	bne.s	LRmain
-LRexit	movem.l	(sp)+,a5-a6
-	rts
-LRname	move.l	ab_ExecBase(a6),a0
-	move.l	([ThisTask.w,a0],TC_Userdata.w),d0	* struct List *
-	beq.s	LRexit
-	move.l	d0,a0
-	FINDNAME
-	beq.s	LRexit			* Exit failure...
-LRmain	move.l	d0,a5			* A5 = struct REI *
-	BTSTL	REIB_LOCK,rei_Flags(a5)	* Check if it's already locked...
-	bne.s	LRexit			* Exit... it's already locked...
-	lea	rei_Request(a5),a0	* put the Window in request mode
-	move.l	ab_IntuiBase(a6),a6	* to block all INPUT...
-	jsr	_LVOInitRequester(a6)
-	lea	rei_Request(a5),a0
-	move.l	rei_Window(a5),a1
-	jsr	_LVORequest(a6)
-	move.l	rei_Window(a5),a0	* Now set the mouse to busy...
-	lea	LRTAG(pc),a1		* see below...
-	jsr	_LVOSetWindowPointerA(a6)
-	BSETL	REIB_LOCK,rei_Flags(a5)	* Set the Flags in the REI....
-	move.l	a5,d0
-	movem.l	(sp)+,a5-a6
-	rts
-LRTAG	dc.l WA_BusyPointer,1,TAG_DONE
+        movem.l a5-a6,-(sp)
+        move.l  a0,d0                   * Was a REI address passed???
+        bne.s   LRmain                  * Yes, then go...
+        move.l  a1,d0                   * Was a name passed, then???
+        bne.s   LRname                  * Perfect, go...
+        bsr.s   _LVOActiveREI           * Ok, get the Active one...
+        bne.s   LRmain
+LRexit  movem.l (sp)+,a5-a6
+        rts
+LRname  move.l  ab_ExecBase(a6),a0
+        move.l  ([ThisTask.w,a0],TC_Userdata.w),d0 * struct List *
+        beq.s   LRexit
+        move.l  d0,a0
+        FINDNAME
+        beq.s   LRexit                  * Exit failure...
+LRmain  move.l  d0,a5                   * A5 = struct REI *
+        BTSTL   REIB_LOCK,rei_Flags(a5) * Check if it's already locked...
+        bne.s   LRexit                  * Exit... it's already locked...
+        lea     rei_Request(a5),a0      * put the Window in request mode
+        move.l  ab_IntuiBase(a6),a6     * to block all INPUT...
+        jsr     _LVOInitRequester(a6)
+        lea     rei_Request(a5),a0
+        move.l  rei_Window(a5),a1
+        jsr     _LVORequest(a6)
+        move.l  rei_Window(a5),a0       * Now set the mouse to busy...
+        lea     LRTAG(pc),a1            * see below...
+        jsr     _LVOSetWindowPointerA(a6)
+        BSETL   REIB_LOCK,rei_Flags(a5) * Set the Flags in the REI....
+        move.l  a5,d0
+        movem.l (sp)+,a5-a6
+        rts
+LRTAG   dc.l    WA_BusyPointer,1,TAG_DONE
 ```

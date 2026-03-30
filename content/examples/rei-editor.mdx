@@ -1,0 +1,422 @@
+import { Callout } from 'nextra/components'
+
+# REI Editor
+
+The **REI Editor** (Ver.0.52) is a tool for creating and editing `.rei` interface definition files used by the Assembly Library's REI (Runtime External Interface) system. These `.rei` files describe complete window layouts -- gadgets, menus, positions, and properties -- and are loaded at runtime by programs using `OpenInterface()` and `OpenREI()`.
+
+The editor works by loading an existing `.rei` file, then writing it back out as a proper AmigaOS loadable binary (with `HUNK_HEADER`, `HUNK_DATA`, `HUNK_RELOC32`, and `HUNK_END` structures). This allows the REI system to `LoadSeg()` the file and use it directly.
+
+<Callout type="info">
+  This is version 0.52 -- an early development version of the editor. The main entry point loads an interface file and writes it to `RAM:test.rei` as a demonstration of the binary writing logic.
+</Callout>
+
+## Source Files
+
+### REIEDITO.C -- Main Program
+
+The C source handles library initialization, loading an existing REI interface, and invoking the binary writer.
+
+```c
+/***************************************************************************
+** REI-Editor Ver.0.52
+**
+** Author: =Jon=
+** Date: (5.5.95)
+**
+****************************************************************************
+*/
+#include <exec/exec.h>
+#include <assembly/assemblybase.h>
+#include <assembly/asmintuition.h>
+#include <libraries/asl.h>
+#include <datatypes/datatypes.h>
+#include <datatypes/datatypesclass.h>
+#include <datatypes/animationclass.h>
+#include <graphics/gfx.h>
+#include <dos/dosextens.h>
+#include <dos/doshunks.h>
+#include <intuition/classusr.h>
+#include <intuition/icclass.h>
+#include <libraries/locale.h>
+#include <workbench/workbench.h>
+#include <workbench/startup.h>
+#include <sources:c/REIEditor/REIEditor.h>
+
+#include <clib/assembly_protos.h>
+#include <clib/datatypes_protos.h>
+#include <clib/alib_protos.h>
+#include <clib/exec_protos.h>
+#include <clib/asl_protos.h>
+#include <clib/dos_protos.h>
+#include <clib/icon_protos.h>
+#include <clib/locale_protos.h>
+#include <clib/graphics_protos.h>
+#include <clib/utility_protos.h>
+#include <clib/wb_protos.h>
+
+struct TagItem ScreenTAG[] = { SA_LikeWorkbench,1,
+                SA_Title,"REI-Editor Ver.1.0 (5.5.95) ** UNREGISTRATED VERSION **",
+                TAG_DONE };
+
+long header[] = {HUNK_HEADER,0,1,0,0,0,HUNK_DATA,0};
+
+/********** Global variables *******************************************************/
+struct AssemblyBase *AssemblyBase;
+struct Library *DosBase,*IntuitionBase,*GfxBase,*AslBase, *IconBase;
+struct Library *GadToolsBase, *LocaleBase, *DataTypesBase, *WorkbenchBase;
+struct Catalog *catalog;
+struct REI *mainrei;            /* Front Edit - main screen */
+
+/********** Prototypes *************************************************************/
+struct AssemblyBase *OpenLibs();
+LONG WriteREIFile(struct Interface *i, STRPTR filename);
+
+/**************************************************************************************
+** Main
+***************************************************************************************
+*/
+VOID main(int argc, char **argv)
+{
+struct WBStartup *wbs;
+struct WBArg *wbarg;
+
+struct Interface *i;
+
+    if ( !(AssemblyBase = OpenLibs()) )     /* Open libs; if it fails, exit... */
+        return(NULL);
+
+    if(i = OpenInterface("renamemovie.rei"))
+    {
+
+        WriteREIFile(i,"ram:test.rei");
+
+        CloseInterface(i);
+    }
+    CloseCatalog(catalog);
+    CloseLibrary(AssemblyBase);
+}
+
+/**************************************************************************************
+ * WriteREIFile()
+ **************************************************************************************
+*/
+LONG WriteREIFile(struct Interface *i, STRPTR filename)
+{
+struct MinList *ml = &(i->int_MinList);
+struct REI *rei = ml->mlh_Head;
+struct REI *lastrei =  ml->mlh_TailPred;
+
+BPTR handle;
+
+#define MAXRELOC32  200                         /* Max possible relocations, in LONGs */
+#define RELOC32_SIZEOF  ((MAXRELOC32+5)<<2)     /* SIZEOF of the structure in Bytes */
+
+long nreloc32 = 0;             /* number of relocations performed */
+long nlong = 0;                /* number of LONGs == SIZEOF of what we write >>2 */
+
+long nbytes = 0;               /* number of bytes written per Write()... */
+
+long ebytes = 0;               /* end bytes */
+
+
+long abytes;                   /* number of alignment bytes */
+
+long *reloc32;                 /* pointer to the Hunk Reloc32 allocated by us */
+long indice = 3;               /* Start from this index to write into Hunk_Reloc32 */
+long *align=0;                 /* A NULL LONG to write, max 4 bytes!! */
+
+
+    reloc32 = AllocVec(RELOC32_SIZEOF,MEMF_PUBLIC|MEMF_CLEAR);  /* allocate space */
+
+
+    handle = Open(filename,MODE_NEWFILE);
+
+
+    Write(handle,header,8<<2);              /* Write HUNK_HEADER */
+
+                                            /* Struct Interface */
+    ebytes = Write(handle,i,sizeof(*i));
+    nbytes = nbytes+ebytes;                 /* total number of bytes written */
+
+
+    reloc32[indice] = ebytes;               /* Next address free */
+    indice ++;                              /* increment index */
+
+                                            /* Struct REI */
+
+    ebytes = Write(handle,rei,sizeof(*rei));  /* write the REI structure */
+    nbytes += ebytes;                       /* total number of bytes written */
+
+    reloc32[indice] = ebytes;               /* Next address free */
+    indice ++;                              /* increment index */
+
+
+
+
+        Seek(handle,reloc32[indice-1]-nbytes,OFFSET_CURRENT);  /* move to the offset to modify */
+        Write(handle,&ebytes,4);            /* we know the REI comes right after */
+        Seek(handle,NULL,OFFSET_END);       /* return to where we were */
+
+                                            /* Struct REI */
+/*********************************************************************************************/
+/* now check if there is a -different- REI as the last in the list */
+        if ((rei == lastrei)
+        {
+            reloc32[indice] = OFFSET(MinList,mlh_TailPred);     /* offset */
+            indice ++;                              /* increment index */
+            nreloc32 ++;                            /* reloc count = reloc count +1 */
+
+            Seek(handle,reloc32[indice-1]-nbytes,OFFSET_CURRENT);  /* move to the offset to modify */
+            Write(handle,sizeof(*i),4);             /* we know the REI comes right after */
+            Seek(handle,NULL,OFFSET_END);           /* return to where we were */
+        }
+        else
+        {
+
+        }
+
+
+/**********************************************************************************************
+** We are practically done
+**********************************************************************************************/
+        abytes = (nbytes+3) & (~3);            /* Align written bytes to LONG */
+        nlong = abytes>>2;                     /* calculate the LONGs written */
+        abytes = abytes-nbytes;                /* Check if we need to write extra bytes */
+
+        if(abytes)
+            Write(handle,align,abytes);
+
+        reloc32[0] = HUNK_RELOC32;
+        reloc32[1] = nreloc32;                 /* number of relocations to perform */
+        reloc32[2] = 0;                        /* in this Hunk */
+        reloc32[indice] = 0;                   /* NULL is always present */
+        reloc32[indice+1] = HUNK_END;          /* End */
+
+        /* Write the Hunk_Reloc32 together with Hunk_End */
+        Write(handle,reloc32,(5+nreloc32)<<2);
+
+
+        /* Write the number of LONGs of the DATA SEGMENT */
+        Seek(handle,20,OFFSET_BEGINNING);
+        Write(handle,&nlong,4);
+        Seek(handle,4,OFFSET_CURRENT);
+        Write(handle,&nlong,4);
+
+
+    Close(handle);
+    FreeVec(reloc32);
+}
+
+/**************************************************************************************
+ * OpenLibs()
+ **************************************************************************************
+*/
+struct AssemblyBase *OpenLibs()
+{
+    if(AssemblyBase = OpenLibrary(ASSEMBLYNAME, ASSEMBLY_MINIMUM))
+    {
+        DosBase = AssemblyBase->ab_DosBase;
+        IconBase = AssemblyBase->ab_IconBase;
+        IntuitionBase = AssemblyBase->ab_IntuiBase;
+        GfxBase = AssemblyBase->ab_GfxBase;
+        AslBase = AssemblyBase->ab_AslBase;
+        GadToolsBase = AssemblyBase->ab_GadToolsBase;
+        LocaleBase = AssemblyBase->ab_LocaleBase;
+        DataTypesBase = AssemblyBase->ab_DataTypesBase;
+        WorkbenchBase = AssemblyBase->ab_WorkbenchBase;
+
+        catalog = OpenCatalogA(NULL,"REIEditor.catalog",NULL);
+    }
+    return(AssemblyBase);
+}
+
+
+/*************************************************************************************/
+VOID wbmain(wbmsg)
+{
+    main(NULL, (struct WBStartup *)wbmsg);
+    exit(0);
+}
+```
+
+### REIEDITO.H -- Header File
+
+Defines REI IDs, standard window flags, and a private data structure used by the editor.
+
+```h
+/*
+** ReEdit.h - Private include files for ReEdit
+*/
+
+/* Define ID's REI */
+#define MAINREI_ID   0x0000
+#define CUSTOMREI_ID 0x9999
+
+/* Standard Flags for a NewWindow in a Custom REI structure */
+#define STDFLAGS    (WFLG_CLOSEGADGET|WFLG_SIZEGADGET|WFLG_DRAGBAR|WFLG_DEPTHGADGET)
+
+/*
+** Special structure MyAlloc for private storage of data
+*/
+struct MyAlloc {
+    struct Interface *mya_Interface;     /* ReEdit Interface pointer */
+    struct REI *mya_MREI;               /* (Main) ReEdit REI pointer */
+
+    struct REI *mya_CREI;               /* (Custom) REI, added with AddCREI() */
+
+};
+```
+
+### REIEDITO.ASM -- Assembly Support Module
+
+This assembly module contains the core `WriteREIFile` function that writes `.rei` files as proper AmigaOS loadable binaries. It handles:
+
+- Writing `HUNK_HEADER` and `HUNK_DATA` segments
+- Clearing runtime-only REI fields (Screen, Window, Gadget, Menu, Font, etc.) before saving
+- Writing ScreenTAGs, PubScreenName, window title, and NewWindowTAGs with proper relocation entries
+- LONG-aligning the output data
+- Building and writing the `HUNK_RELOC32` table for all pointer fields
+- Writing `HUNK_END` to finalize the file
+
+```asm
+***************************************************************************************
+*
+* ReEdit.asm - ReEdit.o - Object files
+*
+* This is a special support module for the ReEdit.c program. It contains all
+* the functions for writing a .rei file.
+*
+*
+***************************************************************************************
+    opt NOCHKBIT
+
+    include DevPac:system
+
+    include include_i:assembly/asmprivate.i
+    include include_i:assembly/assembly_lib.i
+
+ STRUCTURE SPECIAL,0
+    APTR    sx_MainREI       * First REI address
+    BPTR    sx_Handle        * pointer to file handle of .rei file...
+
+    APTR    sx_Buffer        * What do we need to write?
+    LONG    sx_Byte          * Number of bytes written so far...
+    LONG    sx_StrOffset     * Last row offset...
+
+    STRUCT  sx_Rel32Offset,256*4  * Hunk_reloc32
+    STRUCT  sx_REI,rei_SIZEOF     * Copy of the REI to write
+    LABEL   sx_SIZEOF
+;--------------------------------------------------------------------------------------
+AWRITE  MACRO   ;&buffer, len
+    move.l  sx_Handle(a4),d1        * handle...
+    move.l  \1,d2                   * Buffer...
+    move.l  \2,d3                   * Number of bytes to write...
+    jsr     _LVOWrite(a6)           * go...
+    ENDM
+;--------------------------------------------------------------------------------------
+SEEKB   MACRO   ;Pos
+    move.l  sx_Handle(a4),d1
+    move.l  \1,d2
+    moveq   #OFFSET_BEGINNING,d3
+    jsr     _LVOSeek(a6)
+    ENDM
+;--------------------------------------------------------------------------------------
+SEEKC   MACRO   ;Pos
+    move.l  sx_Handle(a4),d1
+    move.l  \1,d2
+    moveq   #OFFSET_CURRENT,d3
+    jsr     _LVOSeek(a6)
+    ENDM
+;--------------------------------------------------------------------------------------
+SEEKEND MACRO
+    move.l  sx_Handle(a4),d1        * Return to end
+    moveq   #0,d2
+    moveq   #OFFSET_END,d3
+    jsr     _LVOSeek(a6)
+    ENDM
+;--------------------------------------------------------------------------------------
+    XDEF    _WriteREIFile
+
+    XREF    _AssemblyBase
+;--------------------------------------------------------------------------------------
+; success = WriteREIFile(filename, rei)
+;   D0                      A0     A1
+;
+; BOOL WriteREIFile(STRPTR filename, struct REI *rei);
+;--------------------------------------------------------------------------------------
+SPOFF   SET (6+5)*4
+_WriteREIFile
+    movem.l d2-d7/a2-a6,-(sp)
+    movem.l SPOFF+4(sp),a2-a3       * filename/rei
+    move.l  _AssemblyBase(a4),a5    * A5 = AssemblyBase
+;--------------------------------------------------------------------------------------
+    move.l  #sx_SIZEOF+4,d2         * Allocate memory for our private
+    move.l  d2,d0                   * SPECIAL structure, where we keep
+    move.l  #MEMF_CLEAR|MEMF_PUBLIC,d1  * data related to writing the
+    move.l  ab_ExecBase(a5),a6      * .rei file
+    jsr     _LVOAllocMem(a6)        * Allocate, simulating an AllocVec().
+    tst.l   d0
+    bne.s   ALLOK
+SExit   movem.l (sp)+,d2-d7/a2-a6  * Error, exit... NULL
+    rts
+;--------------------------------------------------------------------------------------
+ALLOK   move.l  d0,a4               * A4 = (struct SPECIAL *)
+    move.l  d2,(a4)+                * AllocVec()
+;--------------------------------------------------------------------------------------
+    move.l  a3,sx_MainREI(a4)       * Save the REI passed in INPUTS...
+    move.l  #rei_SIZEOF,sx_StrOffset(a4) * Last row offset for calculation...
+    lea     sx_Rel32Offset(a4),a3   * A3 = hunk_reloc32 pointer variable
+    move.l  sx_MainREI(a4),a0       * source rei
+    lea     sx_REI(a4),a1           * destination
+    move.l  a1,sx_Buffer(a4)        * we write this first...
+    move.l  #(rei_SIZEOF/2)-1,d0
+CopREI  move.w  (a0)+,(a1)+
+    dbf     d0,CopREI
+;--------------------------------------------------------------------------------------
+    move.l  a2,d1                   * Open the file on disk
+    move.l  #MODE_NEWFILE,d2
+    move.l  ab_DosBase(a5),a6
+    jsr     _LVOOpen(a6)
+    tst.l   d0                      * Check Handle...
+    beq.s   SExit                   * Go error...
+    move.l  d0,sx_Handle(a4)        * Save Handle pointer
+;--------------------------------------------------------------------------------------
+    AWRITE  #Hunk_Header,#32        * Write the Hunk_Header
+;--------------------------------------------------------------------------------------
+    moveq   #0,d0                   * Clear the REI fields that are not
+    move.l  sx_Buffer(a4),a0        * needed for saving...
+    move.l  d0,rei_Screen(a0)
+    move.l  d0,rei_Window(a0)
+    move.l  d0,rei_Gadget(a0)
+    move.l  d0,rei_Menu(a0)
+    move.l  d0,rei_Font(a0)
+    move.l  d0,rei_OldHook(a0)
+    move.l  d0,rei_VI(a0)
+
+    AWRITE  a0,#rei_SIZEOF          * write the entire REI structure
+    move.l  sx_MainREI(a4),sx_Buffer(a4) * Move the pointer...
+    add.l   d0,sx_Buffer(a4)        * update position...
+    add.l   d0,sx_Byte(a4)          * update number of bytes written...
+;--------------------------------------------------------------------------------------
+    ; ... (continues with ScreenTAG, PubScreenName, Window Title,
+    ;      NewWindowTAG writing and relocation handling)
+;--------------------------------------------------------------------------------------
+```
+
+<Callout type="info">
+  The assembly module is the heart of the REI file format writer. It produces proper AmigaOS executable binaries with relocation tables, allowing the REI system to `LoadSeg()` the interface files and use them with fully resolved pointers.
+</Callout>
+
+## How It Works
+
+1. **Load existing interface** -- `OpenInterface()` loads an existing `.rei` file into memory, creating `Interface` and `REI` structures.
+
+2. **Write binary output** -- `WriteREIFile()` serializes the in-memory structures into a proper AmigaOS loadable binary file with:
+   - `HUNK_HEADER` -- standard AmigaOS executable header
+   - `HUNK_DATA` -- the serialized Interface and REI structures, plus strings and tag lists
+   - `HUNK_RELOC32` -- relocation entries for all pointer fields so `LoadSeg()` can fix up addresses
+   - `HUNK_END` -- marks the end of the file
+
+3. **Field cleanup** -- Before writing, runtime-only fields (Screen, Window, Gadget, Menu, Font, OldHook, VI) are zeroed out since they are populated at runtime by `OpenREI()`.
+
+4. **Data serialization** -- String fields (PubScreenName, window title) and TagItem arrays (ScreenTAG, NewWindowTAG) are written sequentially after the main structure, with their offsets recorded in the relocation table.

@@ -65,36 +65,34 @@ If the `-` character is present, it always overrides the `+` character regardles
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (20-Feb-1995) --- value = StringBinToValue(string, optlen) (a0/d0)
-***************************************************************************************
+; (20-Feb-1995) --- value = StringBinToValue(string, optlen) (a0/d0)
 _LVOStringBinToValue
-	movem.l	d1-d3/a0,-(sp)
-	moveq	#0,d2			* Mark Negative
-	moveq	#"0",d3			* Type Of Chars
-B2V_Skp	cmp.b	(a0),d3			* Check Jolly Char
-	ble.s	B2V_Con
-	cmpi.b	#"%",(a0)+		* Jolly...
-	beq.s	B2V_Skp
-	cmpi.b	#"+",-1(a0)		* Pos
-	beq.s	B2V_Skp
-	cmpi.b	#"-",-1(a0)		* NOT... triggers something...
-	bne.s	B2V_Skp
-	moveq	#1,d2			* Set Mark Negative
-	bra.s	B2V_Skp
-B2V_Con	move.w	d0,d1			* Forced length provided?
-	bne.s	B2V_Chk			* Yes... use this one...
-	STRLEN	a0,d1			* Entire string
-B2V_Chk	moveq	#0,d0
-	subq.w	#1,d1
-	bmi.s	B2V_Ext
-B2V_SBt	cmp.b	(a0)+,d3
-	beq.s	B2V_Lp
-	bset	d1,d0
-B2V_Lp	dbf	d1,B2V_SBt
-	tst.w	d2
-	beq.s	B2V_Ext
-	not.l	d0
-B2V_Ext	movem.l	(sp)+,d1-d3/a0
-	rts
+        movem.l d1-d3/a0,-(sp)
+        moveq   #0,d2                    ; Mark Negative
+        moveq   #"0",d3                  ; Type Of Chars
+B2V_Skp cmp.b   (a0),d3                  ; Check Jolly Char
+        ble.s   B2V_Con
+        cmpi.b  #"%",(a0)+              ; Jolly...
+        beq.s   B2V_Skp
+        cmpi.b  #"+",-1(a0)             ; Pos
+        beq.s   B2V_Skp
+        cmpi.b  #"-",-1(a0)             ; NOT... triggers something...
+        bne.s   B2V_Skp
+        moveq   #1,d2                    ; Set Mark Negative
+        bra.s   B2V_Skp
+B2V_Con move.w  d0,d1                    ; Forced length provided?
+        bne.s   B2V_Chk                  ; Yes... use this one...
+        STRLEN  a0,d1                    ; Entire string
+B2V_Chk moveq   #0,d0
+        subq.w  #1,d1
+        bmi.s   B2V_Ext
+B2V_SBt cmp.b   (a0)+,d3
+        beq.s   B2V_Lp
+        bset    d1,d0
+B2V_Lp  dbf     d1,B2V_SBt
+        tst.w   d2
+        beq.s   B2V_Ext
+        not.l   d0
+B2V_Ext movem.l (sp)+,d1-d3/a0
+        rts
 ```

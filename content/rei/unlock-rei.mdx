@@ -37,35 +37,33 @@ If both inputs are NULL, this function fails. Unlike `LockREI()`, which automati
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (25-Jan-1995) =Jon= ** rei = UnlockREI(rei, name) (a0/a1)
-***************************************************************************************
+; (25-Jan-1995) --- rei = UnlockREI(rei, name) (a0/a1)
 _LVOUnlockREI
-	movem.l	a5-a6,-(sp)
-	move.l	a0,d0			* Was an address passed??
-	bne.s	URmain
-	move.l	a1,d0			* Was the name passed then??
-	bne.s	URname
-URexit	movem.l	(sp)+,a5-a6
-	rts
-URname	move.l	ab_ExecBase(a6),a0
-	move.l	([ThisTask.w,a0],TC_Userdata.w),d0	* struct List *
-	beq.s	URexit
-	move.l	d0,a0
-	FINDNAME
-	beq.s	URexit			* Exit failure...
-URmain	move.l	d0,a5			* A5 = struct REI *
-	BTSTL	REIB_LOCK,rei_Flags(a5)	* Check if it's locked...
-	beq.s	URexit			* well... then why unlock it.. exit
-	lea	rei_Request(a5),a0	* Request
-	move.l	rei_Window(a5),a1	* This Window
-	move.l	ab_IntuiBase(a6),a6	* Intuition...
-	jsr	_LVOEndRequest(a6)	* Unlock!! -- resume messages...
-	move.l	rei_Window(a5),a0	* Window another
-	lea	ULTAG(pc),a1		* Normal Pointer
-	jsr	_LVOSetWindowPointerA(a6)	* Clear pointer to normal
-	BCLRL	REIB_LOCK,rei_Flags(a5)	* clear the lock bit, since...
-UREI_LK	movem.l	(sp)+,a5-a6
-	rts
-ULTAG	dc.l WA_BusyPointer,0,TAG_DONE
+        movem.l a5-a6,-(sp)
+        move.l  a0,d0                   * Was an address passed??
+        bne.s   URmain
+        move.l  a1,d0                   * Was the name passed then??
+        bne.s   URname
+URexit  movem.l (sp)+,a5-a6
+        rts
+URname  move.l  ab_ExecBase(a6),a0
+        move.l  ([ThisTask.w,a0],TC_Userdata.w),d0 * struct List *
+        beq.s   URexit
+        move.l  d0,a0
+        FINDNAME
+        beq.s   URexit                  * Exit failure...
+URmain  move.l  d0,a5                   * A5 = struct REI *
+        BTSTL   REIB_LOCK,rei_Flags(a5) * Check if it's locked...
+        beq.s   URexit                  * well... then why unlock it.. exit
+        lea     rei_Request(a5),a0      * Request
+        move.l  rei_Window(a5),a1       * This Window
+        move.l  ab_IntuiBase(a6),a6     * Intuition...
+        jsr     _LVOEndRequest(a6)      * Unlock!! -- resume messages...
+        move.l  rei_Window(a5),a0       * Window another
+        lea     ULTAG(pc),a1            * Normal Pointer
+        jsr     _LVOSetWindowPointerA(a6) * Clear pointer to normal
+        BCLRL   REIB_LOCK,rei_Flags(a5) * clear the lock bit, since...
+UREI_LK movem.l (sp)+,a5-a6
+        rts
+ULTAG   dc.l    WA_BusyPointer,0,TAG_DONE
 ```

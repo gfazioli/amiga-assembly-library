@@ -38,25 +38,23 @@ None.
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (13-Jan-1995) --- AllocNewList()
-***************************************************************************************
+; (13-Jan-1995) --- AllocNewList()
 _LVOAllocNewList
-	movem.l	d2/a6,-(sp)
-	moveq	#4+LH_SIZE,d0			* D0 = SIZEOF
-	move.l	d0,d2				* Save for PackAlloc()
-	moveq	#1,d1
-	swap	d1
-	move.l	ab_ExecBase(a6),a6	* Exec...
-	jsr	_LVOAllocMem(a6)
-	tst.l	d0
-	beq.s	ALFail			* Can't Alloc Memory...
-	move.l	d0,a0			* A0 = (struct list *)
-	move.l	d2,(a0)+		* A0 = True address to return...
-	move.l	a0,LH_TAILPRED(a0)	* MY NEWLIST...
-	addq.w	#4,a0
-	move.l	a0,-(a0)
-	move.l	a0,d0			* Result...
-ALFail	movem.l	(sp)+,d2/a6
-	rts
+        movem.l d2/a6,-(sp)
+        moveq   #4+LH_SIZE,d0           ; D0 = SIZEOF
+        move.l  d0,d2                    ; Save for PackAlloc()
+        moveq   #1,d1
+        swap    d1
+        move.l  ab_ExecBase(a6),a6       ; Exec...
+        jsr     _LVOAllocMem(a6)
+        tst.l   d0
+        beq.s   ALFail                   ; Can't Alloc Memory...
+        move.l  d0,a0                    ; A0 = (struct list *)
+        move.l  d2,(a0)+                 ; A0 = True address to return...
+        move.l  a0,LH_TAILPRED(a0)      ; MY NEWLIST...
+        addq.w  #4,a0
+        move.l  a0,-(a0)
+        move.l  a0,d0                    ; Result...
+ALFail  movem.l (sp)+,d2/a6
+        rts
 ```

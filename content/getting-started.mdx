@@ -171,3 +171,1193 @@ This means you do **not** need to open them yourself -- simply read the pointers
 </Callout>
 
 The structure also contains library preferences such as default pen colors for requesters (`ab_FgPenRequest`, `ab_BgPenRequest`), draw mode (`ab_DrMdRequest`), pre-built images for requester icons (`ab_QuestionImage`, `ab_WarningImage`, `ab_DangerImage`), and a default `Locale` pointer (`ab_Locale`).
+
+## Library Internals
+
+This section documents the two key source files that make up the `assembly.library` binary and its C linker support.
+
+### lib.asm -- Library Source
+
+This is the main source file that defines the entire `assembly.library`. It contains all of the standard Amiga shared library infrastructure:
+
+- **Library Descriptor** (`InitDDescrip`) -- The Resident (RomTag) structure that Exec scans to identify and auto-initialize the library.
+- **Function Table** (`FuncTable`) -- A list of pointers to every public library function. Unused slots point to `Void` (which simply returns 0). The table is terminated by `-1`.
+- **Data Table** (`DataTable`) -- Uses Exec `INIT*` macros to pre-fill the library base node (name, type, flags, version, revision, ID string).
+- **Init Routine** (`InitRoutine`) -- Called once when the library is first loaded. It opens all sub-libraries (graphics, intuition, dos, asl, gadtools, commodities, icon, workbench, datatypes, locale, lowlevel, realtime), extracts `UtilityBase` and `LayersBase` from the graphics library base, opens the default system `Locale`, and sets default preferences (tick delay, pen colors, draw mode).
+- **Open / Close / Expunge** -- Standard handlers that manage the open count, deferred expunge flag, and cleanup (closing all sub-libraries and freeing library memory).
+- **Module Includes** -- At the end of the file, all module source files are pulled in via `include` directives: `Dos`, `Exec`, `Graphics`, `Intui_GadTools`, `REI`, `Libraries`, `Math`, and `section`.
+
+```asm
+;*************************************************************************************
+;* Assembly Library Source file -- $Release.1.0a (C)1990,91,92,93,94,95
+;*************************************************************************************
+; HISTORY
+;--------+--------+-----------+-----------------------------------------------------
+; Author | Rel    | Date      | Comment
+;--------+--------+-----------+-----------------------------------------------------
+; jon    | 41.2   | 30-Sep-95 | Add ReAllocVec() - Remove NewCopyMemQuick()
+; jon    | 41.2   |  7-Oct-95 | Test on DoubleClick()
+; jon    | 41.21  | 18-Nov-95 | Add AGAT_HighLight in SetAsmGadgetAttrs()
+; jon    | 41.21  | 18-Nov-95 | Check CREATEGADGET MACRO?? & SetAsmGadgetAttrs()
+; jon    | 41.22  | 19-Nov-95 | Fix bugs in OpenInterface() on change dir "sys:i"
+;--------+--------+-----------+-----------------------------------------------------
+
+    opt NOCHKBIT
+
+    OUTPUT LIBS:Assembly.Library
+
+    include DevPac:system
+
+    include include_I:assembly/asmprivate.i     ; Only ##private use
+    include INCLUDE_I:assembly/assemblybase.i
+
+    SECTION assemblylib,CODE
+Void
+    moveq   #0,d0
+    rts
+
+InitDDescrip
+    dc.w RTC_MATCHWORD
+    dc.l InitDDescrip
+    dc.l EndCode
+    dc.b RTF_AUTOINIT
+    dc.b ASSEMBLY_VERSION
+    dc.b NT_LIBRARY
+    dc.b 0                      ; RT_PRI
+    dc.l LibName                ; PTR to library name
+    dc.l IdString               ; PTR to identification string
+    dc.l Init
+LibName ASSEMBLYNAME
+;*************************************************************************************
+;* Format: name $Rel.x.x (Last date change)
+;*************************************************************************************
+IdString
+    dc.b "Assembly 41.22 (19.11.95)",13,10,0
+    even
+
+gfxname     STRING "graphics.library"
+intuiname
+    STRING "intuition.library"
+dosname     STRING "dos.library"
+aslname     STRING "asl.library"
+gadtoolsname
+    STRING "gadtools.library"
+commoname
+    STRING "commodities.library"
+iconname
+    STRING "icon.library"
+wbname      STRING "workbench.library"
+dtname      STRING "datatypes.library"
+localename
+    STRING "locale.library"
+lowname     STRING "lowlevel.library"
+realname
+    STRING "realtime.library"
+ArrayName
+    dc.l gfxname,intuiname,dosname,aslname,gadtoolsname
+    dc.l commoname,iconname,wbname,dtname,localename,lowname,realname
+
+Init
+    dc.l ab_SIZEOF              ; Library Base SIZE_OF
+    dc.l FuncTable              ; PTR to function table
+    dc.l DataTable              ; PTR to data table
+    dc.l InitRoutine            ; PTR to init routine
+
+FuncTable
+    dc.l Open
+    dc.l Close
+    dc.l Expugne
+    dc.l Void                   ; Default exit routine (reserved)
+
+    dc.l _LVOFileInfo
+    dc.l Void
+    dc.l Void
+    dc.l _LVOLoad
+    dc.l _LVOSave
+    dc.l _LVOCheckSum
+    dc.l Void
+    dc.l _LVOLineInput
+    dc.l _LVOUnitInfo
+    dc.l Void
+    dc.l _LVOCheckFile
+    dc.l _LVOFreeNodeName
+    dc.l _LVOFreeListName
+    dc.l _LVOFreeNode
+    dc.l _LVORevertMem
+    dc.l _LVOAllocNewList
+    dc.l _LVOAllocNode
+    dc.l _LVOFreeList
+    dc.l _LVOAllocRastPort
+    dc.l _LVOCloneRastPort
+    dc.l _LVONewAllocRaster
+    dc.l _LVOAddBitPlanes
+    dc.l _LVORemoveBitPlanes
+    dc.l _LVOTextFmtRastPortArgs
+    dc.l _LVODrawBox
+    dc.l _LVODrawFrameStateA
+    dc.l _LVOEraseInternalRect
+    dc.l Void                   ; _LVOCloseImage removed
+    dc.l _LVOOpenInterface
+    dc.l _LVOCloseInterface
+    dc.l _LVOOpenREIA
+    dc.l _LVOCloseREI
+    dc.l _LVOActiveREI
+    dc.l _LVOFindREI
+    dc.l _LVORefreshREI
+    dc.l _LVOWaitREIMsg
+    dc.l _LVOLockREI
+    dc.l _LVOUnlockREI
+    dc.l Void
+    dc.l Void
+    dc.l Void
+    dc.l _LVOAS_MenuAddress
+    dc.l _LVOSetREIAttrsA
+    dc.l _LVOGetREIAttrsA
+    dc.l Void
+    dc.l _LVOFindAsmGadget
+    dc.l Void                   ; _LVOAllocAsmGadgets
+    dc.l Void                   ; _LVOFreeAsmGadgets
+    dc.l _LVOTextFmtSizeArgs
+    dc.l _LVOAllocAsmRequestA
+    dc.l _LVOFreeAsmRequest
+    dc.l _LVOAsmRequestArgs
+    dc.l _LVOChangeAsmReqAttrsA
+    dc.l _LVOSetAsmGadgetAttrsA
+    dc.l _LVOGetAsmGadgetAttr
+    dc.l Void
+    dc.l Void
+    dc.l _LVOInterfaceInfo
+    dc.l Void
+    dc.l Void
+    dc.l Void
+    dc.l Void
+    dc.l Void
+    dc.l Void
+    dc.l Void
+    dc.l _LVOStringDecToValue
+    dc.l _LVOStringHexToValue
+    dc.l _LVOStringBinToValue
+    dc.l _LVOValueToStringDec
+    dc.l _LVOValueToStringHex
+    dc.l _LVOValueToStringBin
+    dc.l Void
+    dc.l _LVOChangeChar
+    dc.l _LVOFilterChars        ; Rem: CmpStrings() - use Locale/StrnCmp() instead
+    dc.l _LVOStringToLower
+    dc.l _LVOStringToUpper      ; Rem: SetStringCase() - use Locale/ConvToUpper() instead
+    dc.l _LVOReAllocVec         ; New (29-Sept-1995)
+    dc.l Void                   ; Rem: SgnStrings()
+    dc.l Void                   ; Reserved SortA()
+    dc.l Void
+    dc.l Void
+    dc.l Void
+    dc.l _LVOFindAIFFChunk      ; This IFF section will be replaced later
+    dc.l _LVONextIFFChunk       ; with DataTypes.Library support functions...
+    dc.l _LVOTestAIFFChunk
+    dc.l _LVOUnPackerILBMBODY
+    dc.l _LVOUnPackerILBMCMAP
+
+    dc.l -1
+
+DataTable
+    INITBYTE LN_TYPE,NT_LIBRARY
+    INITLONG LN_NAME,LibName
+    INITBYTE LIB_FLAGS,LIBF_SUMUSED|LIBF_CHANGED
+    INITWORD LIB_VERSION,ASSEMBLY_VERSION
+    INITWORD LIB_REVISION,ASSEMBLY_REVISION
+    INITLONG LIB_IDSTRING,IdString
+    dc.l 0
+
+InitRoutine
+    movem.l a2-a5,-(sp)
+    move.l  d0,a5
+    move.l  a0,ab_private2(a5)  ; SegList
+    move.l  a6,ab_ExecBase(a5)
+
+    lea     ArrayName(pc),a2
+    lea     ab_GfxBase(a5),a4
+
+    ; Open graphics.library, intuition.library, dos.library
+    REPT 3
+    moveq   #0,d0
+    move.l  (a2)+,a1
+    jsr     _LVOOpenLibrary(a6)
+    move.l  d0,(a4)+
+    ENDR
+
+    ; Extract UtilityBase and LayersBase from the graphics library base
+    move.l  ab_GfxBase(a5),a4
+    move.l  gb_UtilBase(a4),d0
+    move.l  d0,ab_UtilityBase(a5)
+    move.l  gb_LayersBase(a4),d0
+    move.l  d0,ab_LayersBase(a5)
+
+    lea     ab_AslBase(a5),a4
+
+    ; Open asl, gadtools, commodities, icon, workbench, datatypes
+    REPT 6
+    moveq   #0,d0
+    move.l  (a2)+,a1
+    jsr     _LVOOpenLibrary(a6)
+    move.l  d0,(a4)+
+    ENDR
+
+    lea     ab_LocaleBase(a5),a4
+
+    ; Open locale, lowlevel, realtime
+    REPT 3
+    moveq   #0,d0
+    move.l  (a2)+,a1
+    jsr     _LVOOpenLibrary(a6)
+    move.l  d0,(a4)+
+    ENDR
+;*************************************************************************************
+;* (V41) -- Init Language Value in AssemblyBase... ;-) - FUTURE EXTENSION
+;*************************************************************************************
+;* NOT IMPLEMENTED YET
+
+;   move.l  ab_LowLevel(a5),a6
+;   jsr     _LVOGetLanguageSelection(a6)
+;   move.l  d0,ab_SystemLanguage(a5)
+
+    move.l  ab_LocaleBase(a5),a6        ; Get system (struct Locale *)
+    suba.l  a0,a0                       ; default locale
+    jsr     _LVOOpenLocale(a6)
+    move.l  d0,ab_Locale(a5)
+
+;*************************************************************************************
+;* Assembly Preferences
+;* This section manages system preferences, starting with AsmRequest defaults...
+;*************************************************************************************
+    move.w  #5,ab_TicksDelay(a5)        ; Default time for simulated gadget press
+    move.l  #$00010000,ab_FgPenRequest(a5) ; Default foreground and background pens
+    move.w  #0,ab_DrMdRequest(a5)       ; Default draw mode for requesters
+
+;*************************************************************************************
+;* #Private old =stid= code -- =STID= private user task system list...
+;* Kept for backwards compatibility and future expansion
+;*************************************************************************************
+    move.l  ab_ExecBase(a5),a6          ; Reset ExecBase for system safety
+    lea     ab_TledTask(a5),a4          ; Task list head
+    move.l  a4,ab_LastTask(a5)
+
+    move.l  a5,d0
+    movem.l (sp)+,a2-a5
+    rts
+
+Open
+    addq.w  #1,LIB_OPENCNT(a6)         ; Increment open count
+    bclr    #3,ab_private1(a6)          ; Clear delayed-expunge flag
+    move.l  a6,d0
+    rts
+
+Close
+    moveq   #0,d0
+    subq.w  #1,LIB_OPENCNT(a6)         ; Decrement open count
+    bne.s   NoExpugne
+    btst    #3,ab_private1(a6)          ; Check delayed-expunge flag
+    beq.s   NoExpugne
+    bsr.s   Expugne
+NoExpugne
+    rts
+
+Expugne
+    movem.l d2/a5/a6,-(sp)
+    tst.w   LIB_OPENCNT(a6)
+    beq.s   lbC0000EA
+    bset    #3,ab_private1(a6)          ; Set delayed-expunge flag
+    moveq   #0,d0
+    bra     lbC00010C
+
+lbC0000EA
+    move.l  a6,a5
+    move.l  ab_ExecBase(a5),a6
+
+    move.l  a5,a1
+    jsr     _LVORemove(a6)
+
+    move.l  ab_LocaleBase(a5),a6        ; Close locale access
+    move.l  ab_Locale(a5),a0
+    jsr     _LVOCloseLocale(a6)
+
+;*************************************************************************************
+;* Close all sub-libraries
+;*************************************************************************************
+    move.l  ab_ExecBase(a5),a6
+
+    lea     ab_GfxBase(a5),a4
+
+    ; Close graphics, intuition, dos
+    REPT 3
+    move.l  (a4)+,a1
+    jsr     _LVOCloseLibrary(a6)
+    ENDR
+
+    lea     ab_AslBase(a5),a4
+
+    ; Close asl, gadtools, commodities, icon, workbench, datatypes
+    REPT 6
+    move.l  (a4)+,a1
+    jsr     _LVOCloseLibrary(a6)
+    ENDR
+
+    lea     ab_LocaleBase(a5),a4
+
+    ; Close locale, lowlevel, realtime
+    REPT 3
+    move.l  (a4)+,a1
+    jsr     _LVOCloseLibrary(a6)
+    ENDR
+
+    move.l  ab_private2(a5),d2          ; SegList
+
+    move.l  a5,a1
+    moveq   #0,d0
+    move.w  LIB_NEGSIZE(a5),d0
+    sub.l   d0,a1
+    add.w   LIB_POSSIZE(a5),d0
+    jsr     _LVOFreeMem(a6)            ; Free library memory
+    move.l  d2,d0
+lbC00010C
+    movem.l (sp)+,d2/a5/a6
+    rts
+
+;*************************************************************************************
+;* All included assembly routine modules...
+;*************************************************************************************
+    incdir  ASM:ZRoutine/
+
+    include Dos
+    include Exec
+    include Graphics
+    include Intui_GadTools
+    include REI
+    include Libraries
+    include Math
+    include section
+
+;*************************************************************************************
+;* Reserved
+;*************************************************************************************
+    SECTION ClearRegs_HOLE,BSS
+ClearRegs
+    ds.w 8
+
+    SECTION BUZZ,DATA
+
+EndCode dc.w 0
+    END
+```
+
+<Callout type="info">
+  The `REPT` / `ENDR` blocks are DevPac assembler repeat macros. They unroll the loop at assembly time, so the three `REPT 3` blocks generate three consecutive `OpenLibrary` (or `CloseLibrary`) calls -- one for each library name pointer in the `ArrayName` table.
+</Callout>
+
+### assembly.asm -- C Linker Stubs
+
+This file is assembled as a linkable `.o` object file (named `assembly.lib`) and linked directly into C programs compiled with SAS/C or a compatible compiler. It provides C-callable wrapper functions that translate the C stack-based calling convention into the library's register-based calling convention.
+
+Each wrapper follows the same pattern:
+
+1. Save `a6` on the stack (since it will be overwritten with the library base).
+2. Pull C function arguments from the stack into the appropriate 68k registers (`d0`-`d2`, `a0`-`a3`).
+3. Load `_AssemblyBase` into `a6`.
+4. Call the corresponding `_LVO*` library vector.
+5. Restore `a6` and return (result in `d0`).
+
+For functions that accept a tag list, two versions are provided: an `A`-suffixed version (e.g., `_AllocAsmRequestA`) that takes an explicit tag array pointer, and a variadic version (e.g., `_AllocAsmRequest`) that builds the tag pointer from the stack address of the first variadic argument.
+
+The file also includes two special routines:
+
+- **`_HookEntry`** -- A trampoline for Amiga `Hook` callbacks. It pushes `a0` (the hook), `a2` (the object), and `a1` (the message) onto the stack in left-to-right C order, then calls the hook's `h_SubEntry` function. This allows hooks to be written in C.
+- **`_LoadNewDTObjectA` / `_LoadNewDTObject`** -- Helper wrappers for loading DataType objects. They try multiple search paths (current directory, the task's home directory, and `sys:Classes/Images`) to locate the file before giving up.
+
+```asm
+;*****************************************************************************
+;*
+;* Assembly.Lib -- .o file -- $VER.1.1
+;*
+;* This file must be assembled in "linked" mode and registered under the
+;* file Assembly.Lib
+;*
+;*****************************************************************************
+
+    include DevPac:system
+
+    incdir  include_I:
+    include assembly/assembly.i
+    include assembly/assembly_lib.i
+
+    XDEF    _HookEntry              ; Only in .lib file
+    XDEF    _LoadNewDTObjectA
+    XDEF    _LoadNewDTObject
+    ;
+    XDEF    _FileInfo
+    XDEF    _Load
+    XDEF    _Save
+    XDEF    _CheckSum
+    XDEF    _LineInput
+    XDEF    _UnitInfo
+    XDEF    _CheckFile
+    XDEF    _FreeNodeName
+    XDEF    _FreeListName
+    XDEF    _FreeNode
+    XDEF    _RevertMem
+    XDEF    _AllocNewList
+    XDEF    _AllocNode
+    XDEF    _FreeList
+    XDEF    _AllocRastPort
+    XDEF    _CloneRastPort
+    XDEF    _NewAllocRaster
+    XDEF    _AddBitPlanes
+    XDEF    _RemoveBitPlanes
+    XDEF    _TextFmtRastPortArgs
+    XDEF    _TextFmtRastPort
+    XDEF    _DrawBox
+    XDEF    _DrawFrameStateA
+    XDEF    _DrawFrameState
+    XDEF    _EraseInternalRect
+    XDEF    _OpenInterface
+    XDEF    _CloseInterface
+    XDEF    _OpenREIA
+    XDEF    _OpenREI
+    XDEF    _CloseREI
+    XDEF    _ActiveREI
+    XDEF    _FindREI
+    XDEF    _RefreshREI
+    XDEF    _WaitREIMsg
+    XDEF    _LockREI
+    XDEF    _UnlockREI
+    XDEF    _AS_MenuAddress
+    XDEF    _SetREIAttrsA
+    XDEF    _SetREIAttrs
+    XDEF    _GetREIAttrsA
+    XDEF    _GetREIAttrs
+    XDEF    _FindAsmGadget
+    XDEF    _TextFmtSizeArgs
+    XDEF    _TextFmtSize
+    XDEF    _AllocAsmRequestA
+    XDEF    _AllocAsmRequest
+    XDEF    _FreeAsmRequest
+    XDEF    _AsmRequestArgs
+    XDEF    _AsmRequest
+    XDEF    _ChangeAsmReqAttrsA
+    XDEF    _ChangeAsmReqAttrs
+    XDEF    _SetAsmGadgetAttrsA
+    XDEF    _SetAsmGadgetAttrs
+    XDEF    _GetAsmGadgetAttr
+    XDEF    _InterfaceInfo
+    XDEF    _StringDecToValue
+    XDEF    _StringHexToValue
+    XDEF    _StringBinToValue
+    XDEF    _ValueToStringDec
+    XDEF    _ValueToStringHex
+    XDEF    _ValueToStringBin
+    XDEF    _ChangeChar
+    XDEF    _FilterChars
+    XDEF    _StringToLower
+    XDEF    _StringToUpper
+    XDEF    _ReAllocVec
+
+    XREF    _AssemblyBase
+
+;---------------------------------------------------------------------------
+; _HookEntry -- C callback trampoline for Amiga Hooks
+; Pushes hook (a0), object (a2), message (a1) onto the stack,
+; then calls h_SubEntry so the hook function can be written in C.
+;---------------------------------------------------------------------------
+_HookEntry
+    move.l  a1,-(sp)
+    move.l  a2,-(sp)
+    move.l  a0,-(sp)
+    move.l  h_SubEntry(a0),a0
+    jsr     (a0)
+    lea     12(sp),sp
+    rts
+
+;---------------------------------------------------------------------------
+;  obj = LoadNewDTObjectA(name, taglist)  (d0, a0)
+;---------------------------------------------------------------------------
+;*****************************************************************************
+;* ### PRIVATE ###
+;* (9-Mar-1995) =Jon= --- obj = LoadNewDTObjectA(name, taglist) (d0, a0)
+;*****************************************************************************
+SPOFF   SET 4*1
+_LoadNewDTObjectA
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),d0          ; name
+    move.l  SPOFF+8(sp),a0          ; taglist pointer
+    move.l  _AssemblyBase(a4),a6
+    bra.s   Skipp
+
+_LoadNewDTObject
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),d0          ; name
+    lea     SPOFF+8(sp),a0          ; taglist on stack (variadic)
+    move.l  _AssemblyBase(a4),a6
+
+Skipp
+    movem.l a2-a6,-(sp)
+    move.l  a6,a5                   ; Move AssemblyBase to A5
+    move.l  a0,a4                   ; Save the tag list
+    move.l  d0,a3                   ; Save the filename
+;---------------------------------------------------------------------------
+    move.l  ab_DataTypesBase(a5),a6
+    jsr     _LVONewDTObjectA(a6)
+    tst.l   d0
+    bne.s   LNDExit                 ; Ok, found it
+;---------------------------------------------------------------------------
+    move.l  ab_DosBase(a5),a6       ; Switch to DOS
+    move.l  a3,d1                   ; Extract just the filename (last
+    jsr     _LVOFilePart(a6)        ; part of the path)
+    move.l  d0,a3                   ; Now we have just the filename without path
+    move.l  ([ab_ExecBase.w,a5],ThisTask.w),a0  ; A0 = (struct Task *)
+    move.l  pr_HomeDir(a0),d1       ; Switch to the current drawer
+    jsr     _LVOCurrentDir(a6)
+;---------------------------------------------------------------------------
+    move.l  a4,a0                   ; Try again here
+    move.l  a3,d0
+    move.l  ab_DataTypesBase(a5),a6
+    jsr     _LVONewDTObjectA(a6)
+    tst.l   d0
+    bne.s   OkTrova                 ; Ok, found it
+;---------------------------------------------------------------------------
+    lea     DefImageDraw(pc),a0
+    move.l  a0,d1
+    move.l  #ACCESS_READ,d2
+    move.l  ab_DosBase(a5),a6
+    jsr     _LVOLock(a6)
+    tst.l   d0
+    beq.s   OkTrova
+    move.l  d0,a2                   ; Save lock for UnLock()
+    move.l  d0,d1
+    jsr     _LVOCurrentDir(a6)     ; Switch to sys:Classes/Images
+;---------------------------------------------------------------------------
+    move.l  a4,a0                   ; Try again here
+    move.l  a3,d0
+    move.l  ab_DataTypesBase(a5),a6
+    jsr     _LVONewDTObjectA(a6)
+    move.l  d0,a3
+    move.l  a2,d1
+    move.l  ab_DosBase(a5),a6
+    jsr     _LVOUnLock(a6)
+    moveq   #0,d1                   ; root
+    jsr     _LVOCurrentDir(a6)
+    move.l  a3,d0
+LNDExit
+    movem.l (sp)+,a2-a6
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+OkTrova
+    move.l  d0,a3
+    moveq   #0,d1                   ; root
+    jsr     _LVOCurrentDir(a6)
+    move.l  a3,d0
+    movem.l (sp)+,a2-a6
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+DefImageDraw
+    STRING <"sys:Classes/Images">
+;---------------------------------------------------------------------------
+
+;---------------------------------------------------------------------------
+; C Wrapper Stubs -- each function saves a6, loads arguments from the
+; C stack into registers, loads AssemblyBase into a6, calls the library
+; vector, restores a6, and returns.
+;---------------------------------------------------------------------------
+SPOFF   SET 1*4
+_FileInfo
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0          ; filename
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOFileInfo(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_Load
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0/a1      ; filename / buffer
+    move.l  SPOFF+12(sp),d0        ; type of memory
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOLoad(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_Save
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    move.l  SPOFF+12(sp),d0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOSave(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_CheckSum
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0         ; void *
+    move.l  SPOFF+8(sp),d0         ; type of calculation
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOCheckSum(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_LineInput
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    movem.l SPOFF+8(sp),d0-d1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOLineInput(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_UnitInfo
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOUnitInfo(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_CheckFile
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0/a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOCheckFile(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_FreeNodeName
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0/a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOFreeNodeName(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_FreeListName
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOFreeListName(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_FreeNode
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0/a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOFreeNode(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_RevertMem
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0/a1
+    move.l  SPOFF+12(sp),d0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVORevertMem(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_AllocNewList
+    move.l  a6,-(sp)
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOAllocNewList(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_AllocNode
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0/a1
+    movem.l SPOFF+12(sp),d0/d1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOAllocNode(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_FreeList
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOFreeList(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_AllocRastPort
+    move.l  a6,-(sp)
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOAllocRastPort(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_CloneRastPort
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOCloneRastPort(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_NewAllocRaster
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),d0-d1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVONewAllocRaster(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_AddBitPlanes
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  SPOFF+8(sp),d0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOAddBitPlanes(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_RemoveBitPlanes
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  SPOFF+8(sp),d0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVORemoveBitPlanes(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 3*4
+_TextFmtRastPortArgs
+    movem.l d2/a2/a6,-(sp)
+    move.l  SPOFF+4(sp),a1
+    move.l  SPOFF+8(sp),a0
+    movem.l SPOFF+12(sp),d0-d2
+    move.l  SPOFF+24(sp),a2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOTextFmtRastPortArgs(a6)
+    movem.l (sp)+,d2/a2/a6
+    rts
+;---------------------------------------------------------------------------
+_TextFmtRastPort
+    movem.l d2/a2/a6,-(sp)
+    move.l  SPOFF+4(sp),a1
+    move.l  SPOFF+8(sp),a0
+    movem.l SPOFF+12(sp),d0-d2
+    lea     SPOFF+24(sp),a2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOTextFmtRastPortArgs(a6)
+    movem.l (sp)+,d2/a2/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 3*4
+_DrawBox
+    movem.l d2-d3/a6,-(sp)
+    move.l  SPOFF+4(sp),a1
+    movem.l SPOFF+8(sp),d0-d3
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVODrawBox(a6)
+    movem.l (sp)+,d2-d3/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 4*4
+_DrawFrameStateA
+    movem.l d2-d4/a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    movem.l SPOFF+8(sp),d0-d4
+    move.l  SPOFF+28(sp),a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVODrawFrameStateA(a6)
+    movem.l (sp)+,d2-d4/a6
+    rts
+;---------------------------------------------------------------------------
+_DrawFrameState
+    movem.l d2-d4/a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    movem.l SPOFF+8(sp),d0-d4
+    lea     SPOFF+28(sp),a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVODrawFrameStateA(a6)
+    movem.l (sp)+,d2-d4/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 1*4
+_EraseInternalRect
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOEraseInternalRect(a6)
+    move.l  (sp)+,a6
+;---------------------------------------------------------------------------
+_OpenInterface
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOOpenInterface(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_CloseInterface
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOCloseInterface(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 2*4
+_OpenREIA
+    movem.l a2/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOOpenREIA(a6)
+    movem.l (sp)+,a2/a6
+    rts
+;---------------------------------------------------------------------------
+_OpenREI
+    movem.l a2/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    lea     SPOFF+12(sp),a2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOOpenREIA(a6)
+    movem.l (sp)+,a2/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 1*4
+_CloseREI
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOCloseREI(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_ActiveREI
+    move.l  a6,-(sp)
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOActiveREI(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_FindREI
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOFindREI(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_RefreshREI
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVORefreshREI(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_WaitREIMsg
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  SPOFF+8(sp),d0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOWaitREIMsg(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_LockREI
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOLockREI(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_UnlockREI
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOUnlockREI(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 2*4
+_AS_MenuAddress
+    movem.l d2/a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    movem.l SPOFF+8(sp),d0-d2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOAS_MenuAddress(a6)
+    movem.l (sp)+,d2/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 2*4
+_SetREIAttrsA
+    movem.l a2/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOSetREIAttrsA(a6)
+    movem.l (sp)+,a2/a6
+    rts
+;---------------------------------------------------------------------------
+_SetREIAttrs
+    movem.l a2/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    lea     SPOFF+12(sp),a2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOSetREIAttrsA(a6)
+    movem.l (sp)+,a2/a6
+    rts
+;---------------------------------------------------------------------------
+_GetREIAttrsA
+    movem.l a2/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOGetREIAttrsA(a6)
+    movem.l (sp)+,a2/a6
+    rts
+;---------------------------------------------------------------------------
+_GetREIAttrs
+    movem.l a2/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    lea     SPOFF+12(sp),a2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOGetREIAttrsA(a6)
+    movem.l (sp)+,a2/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 1*4
+_FindAsmGadget
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOFindAsmGadget(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 3*4
+_TextFmtSizeArgs
+    movem.l a2-a3/a6,-(sp)
+    move.l  SPOFF+4(sp),a1
+    move.l  SPOFF+8(sp),a3
+    move.l  SPOFF+12(sp),a0
+    move.l  SPOFF+16(sp),a2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOTextFmtSizeArgs(a6)
+    movem.l (sp)+,a2-a3/a6
+    rts
+;---------------------------------------------------------------------------
+_TextFmtSize
+    movem.l a2-a3/a6,-(sp)
+    move.l  SPOFF+4(sp),a1
+    move.l  SPOFF+8(sp),a3
+    move.l  SPOFF+12(sp),a0
+    lea     SPOFF+16(sp),a2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOTextFmtSizeArgs(a6)
+    movem.l (sp)+,a2-a3/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 1*4
+_AllocAsmRequestA
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOAllocAsmRequestA(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_AllocAsmRequest
+    move.l  a6,-(sp)
+    lea     SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOAllocAsmRequestA(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_FreeAsmRequest
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOFreeAsmRequest(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 3*4
+_AsmRequestArgs
+    movem.l a2-a3/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a3
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOAsmRequestArgs(a6)
+    movem.l (sp)+,a2-a3/a6
+    rts
+;---------------------------------------------------------------------------
+_AsmRequest
+    movem.l a2-a3/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a2
+    lea     SPOFF+16(sp),a3
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOAsmRequestArgs(a6)
+    movem.l (sp)+,a2-a3/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 1*4
+_ChangeAsmReqAttrsA
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOChangeAsmReqAttrsA(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_ChangeAsmReqAttrs
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    lea     SPOFF+8(sp),a1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOChangeAsmReqAttrsA(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 3*4
+_SetAsmGadgetAttrsA
+    movem.l a2-a3/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a3
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOSetAsmGadgetAttrsA(a6)
+    movem.l (sp)+,a2-a3/a6
+    rts
+;---------------------------------------------------------------------------
+_SetAsmGadgetAttrs
+    movem.l a2-a3/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a2
+    lea     SPOFF+16(sp),a3
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOSetAsmGadgetAttrsA(a6)
+    movem.l (sp)+,a2-a3/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 2*4
+_GetAsmGadgetAttr
+    movem.l a2/a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a2
+    move.l  SPOFF+16(sp),d0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOGetAsmGadgetAttr(a6)
+    movem.l (sp)+,a2/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 1*4
+_InterfaceInfo
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOInterfaceInfo(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 1*4
+_StringDecToValue
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOStringDecToValue(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_StringHexToValue
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOStringHexToValue(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_StringBinToValue
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    move.l  SPOFF+8(sp),d0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOStringBinToValue(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_ValueToStringDec
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    movem.l SPOFF+8(sp),d0-d1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOValueToStringDec(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 2*4
+_ValueToStringHex
+    movem.l d2/a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    movem.l SPOFF+8(sp),d0-d2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOValueToStringHex(a6)
+    movem.l (sp)+,d2/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 1*4
+_ValueToStringBin
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    movem.l SPOFF+8(sp),d0-d1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOValueToStringBin(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 2*4
+_ChangeChar
+    movem.l d2/a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    movem.l SPOFF+8(sp),d0-d2
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOChangeChar(a6)
+    movem.l (sp)+,d2/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 3*4
+_FilterChars
+    movem.l d2-d3/a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    movem.l SPOFF+8(sp),d0-d3
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOFilterChars(a6)
+    movem.l (sp)+,d2-d3/a6
+    rts
+;---------------------------------------------------------------------------
+SPOFF   SET 1*4
+_StringToLower
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    move.l  SPOFF+12(sp),d0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOStringToLower(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_StringToUpper
+    move.l  a6,-(sp)
+    movem.l SPOFF+4(sp),a0-a1
+    move.l  SPOFF+12(sp),d0
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOStringToUpper(a6)
+    move.l  (sp)+,a6
+    rts
+;---------------------------------------------------------------------------
+_ReAllocVec
+    move.l  a6,-(sp)
+    move.l  SPOFF+4(sp),a0
+    movem.l SPOFF+8(sp),d0/d1
+    move.l  _AssemblyBase(a4),a6
+    jsr     _LVOReAllocVec(a6)
+    move.l  (sp)+,a6
+    rts
+```
+
+<Callout type="info">
+  The `SPOFF` constant tracks the current stack offset caused by saved registers. For example, after `movem.l d2/a6,-(sp)` saves 2 registers (8 bytes), `SPOFF` is set to `2*4` so that `SPOFF+4(sp)` correctly reaches the first C argument past the return address.
+</Callout>

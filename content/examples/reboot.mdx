@@ -1,0 +1,307 @@
+import { Callout } from 'nextra/components'
+
+# Reboot
+
+**Reboot** (Ver.1.21) is a Workbench Tools menu utility that provides a safe, user-confirmed system reboot. It installs itself as an AppMenuItem in the Workbench Tools menu and, when selected, displays an `AsmRequest` dialog (with an optional image and sound) asking the user to confirm the reboot.
+
+## Features
+
+- **AppMenuItem integration** -- Adds a "Reboot" entry to the Workbench Tools menu
+- **AsmRequest dialog** -- Confirmation dialog with DataType image and optional sound
+- **Localization** -- All strings loaded from a locale catalog (`Reboot.catalog`)
+- **ToolType configuration** -- IMAGE, SOUND, APPMENUNAME, RETURNKEY, TEXTUNDEROBJ
+- **Safe reboot** -- Only reboots on AmigaOS 3.0+ (Exec V39+) using `ColdReboot()`
+
+## REBOOT.C -- Source Code
+
+```c
+/***************************************************************************
+**
+** Reboot.c -- $VER.1.21
+**
+****************************************************************************
+*/
+#include <exec/exec.h>
+#include <assembly/assemblybase.h>
+#include <libraries/commodities.h>
+#include <libraries/asl.h>
+#include <libraries/locale.h>
+#include <datatypes/datatypes.h>
+#include <datatypes/datatypesclass.h>
+#include <datatypes/animationclass.h>
+#include <datatypes/pictureclass.h>
+#include <graphics/gfx.h>
+#include <graphics/rastport.h>
+#include <graphics/view.h>
+#include <dos/dosextens.h>
+#include <intuition/classusr.h>
+#include <intuition/icclass.h>
+#include <libraries/locale.h>
+#include <utility/hooks.h>
+#include <workbench/workbench.h>
+#include <workbench/startup.h>
+
+#include <clib/assembly_protos.h>
+#include <clib/commodities_protos.h>
+#include <clib/datatypes_protos.h>
+#include <clib/diskfont_protos.h>
+#include <clib/alib_protos.h>
+#include <clib/exec_protos.h>
+#include <clib/asl_protos.h>
+#include <clib/dos_protos.h>
+#include <clib/icon_protos.h>
+#include <clib/locale_protos.h>
+#include <clib/graphics_protos.h>
+#include <clib/utility_protos.h>
+#include <clib/wb_protos.h>
+
+/*********************************************************************************/
+
+#define MSG_BODY_REBOOT 1
+#define MSG_GADS        100
+
+/********** Global variables *********************************************************/
+struct AssemblyBase *AssemblyBase;
+struct Library *DosBase,*IntuitionBase,*GfxBase,*AslBase, *IconBase, *ExecBase;
+struct Library *GadToolsBase, *LocaleBase, *DataTypesBase, *WorkbenchBase;
+struct Library *CxBase, *DiskfontBase;
+struct Catalog *catalog;
+
+/********** Prototypes ***************************************************************/
+struct AssemblyBase *OpenLibs(void);
+
+/********** Prototypes ***************************************************************/
+Object *LoadNewDTObjectA(STRPTR filename, struct TagItem *);
+Object *LoadNewDTObject(STRPTR filename, Tag, ...);
+
+void GetDefToolsTypes(int argc, char **argv,STRPTR , STRPTR, STRPTR );
+
+/**************************************************************************************
+** Main
+***************************************************************************************
+*/
+
+VOID main(int argc, char **argv)
+{
+
+struct WBStartup    *wbs;
+struct WBArg        *wbarg;
+
+struct  AsmRequest  *areq;
+Object  *myimg_stop, *mysound;
+ULONG   response;
+
+char    iname[80], sname[80], appmenuname[30];
+ULONG   retkey=TRUE;
+ULONG   underobj=FALSE;
+char    YesNo[20];
+
+struct  MsgPort     *myport=NULL;
+struct  AppMenuItem *appitem=NULL;
+struct  AppMessage  *appmsg=NULL;
+
+    if (AssemblyBase = OpenLibs())
+    {
+        /* Read ToolTypes for configuration */
+        GetDefToolsTypes(argc, argv,"IMAGE","Warning.bsh",iname);
+        GetDefToolsTypes(argc, argv,"APPMENUNAME","Reboot V1.21",appmenuname);
+        GetDefToolsTypes(argc, argv,"SOUND","",sname);
+
+        GetDefToolsTypes(argc, argv,"RETURNKEY","YES",YesNo);
+        if(!StrnCmp(AssemblyBase->ab_Locale,YesNo,"NO",-1,SC_ASCII))
+            retkey = FALSE;
+
+        GetDefToolsTypes(argc, argv,"TEXTUNDEROBJ","NO",YesNo);
+        if(!StrnCmp(AssemblyBase->ab_Locale,YesNo,"YES",-1,SC_ASCII))
+            underobj = TRUE;
+
+        /* Load DataType objects for the dialog image and sound */
+        myimg_stop = LoadNewDTObject(iname,DTA_ControlPanel,FALSE,
+                                            PDTA_Remap,FALSE,
+                                            PDTA_NumColors,16,
+                                            TAG_DONE);
+
+        mysound = LoadNewDTObject(sname,TAG_DONE);
+
+        /* Create the confirmation requester */
+        areq = AllocAsmRequest(AREQ_Title, "Reboot...",
+                           AREQ_Object,myimg_stop,
+                           AREQ_Sound,mysound,
+                           AREQ_ReturnKey,retkey,
+                           AREQ_CenterHScreen,TRUE,
+                           AREQ_CenterVScreen,TRUE,
+                           AREQ_Justification, ASJ_CENTER,
+                           AREQ_TextUnderObject,underobj,
+                           TAG_DONE);
+
+    /* Create a message port and add an AppMenuItem to the Workbench Tools menu */
+    myport = CreateMsgPort();
+
+    appitem=AddAppMenuItemA(0L,0L,appmenuname,myport,NULL);
+
+    while(appitem && myport)
+    {
+        WaitPort(myport);
+        while((appmsg=(struct AppMessage *)GetMsg(myport)) && areq )
+        {
+            /* Show the confirmation dialog */
+            response = AsmRequestArgs(areq, GetCatalogStr(catalog, MSG_BODY_REBOOT,
+                            "Do you really want Reboot System?"),
+                              GetCatalogStr(catalog, MSG_GADS, "_Reboot|_Quit|_Cancel"),NULL);
+
+            switch (response)
+            {
+                case 1:
+                    /* Reboot -- only on AmigaOS 3.0+ */
+                    if( (ExecBase->lib_Version) >=39 )
+                    {
+                        Delay(10);
+                        Disable();
+                        ColdReboot();
+                    }
+                    break;
+
+                case 2:
+                    /* Quit -- clean up and exit */
+                    ReplyMsg((struct Message *)appmsg);
+                    RemoveAppMenuItem(appitem);
+                    while(appmsg=(struct AppMessage *)GetMsg(myport))
+                        ReplyMsg((struct Message *)appmsg);
+                    DeleteMsgPort(myport);
+                    FreeAsmRequest(areq);
+                    DisposeDTObject(mysound);
+                    DisposeDTObject(myimg_stop);
+                    CloseCatalog(catalog);
+                    CloseLibrary(AssemblyBase);
+                    return(0L);
+                    break;
+
+                case 0:
+                    /* Cancel -- do nothing */
+                    break;
+            }
+        ReplyMsg((struct Message *)appmsg);
+        }
+    }
+    FreeAsmRequest(areq);
+    DisposeDTObject(mysound);
+    DisposeDTObject(myimg_stop);
+    CloseCatalog(catalog);
+    CloseLibrary(AssemblyBase);
+    }
+}
+
+
+/**************************************************************************************
+ * GetDefToolsTypes() -- Read a ToolType value from the program's icon,
+ * falling back to a default value if not found.
+ **************************************************************************************
+*/
+void GetDefToolsTypes(int argc, char **argv,STRPTR tools, STRPTR defvalue, STRPTR iname)
+{
+struct DiskObject *dobj;
+struct WBStartup *wbs;
+struct WBArg *wbarg;
+STRPTR iiname;
+BPTR lock;
+
+    lock = Lock("PROGDIR:",ACCESS_READ);
+    CurrentDir(lock);
+
+    if (argc == 0)          /* Launched from Workbench */
+    {
+        wbs = (struct WBStartup *)argv;
+        wbarg = wbs->sm_ArgList;
+        dobj = GetDiskObject(wbarg[0].wa_Name);
+    }
+    else
+        dobj = GetDiskObject(argv[0]);
+
+    if(!dobj)
+    {
+        strcpy(iname, defvalue);
+        UnLock(lock);
+        CurrentDir(NULL);
+        return(NULL);
+    }
+
+    iiname = FindToolType(dobj->do_ToolTypes, tools);
+    strcpy(iname,iiname);
+    FreeDiskObject(dobj);
+    UnLock(lock);
+    CurrentDir(NULL);
+}
+
+/**************************************************************************************
+ * OpenLibs()
+ **************************************************************************************
+*/
+struct AssemblyBase *OpenLibs()
+{
+    AssemblyBase = OpenLibrary(ASSEMBLYNAME, ASSEMBLY_MINIMUM);
+
+    DosBase = AssemblyBase->ab_DosBase;
+    IconBase = AssemblyBase->ab_IconBase;
+    IntuitionBase = AssemblyBase->ab_IntuiBase;
+    GfxBase = AssemblyBase->ab_GfxBase;
+    AslBase = AssemblyBase->ab_AslBase;
+    GadToolsBase = AssemblyBase->ab_GadToolsBase;
+    LocaleBase = AssemblyBase->ab_LocaleBase;
+    DataTypesBase = AssemblyBase->ab_DataTypesBase;
+    WorkbenchBase = AssemblyBase->ab_WorkbenchBase;
+    ExecBase = AssemblyBase->ab_ExecBase;
+    CxBase = AssemblyBase->ab_CxBase;
+
+    DiskfontBase = OpenLibrary("diskfont.library",NULL);
+
+    catalog = OpenCatalogA(NULL,"Reboot.catalog",NULL);
+
+    return(AssemblyBase);
+}
+
+
+/*************************************************************************************/
+
+VOID wbmain(wbmsg)
+{
+    main(NULL, (struct WBStartup *)wbmsg);
+    exit(0);
+}
+```
+
+## REBOOT.CD -- Catalog Description
+
+The default (Italian) catalog strings for the dialog:
+
+```
+;
+; Reboot.catalog
+;
+; Catalog Description generated by CatEdit
+; CatEdit is (c) Rafael D'Halleweyn
+;
+MSG_BODY_REBOOT (1//)
+Do you really want to reboot the system?
+;
+MSG_GADS (100//)
+_Reboot|_Quit|_Cancel
+;
+```
+
+## How It Works
+
+1. **ToolType configuration** -- On startup, `GetDefToolsTypes()` reads the program icon's ToolTypes for IMAGE (dialog image file), SOUND (optional sound effect), APPMENUNAME (menu entry text), RETURNKEY (whether Return key confirms), and TEXTUNDEROBJ (text position relative to image).
+
+2. **DataType loading** -- `LoadNewDTObject()` loads a BSH (brush) image and optionally a sound DataType object for the confirmation dialog.
+
+3. **AsmRequest setup** -- `AllocAsmRequest()` creates a reusable requester with the image, sound, centering, and justification options.
+
+4. **AppMenuItem** -- `AddAppMenuItemA()` installs an entry in the Workbench Tools menu. The program then enters a `WaitPort()` loop, waiting for the user to select it.
+
+5. **Confirmation** -- When the menu item is selected, `AsmRequestArgs()` displays the dialog with three options: Reboot, Quit, or Cancel.
+
+6. **Reboot** -- If confirmed and running on AmigaOS 3.0+, calls `Disable()` followed by `ColdReboot()` to perform a clean system restart.
+
+<Callout type="warning">
+  The `ColdReboot()` call is a hardware-level reset. The `Disable()` call before it prevents interrupts from interfering with the reboot sequence. The version check (`ExecBase->lib_Version >= 39`) ensures this only runs on AmigaOS 3.0 or later where `ColdReboot()` is available.
+</Callout>

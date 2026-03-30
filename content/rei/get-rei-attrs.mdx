@@ -51,189 +51,187 @@ The pointer used to store the requested attribute in `ti_Data` MUST point to a L
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (17-Mar-1995) =Jon= --- num = GetREIAttrsA(rei,name,TagList) (a0/a1/a2)
-***************************************************************************************
+; (17-Mar-1995) --- num = GetREIAttrsA(rei,name,TagList) (a0/a1/a2)
 GetREITable
-	dc.l GET_ESR	* Offset...
-	dc.l GETScreen,GETWindowTAG,GETScreenTAG,GETWindowTextAttr
-	dc.l SKIPGET,SKIPGET,GETNewMenu,GETNewMenuTAG
-	dc.l GETUserData,GETLayoutCallBack,GETCustomHook
-	dc.l GETRememberPos,GETRememberSize,GETCenterHScreen,GETCenterVScreen
-	dc.l GETCenterMouse,GETNoFontSensitive,GETWindowTitle,GETWindow
-	dc.l GETFirstAsmGadget,GETLastAsmGadget
-	dc.l SKIPGET,SKIPGET,SKIPGET,SKIPGET,SKIPGET,SKIPGET,SKIPGET,SKIPGET
-	dc.l SKIPGET,SKIPGET,SKIPGET,SKIPGET
-	dc.l GETDoubleClick
+        dc.l    GET_ESR                 * Offset...
+        dc.l    GETScreen,GETWindowTAG,GETScreenTAG,GETWindowTextAttr
+        dc.l    SKIPGET,SKIPGET,GETNewMenu,GETNewMenuTAG
+        dc.l    GETUserData,GETLayoutCallBack,GETCustomHook
+        dc.l    GETRememberPos,GETRememberSize,GETCenterHScreen,GETCenterVScreen
+        dc.l    GETCenterMouse,GETNoFontSensitive,GETWindowTitle,GETWindow
+        dc.l    GETFirstAsmGadget,GETLastAsmGadget
+        dc.l    SKIPGET,SKIPGET,SKIPGET,SKIPGET,SKIPGET,SKIPGET,SKIPGET,SKIPGET
+        dc.l    SKIPGET,SKIPGET,SKIPGET,SKIPGET
+        dc.l    GETDoubleClick
 _LVOGetREIAttrsA
-	movem.l	d2-d6/a2-a6,-(sp)
-	moveq	#0,d2
-	move.l	a6,a5			* Save AsmBase
-	move.l	a0,d0			* Was a REI provided??
-	bne.s	GET_FND			* Ok, then don't search for it by name...
-	move.l	a1,d0			* if a NULL name was provided
-	beq.s	GET_ESR			* exit...
-	move.l	ab_ExecBase(a5),a0
-	move.l	([ThisTask.w,a0],TC_Userdata.w),a0	* struct MinList *
-	move.l	a0,d0
-	beq.s	GET_ESR
-	FINDNAME
-	move.l	d0,a4			* (struct REI *) in A4
-	move.l	a4,d0			* Check...
-	bne.s	GET_FND			* Ok, name and node found... continue...
-GET_ESR	move.l	d2,d0
-	movem.l	(sp)+,d2-d6/a2-a6	* Nothing, just exit
-	rts
+        movem.l d2-d6/a2-a6,-(sp)
+        moveq   #0,d2
+        move.l  a6,a5                   * Save AsmBase
+        move.l  a0,d0                   * Was a REI provided??
+        bne.s   GET_FND                 * Ok, then don't search for it by name...
+        move.l  a1,d0                   * if a NULL name was provided
+        beq.s   GET_ESR                 * exit...
+        move.l  ab_ExecBase(a5),a0
+        move.l  ([ThisTask.w,a0],TC_Userdata.w),a0 * struct MinList *
+        move.l  a0,d0
+        beq.s   GET_ESR
+        FINDNAME
+        move.l  d0,a4                   * (struct REI *) in A4
+        move.l  a4,d0                   * Check...
+        bne.s   GET_FND                 * Ok, name and node found... continue...
+GET_ESR move.l  d2,d0
+        movem.l (sp)+,d2-d6/a2-a6      * Nothing, just exit
+        rts
 ;--------------------------------------------------------------------------------------
-GET_FND	move.l	d0,a4			* THIS REI ALWAYS IN A4
-	move.l	a2,a0			* TagItem in A1...
-	move.l	a0,d0			* Is there a TagItem list??
-	beq.s	GET_ESR			* If no TagList, exit quickly, thanks.
+GET_FND move.l  d0,a4                   * THIS REI ALWAYS IN A4
+        move.l  a2,a0                   * TagItem in A1...
+        move.l  a0,d0                   * Is there a TagItem list??
+        beq.s   GET_ESR                 * If no TagList, exit quickly, thanks.
 ;--------------------------------------------------------------------------------------
-GETTAG	USETAGLIST.l	GetREITable(pc),GETATAG,GET_ESR
+GETTAG  USETAGLIST.l GetREITable(pc),GETATAG,GET_ESR
 ;--------------------------------------------------------------------------------------
 GETScreen
-	move.l	rei_Screen(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra.s	GETATAG
+        move.l  rei_Screen(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra.s   GETATAG
 ;--------------------------------------------------------------------------------------
-SKIPGET	addq.w	#4,a0
-	bra.s	GETATAG
+SKIPGET addq.w  #4,a0
+        bra.s   GETATAG
 ;--------------------------------------------------------------------------------------
 GETWindowTAG
-	move.l	rei_NewWindowTAG(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_NewWindowTAG(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETScreenTAG
-	move.l	rei_ScreenTAG(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_ScreenTAG(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETWindowTextAttr
-	move.l	rei_GadgetTextAttr(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_GadgetTextAttr(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETNewMenu
-	move.l	rei_NewMenu(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_NewMenu(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETNewMenuTAG
-	move.l	rei_NewMenuTAG(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_NewMenuTAG(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETUserData
-	move.l	rei_UserData(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_UserData(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETLayoutCallBack
-	move.l	rei_LayoutCallBack(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_LayoutCallBack(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETCustomHook
-	move.l	rei_CustomHook(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_CustomHook(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETRememberPos
-	move.l	rei_Flags(a4),d0
-	andi.l	#REIB_REMEMBERPOS,d0
-	move.l	d0,([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_Flags(a4),d0
+        andi.l  #REIB_REMEMBERPOS,d0
+        move.l  d0,([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETRememberSize
-	move.l	rei_Flags(a4),d0
-	andi.l	#REIB_REMEMBERSIZE,d0
-	move.l	d0,([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_Flags(a4),d0
+        andi.l  #REIB_REMEMBERSIZE,d0
+        move.l  d0,([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETCenterHScreen
-	move.l	rei_Flags(a4),d0
-	andi.l	#REIB_CENTERHSCREEN,d0
-	move.l	d0,([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_Flags(a4),d0
+        andi.l  #REIB_CENTERHSCREEN,d0
+        move.l  d0,([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETCenterVScreen
-	move.l	rei_Flags(a4),d0
-	andi.l	#REIB_CENTERVSCREEN,d0
-	move.l	d0,([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_Flags(a4),d0
+        andi.l  #REIB_CENTERVSCREEN,d0
+        move.l  d0,([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETCenterMouse
-	move.l	rei_Flags(a4),d0
-	andi.l	#REIB_CENTERMOUSE,d0
-	move.l	d0,([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_Flags(a4),d0
+        andi.l  #REIB_CENTERMOUSE,d0
+        move.l  d0,([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETNoFontSensitive
-	move.l	rei_Flags(a4),d0
-	andi.l	#REIB_NOFONTSENSITIVE,d0
-	move.l	d0,([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_Flags(a4),d0
+        andi.l  #REIB_NOFONTSENSITIVE,d0
+        move.l  d0,([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETWindowTitle
-	move.l	rei_NewWindow+nw_Title(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_NewWindow+nw_Title(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETWindow
-	move.l	rei_Window(a4),([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_Window(a4),([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETFirstAsmGadget
-	move.l	rei_HEADAsmGadget(a4),d1
-	move.l	LN_SUCC(a0),d0
-	bne.s	FHEAD
-	moveq	#0,d1
-FHEAD	move.l	d1,([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_HEADAsmGadget(a4),d1
+        move.l  LN_SUCC(a0),d0
+        bne.s   FHEAD
+        moveq   #0,d1
+FHEAD   move.l  d1,([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETLastAsmGadget
-	move.l	rei_TAILAsmGadget(a4),d1
-	move.l	LN_PRED(a0),d0
-	bne.s	FTAIL
-	moveq	#0,d1
-FTAIL	move.l	d1,([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_TAILAsmGadget(a4),d1
+        move.l  LN_PRED(a0),d0
+        bne.s   FTAIL
+        moveq   #0,d1
+FTAIL   move.l  d1,([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ;--------------------------------------------------------------------------------------
 GETDoubleClick
-	move.l	rei_Flags(a4),d0
-	andi.l	#REIB_DOUBLECLICK,d0
-	move.l	d0,([a0])
-	addq.w	#1,d2
-	addq.w	#4,a0
-	bra	GETATAG
+        move.l  rei_Flags(a4),d0
+        andi.l  #REIB_DOUBLECLICK,d0
+        move.l  d0,([a0])
+        addq.w  #1,d2
+        addq.w  #4,a0
+        bra     GETATAG
 ```

@@ -34,10 +34,10 @@ Advances the data pointer to the next chunk in an IFF data structure. The functi
 The original 68020 assembly implementation:
 
 ```asm
-* Rel.1.0 * Last save: Jul 29 09:10 1991 =JON=
+; Rel.1.0 - Jul 29 1991 --- NextIFFChunk()
 _LVONextIFFChunk
-	move.l	4(a0),d0
-	lea	8(a0,d0.l),a0
-	move.l	4(a0),d0
-	rts
+        move.l  4(a0),d0
+        lea     8(a0,d0.l),a0
+        move.l  4(a0),d0
+        rts
 ```

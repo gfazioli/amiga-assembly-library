@@ -34,20 +34,18 @@ None.
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (20-Jan-1995) =Jon= --- [ CloseInterface(i) (a0) ] ####### TESTING #######
-***************************************************************************************
+; (20-Jan-1995) --- CloseInterface(i) (a0)
 _LVOCloseInterface
-	move.l	a6,-(sp)
-	move.l	ab_ExecBase(a6),a0
-	move.l	ThisTask(a0),a0
-	move.l	TC_Userdata(a0),d1
-	beq.s	CIExit
-	clr.l	TC_Userdata(a0)
-	subq.l	#4,d1
-	asr.l	#2,d1
-	move.l	ab_DosBase(a6),a6
-	jsr	_LVOUnLoadSeg(a6)
-CIExit	move.l	(sp)+,a6
-	rts
+        move.l  a6,-(sp)
+        move.l  ab_ExecBase(a6),a0
+        move.l  ThisTask(a0),a0
+        move.l  TC_Userdata(a0),d1
+        beq.s   CIExit
+        clr.l   TC_Userdata(a0)
+        subq.l  #4,d1
+        asr.l   #2,d1
+        move.l  ab_DosBase(a6),a6
+        jsr     _LVOUnLoadSeg(a6)
+CIExit  move.l  (sp)+,a6
+        rts
 ```
