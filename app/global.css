@@ -2,7 +2,8 @@
 
 @font-face {
   font-family: 'Topaz a1200';
-  src: url('/fonts/Topaz_a1200_v1.0.ttf') format('truetype');
+  src: url('/fonts/Topaz_a1200_v1.0.woff2') format('woff2'),
+       url('/fonts/Topaz_a1200_v1.0.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
