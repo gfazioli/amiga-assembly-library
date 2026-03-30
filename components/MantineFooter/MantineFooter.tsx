@@ -114,17 +114,6 @@ export const MantineFooter = () => {
                 Undolog
               </Anchor>
             </Text>
-            <Divider orientation="vertical" />
-            <Text fz={12} inline>
-              <Group gap={4} component="span">
-                Source on{' '}
-                <Anchor fz={13} href="https://github.com/gfazioli/amiga-68020-library">
-                  <Group gap={4} component="span">
-                    <IconBrandGithubFilled size={16} /> GitHub
-                  </Group>
-                </Anchor>
-              </Group>
-            </Text>
           </Group>
         </Group>
       </Container>
