@@ -53,6 +53,7 @@ export function Welcome() {
         <TextAnimate
           animate="in"
           by="character"
+          inherit
           variant="gradient"
           component="span"
           segmentDelay={0.2}
