@@ -81,8 +81,8 @@ export const Content = () => {
         </Title>
 
         <Text c="dimmed" ta="center" maw={500}>
-          The Assembly Library is organized into specialized modules, each providing a focused set of
-          functions.
+          The Assembly Library is organized into specialized modules, each providing a focused set
+          of functions.
         </Text>
 
         <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="lg" mt="md">
