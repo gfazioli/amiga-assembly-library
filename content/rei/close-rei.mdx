@@ -37,104 +37,102 @@ Closes a specific REI, identified either by the address of the REI to close, or 
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (V41.1) - 15-11-1994 =JON= ** CloseREI(rei, name) (a0/a1)
-***************************************************************************************
+; (V41.1) - 15-11-1994 --- CloseREI(rei, name) (a0/a1)
 _LVOCloseREI
-	movem.l	d2-d4/a3-a6,-(sp)
-	move.l	a6,a5			* Shift AsmBase in A5 - Common
-	move.l	a0,d0			* Was a REI provided??
-	bne.s	USRE_FF			* Ok, then don't search for it by name...
-	move.l	ab_ExecBase(a5),a0
-	move.l	([ThisTask.w,a0],TC_Userdata.w),a0	* struct List *
-	move.l	a0,d0
-	beq.s	USREESR
-	FINDNAME
-	move.l	d0,a4			* (struct REI *) in A4
-	move.l	a4,d0
-	bne.s	USRE_FF			* Found...
-USREESR	movem.l	(sp)+,d2-d4/a3-a6
-	rts
+        movem.l d2-d4/a3-a6,-(sp)
+        move.l  a6,a5                   * Shift AsmBase in A5 - Common
+        move.l  a0,d0                   * Was a REI provided??
+        bne.s   USRE_FF                 * Ok, then don't search for it by name...
+        move.l  ab_ExecBase(a5),a0
+        move.l  ([ThisTask.w,a0],TC_Userdata.w),a0 * struct List *
+        move.l  a0,d0
+        beq.s   USREESR
+        FINDNAME
+        move.l  d0,a4                   * (struct REI *) in A4
+        move.l  a4,d0
+        bne.s   USRE_FF                 * Found...
+USREESR movem.l (sp)+,d2-d4/a3-a6
+        rts
 ;--------------------------------------------------------------------------------------
-USRE_FF	moveq	#0,d4			* D4 = Clear Register...
-	move.l	d0,a4			* Shift REI in A4
-	moveq	#0,d0
-	BTSTL	REIB_OPENCLOSE,rei_Flags(a4)
-	beq.s	USREESR
+USRE_FF moveq   #0,d4                   * D4 = Clear Register...
+        move.l  d0,a4                   * Shift REI in A4
+        moveq   #0,d0
+        BTSTL   REIB_OPENCLOSE,rei_Flags(a4)
+        beq.s   USREESR
 ;--------------------------------------------------------------------------------------
-	move.l	d4,rei_REIMessage+rim_REICode(a4)	* Clear rim_REICode...
+        move.l  d4,rei_REIMessage+rim_REICode(a4) * Clear rim_REICode...
 ;--------------------------------------------------------------------------------------
-USRE_MU	move.l	rei_Menu(a4),d0		* Address of ADD Menu...
-	beq.s	USRE_W			* No Menu... Free Gadgets (V41.1)
-	move.l	rei_Window(a4),a0
-	move.l	ab_IntuiBase(a5),a6
-	jsr	_LVOClearMenuStrip(a6)
-	move.l	rei_Menu(a4),a0
-	move.l	ab_GadToolsBase(a5),a6
-	jsr	_LVOFreeMenus(a6)
-	move.l	d4,rei_Menu(a4)		* Clear Pointer Menu...
+USRE_MU move.l  rei_Menu(a4),d0         * Address of ADD Menu...
+        beq.s   USRE_W                  * No Menu... Free Gadgets (V41.1)
+        move.l  rei_Window(a4),a0
+        move.l  ab_IntuiBase(a5),a6
+        jsr     _LVOClearMenuStrip(a6)
+        move.l  rei_Menu(a4),a0
+        move.l  ab_GadToolsBase(a5),a6
+        jsr     _LVOFreeMenus(a6)
+        move.l  d4,rei_Menu(a4)         * Clear Pointer Menu...
 ;--------------------------------------------------------------------------------------
-USRE_W	BTSTL	REIB_REMEMBERPOS,rei_Flags(a4)
-	beq.s	RemSize
-	movem.w	([rei_Window.w,a4],wd_LeftEdge.w),d0-d1
-	movem.w	d0-d1,rei_RemLeft(a4)
-RemSize	BTSTL	REIB_REMEMBERSIZE,rei_Flags(a4)
-	beq.s	CloseW
-	movem.w	([rei_Window.w,a4],wd_Width.w),d0-d1
-	move.b	([rei_Screen.w,a4],sc_BarHeight.w),d2
-	ext.w	d2
-	addq.b	#1,d2
-	sub.w	d2,d1
-	sub.w	d2,rei_NewWindow+nw_MinHeight(a4)
-	move.w	([rei_rpGadget.w,a4],rp_TxWidth.w),d2
-	move.w	([rei_rpGadget.w,a4],rp_TxHeight.w),d3
-	divu.w	d2,d0
-	swap	d0
-	divu.w	d3,d1
-	swap	d1
-	movem.l	d0-d1,rei_RemWidth(a4)
-	movem.w	rei_NewWindow+nw_MinWidth(a4),d0-d1
-	divu.w	d2,d0
-	divu.w	d3,d1
-	movem.w	d0-d1,rei_NewWindow+nw_MinWidth(a4)
-CloseW	move.l	rei_Window(a4),a0	* Window... always present...
-	move.l	ab_IntuiBase(a5),a6
-	jsr	_LVOCloseWindow(a6)	* Close Window!!!
-	move.l	d4,rei_Window(a4)	* Clear pointer window
-	lea	rei_NewWindow(a4),a0
+USRE_W  BTSTL   REIB_REMEMBERPOS,rei_Flags(a4)
+        beq.s   RemSize
+        movem.w ([rei_Window.w,a4],wd_LeftEdge.w),d0-d1
+        movem.w d0-d1,rei_RemLeft(a4)
+RemSize BTSTL   REIB_REMEMBERSIZE,rei_Flags(a4)
+        beq.s   CloseW
+        movem.w ([rei_Window.w,a4],wd_Width.w),d0-d1
+        move.b  ([rei_Screen.w,a4],sc_BarHeight.w),d2
+        ext.w   d2
+        addq.b  #1,d2
+        sub.w   d2,d1
+        sub.w   d2,rei_NewWindow+nw_MinHeight(a4)
+        move.w  ([rei_rpGadget.w,a4],rp_TxWidth.w),d2
+        move.w  ([rei_rpGadget.w,a4],rp_TxHeight.w),d3
+        divu.w  d2,d0
+        swap    d0
+        divu.w  d3,d1
+        swap    d1
+        movem.l d0-d1,rei_RemWidth(a4)
+        movem.w rei_NewWindow+nw_MinWidth(a4),d0-d1
+        divu.w  d2,d0
+        divu.w  d3,d1
+        movem.w d0-d1,rei_NewWindow+nw_MinWidth(a4)
+CloseW  move.l  rei_Window(a4),a0       * Window... always present...
+        move.l  ab_IntuiBase(a5),a6
+        jsr     _LVOCloseWindow(a6)     * Close Window!!!
+        move.l  d4,rei_Window(a4)       * Clear pointer window
+        lea     rei_NewWindow(a4),a0
 ;--------------------------------------------------------------------------------------
-	move.l	rei_glist(a4),a0	* = CreateContext
-	move.l	ab_GadToolsBase(a5),a6
-	jsr	_LVOFreeGadgets(a6)	* Free Gadgets
-	move.l	d4,rei_glist(a4)	* Clear Gads pointer
+        move.l  rei_glist(a4),a0        * = CreateContext
+        move.l  ab_GadToolsBase(a5),a6
+        jsr     _LVOFreeGadgets(a6)     * Free Gadgets
+        move.l  d4,rei_glist(a4)        * Clear Gads pointer
 ;--------------------------------------------------------------------------------------
-	move.l	rei_VI(a4),a0		* Visual Info...
-	move.l	a5,a6
-	bsr	NewFreeVisualInfo	* My private routine...
-	move.l	d4,rei_VI(a4)		* Clear security
+        move.l  rei_VI(a4),a0           * Visual Info...
+        move.l  a5,a6
+        bsr     NewFreeVisualInfo       * My private routine...
+        move.l  d4,rei_VI(a4)           * Clear security
 ;--------------------------------------------------------------------------------------
-	move.l	rei_ScreenTAG(a4),d0	* NewScreen TagItem list??
-	beq.s	CRFONT			* NO.. Exit... safely and ok...
-	move.l	rei_Screen(a4),a0	* Take Screen ptr
-	move.l	ab_IntuiBase(a5),a6
-	jsr	_LVOCloseScreen(a6)	* Close Screens
-	move.l	d4,rei_Screen(a4)
+        move.l  rei_ScreenTAG(a4),d0    * NewScreen TagItem list??
+        beq.s   CRFONT                  * NO.. Exit... safely and ok...
+        move.l  rei_Screen(a4),a0       * Take Screen ptr
+        move.l  ab_IntuiBase(a5),a6
+        jsr     _LVOCloseScreen(a6)     * Close Screens
+        move.l  d4,rei_Screen(a4)
 ;--------------------------------------------------------------------------------------
-CRFONT	tst.l	rei_GadgetTextAttr(a4)
-	beq.s	RPFREE
-	move.l	rei_GadgetFont(a4),d0
-	beq.s	RPFREE
-	move.l	d0,a1
-	move.l	ab_GfxBase(a5),a6
-	jsr	_LVOCloseFont(a6)
+CRFONT  tst.l   rei_GadgetTextAttr(a4)
+        beq.s   RPFREE
+        move.l  rei_GadgetFont(a4),d0
+        beq.s   RPFREE
+        move.l  d0,a1
+        move.l  ab_GfxBase(a5),a6
+        jsr     _LVOCloseFont(a6)
 ;--------------------------------------------------------------------------------------
-RPFREE	move.l	ab_ExecBase(a5),a6
-	move.l	rei_rpGadget(a4),a1
-	move.l	-(a1),d0
-	jsr	_LVOFreeMem(a6)
+RPFREE  move.l  ab_ExecBase(a5),a6
+        move.l  rei_rpGadget(a4),a1
+        move.l  -(a1),d0
+        jsr     _LVOFreeMem(a6)
 ;--------------------------------------------------------------------------------------
-USRE_E	BCLRL	REIB_OPENCLOSE,rei_Flags(a4)	* This REI is CLOSED
-	move.l	a4,d0				* A4 = Address REI
-	movem.l	(sp)+,d2-d4/a3-a6
-	rts
+USRE_E  BCLRL   REIB_OPENCLOSE,rei_Flags(a4) * This REI is CLOSED
+        move.l  a4,d0                   * A4 = Address REI
+        movem.l (sp)+,d2-d4/a3-a6
+        rts
 ```

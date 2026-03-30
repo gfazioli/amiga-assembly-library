@@ -58,44 +58,42 @@ If the `-` character is present, it always overrides the `+` character regardles
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (20-Feb-1995) --- value = StringHexToValue(string) (a0)
-***************************************************************************************
+; (20-Feb-1995) --- value = StringHexToValue(string) (a0)
 _LVOStringHexToValue
-	movem.l	d1-d7/a0-a2,-(sp)
-	movem.w	DecClearRegs(pc),d0-d7
-	suba.l	a2,a2			* Marking Neg Number
-	moveq	#5,d4			* Fast CODE
-	moveq	#"a",d5			* Fast CODE
-	moveq	#"0",d6			* Fast CODE
-	moveq	#$57,d7			* Fast CODE
-H2V_Skp	cmp.b	(a0),d6			* Check Jolly Char
-	ble.s	H2V_Con
-	cmpi.b	#"$",(a0)+		* Jolly...
-	beq.s	H2V_Skp
-	cmpi.b	#"+",-1(a0)		* Pos
-	beq.s	H2V_Skp
-	cmpi.b	#"-",-1(a0)		* NOT... triggers something...
-	bne.s	H2V_Skp
-	addq.w	#1,a2			* Set Mark Negative
-	bra.s	H2V_Skp
-H2V_Con	STRLEN	a0,d1
-	subq.w	#1,d1
-H2V_Lop	move.b	(a0,d1.w),d2
-	bset	d4,d2			* bit 5 UP  sDn,sDn for Fast
-	cmp.b	d5,d2			* "A"	sDn,sDn for Fast
-	bge.s	H2V_Wrd
-	sub.b	d6,d2			* "0"	sDn,sDn for fast
-	bra.s	H2V_Put
-H2V_Wrd	sub.b	d7,d2			* #$57 sDn,sDn for fast
-H2V_Put	rol.l	d3,d2
-	or.l	d2,d0
-	addq.b	#4,d3			* Ok 4 clock cycles only QUICK
-	moveq	#0,d2
-	dbf     d1,H2V_Lop
-	move.w	a2,d1
-	beq.s	H2V_Ext
-	neg.l	d0
-H2V_Ext	movem.l	(sp)+,d1-d7/a0-a2
-	rts
+        movem.l d1-d7/a0-a2,-(sp)
+        movem.w DecClearRegs(pc),d0-d7
+        suba.l  a2,a2                    ; Marking Neg Number
+        moveq   #5,d4                    ; Fast CODE
+        moveq   #"a",d5                  ; Fast CODE
+        moveq   #"0",d6                  ; Fast CODE
+        moveq   #$57,d7                  ; Fast CODE
+H2V_Skp cmp.b   (a0),d6                  ; Check Jolly Char
+        ble.s   H2V_Con
+        cmpi.b  #"$",(a0)+              ; Jolly...
+        beq.s   H2V_Skp
+        cmpi.b  #"+",-1(a0)             ; Pos
+        beq.s   H2V_Skp
+        cmpi.b  #"-",-1(a0)             ; NOT... triggers something...
+        bne.s   H2V_Skp
+        addq.w  #1,a2                    ; Set Mark Negative
+        bra.s   H2V_Skp
+H2V_Con STRLEN  a0,d1
+        subq.w  #1,d1
+H2V_Lop move.b  (a0,d1.w),d2
+        bset    d4,d2                    ; bit 5 UP  sDn,sDn for Fast
+        cmp.b   d5,d2                    ; "A" sDn,sDn for Fast
+        bge.s   H2V_Wrd
+        sub.b   d6,d2                    ; "0" sDn,sDn for fast
+        bra.s   H2V_Put
+H2V_Wrd sub.b   d7,d2                    ; #$57 sDn,sDn for fast
+H2V_Put rol.l   d3,d2
+        or.l    d2,d0
+        addq.b  #4,d3                    ; Ok 4 clock cycles only QUICK
+        moveq   #0,d2
+        dbf     d1,H2V_Lop
+        move.w  a2,d1
+        beq.s   H2V_Ext
+        neg.l   d0
+H2V_Ext movem.l (sp)+,d1-d7/a0-a2
+        rts
 ```

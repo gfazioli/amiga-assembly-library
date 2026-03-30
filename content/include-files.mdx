@@ -14,6 +14,7 @@ This page provides a reference for all C header files included with the Assembly
 | `assembly/asmexec.h` (ASMEXEC.H) | Exec definitions -- reserved for future use |
 | `assembly/asmlibra.h` (ASMLIBRA.H) | Library utility definitions -- `RevertMem` type flags |
 | `assembly/asmintui.h` (ASMINTUI.H) | Intuition definitions -- `Interface`, `REI`, `REIMessage`, `AsmGadget`, `AsmRequest` structures and all associated tags |
+| `assembly/asmalert.h` (ASMALERT.H) | Alert definitions -- assembly.library alert numbers for system crashes |
 
 ---
 
@@ -688,3 +689,144 @@ The `AsmRequest` structure is fully private. It is allocated with `AllocAsmReque
 | `AREQ_FrameOnly` | Draw frame only (no backfill) |
 | `AREQ_WindowFlags` | Additional window flags |
 | `AREQ_ButtomHook` | Hook for custom button rendering |
+
+---
+
+## ASMALERT.H -- Alert Definitions
+
+Defines alert numbers used by the Assembly Library, following the standard Amiga alert format (see `exec/alerts.h`). These alerts are displayed during system crashes or recoverable error conditions.
+
+```c
+#ifndef ASSEMBLY_ASMALERT_H
+#define ASSEMBLY_ASMALERT_H
+/*
+**
+**    $VER: asmalert.h 37.00 (11.10.94)
+**    Includes Release 41.1
+**
+**    Alert numbers, as displayed by system crashes.
+**
+**    (No) Copyrights, Public Domain Software
+**            Nothing Rights Reserved
+**
+*/
+
+#ifndef EXEC_TYPES_H
+#include <exec/types.h>
+#endif
+
+#ifndef EXEC_ALERTS_H
+#include <exec/alerts.h>
+#endif
+
+/** For the format of the alert, see EXEC/ALERT.H */
+
+/* ======================================================================= */
+/* ==== ALERTS Define ==================================================== */
+/* ======================================================================= */
+#define AA AN_Unknown        /* assembly.library identifier */
+#define AA_DeadEnd (AA && AT_DeadEnd)   /* Unrecoverable. */
+#define AA_Recovery (AA && AT_Recovery) /* Recoverable. */
+
+/* -- Libraries Alert ---------------------------------------------------- */
+#define AA_lib (AA_Recovery | 0x00000010)
+#define AA_LIB (AA_DeadEnd | 0x00000010)
+
+#define AA_InvalidLibs (AA_lib | 0x00000001) /* Failed to open system
+                                                libraries. */
+#define AA_Invalid (AA_lib | 0x00000002) /* USER USE! The assembly library
+                                            was opened with an incorrect
+                                            version. */
+
+/* -- System Alert ------------------------------------------------------- */
+#define AA_sys (AA_Recovery | 0x00000020)
+#define AA_SYS (AA_DeadEnd | 0x00000020)
+
+#endif /* ASSEMBLY_ASMALERT_H */
+```
+
+### Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `AA` | `AN_Unknown` | Base alert identifier for the Assembly Library |
+| `AA_DeadEnd` | `AA && AT_DeadEnd` | Unrecoverable (dead-end) alert base |
+| `AA_Recovery` | `AA && AT_Recovery` | Recoverable alert base |
+| `AA_lib` | `AA_Recovery \| 0x10` | Recoverable library alert base |
+| `AA_LIB` | `AA_DeadEnd \| 0x10` | Unrecoverable library alert base |
+| `AA_InvalidLibs` | `AA_lib \| 0x01` | Failed to open required system libraries |
+| `AA_Invalid` | `AA_lib \| 0x02` | Library opened with an incorrect version (user-defined) |
+| `AA_sys` | `AA_Recovery \| 0x20` | Recoverable system alert base |
+| `AA_SYS` | `AA_DeadEnd \| 0x20` | Unrecoverable system alert base |
+
+---
+
+## AutoDoc Include Files
+
+The Assembly Library source tree includes two template files used for generating standardized documentation for library functions. These are not C headers but assembly-style include files (`.inc`) that provide blank documentation templates.
+
+### autodoc.inc -- Amiga AutoDoc Template
+
+This file provides a blank template in the standard Amiga AutoDoc format. It was included in assembly source files and filled in for each library function to produce documentation compatible with the Amiga AutoDoc tool.
+
+```asm
+******* assembly.library/ ****************************************
+*
+*   NAME
+*
+*   SYNOPSIS
+*
+*   FUNCTION
+*
+*   INPUTS
+*
+*   RESULT
+*
+*   EXAMPLE
+*
+*   NOTES
+*
+*   BUGS
+*
+*   SEE ALSO
+*
+****************************************************************************
+*
+*
+*
+*
+```
+
+### cdoc.inc -- C Documentation Template
+
+This file provides a blank template for documenting internal C-language bindings. It follows the same section structure as the AutoDoc template but uses C-style comment delimiters and is marked as an internal (`/****i*`) entry.
+
+```asm
+/****i* C_Language/internal ******************************************
+*
+*   NAME
+*
+*   SYNOPSIS
+*
+*   FUNCTION
+*
+*   INPUTS
+*
+*   RESULT
+*
+*   EXAMPLE
+*
+*   NOTES
+*
+*   BUGS
+*
+*   SEE ALSO
+*
+*****************************************************************************
+*
+*/
+```
+
+<Callout type="info">
+  Both `autodoc.inc` and `cdoc.inc` exist in two locations within the source tree: the root `Assembly-Library/` directory and the `Assembly-Library/sources/` directory. The contents are identical -- they serve as convenient templates that can be included or copied when writing new function documentation.
+</Callout>

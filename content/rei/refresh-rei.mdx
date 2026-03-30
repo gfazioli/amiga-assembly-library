@@ -38,26 +38,24 @@ This command may gain additional refresh capabilities in future versions.
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (V41.1) - 06-10-1994 =JON= **** ######NEEDS TO BE REDONE OR REMOVED########
-***************************************************************************************
+; (V41.1) - 06-10-1994 --- RefreshREI()
 _LVORefreshREI
-	movem.l	d2-d4/a2-a6,-(sp)
-	move.l	a6,a5			* Save AsmBase
-	move.l	a0,a3			* Save REI Address
-	move.l	rei_glist(a3),a0	* There is a Gadget?
-	move.l	rei_Window(a3),a1	* On this Window
-	suba.l	a2,a2			* No Request mode
-	moveq	#-1,d0			* All Gadgets list
-	move.l	ab_IntuiBase(a5),a6	* Use only Intuition
-	jsr	_LVORefreshGList(a6)
-	move.l	rei_Window(a3),a0
-	suba.l	a1,a1
-	move.l	ab_GadToolsBase(a5),a6
-	jsr	_LVOGT_RefreshWindow(a6)
-RRE_WIN	move.l	rei_Window(a3),a0
-	move.l	ab_IntuiBase(a5),a6
-	jsr	_LVORefreshWindowFrame(a6)
-	movem.l	(sp)+,d2-d4/a2-a6
-	rts
+        movem.l d2-d4/a2-a6,-(sp)
+        move.l  a6,a5                   * Save AsmBase
+        move.l  a0,a3                   * Save REI Address
+        move.l  rei_glist(a3),a0        * There is a Gadget?
+        move.l  rei_Window(a3),a1       * On this Window
+        suba.l  a2,a2                   * No Request mode
+        moveq   #-1,d0                  * All Gadgets list
+        move.l  ab_IntuiBase(a5),a6     * Use only Intuition
+        jsr     _LVORefreshGList(a6)
+        move.l  rei_Window(a3),a0
+        suba.l  a1,a1
+        move.l  ab_GadToolsBase(a5),a6
+        jsr     _LVOGT_RefreshWindow(a6)
+RRE_WIN move.l  rei_Window(a3),a0
+        move.l  ab_IntuiBase(a5),a6
+        jsr     _LVORefreshWindowFrame(a6)
+        movem.l (sp)+,d2-d4/a2-a6
+        rts
 ```

@@ -34,20 +34,18 @@ None.
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-** (18-Jan-1995) =Jon= --- FreeAsmRequest(areq) (A0)
-***************************************************************************************
+; (18-Jan-1995) --- FreeAsmRequest(areq) (A0)
 _LVOFreeAsmRequest
-	movem.l	a2-a6,-(sp)
-	move.l	a6,a5			* Save AssemblyBase
-	move.l	a0,a4			* Save AsmRequest
-	move.l	ab_ExecBase(a5),a6	* Get Exec
-	move.l	areq_SysRP(a4),a1	* System RastPort
-	move.l	-(a1),d0		* Pack Alloc
-	jsr	_LVOFreeMem(a6)
-	move.l	a4,a1			* AsmRequest...
-	move.l	-(a1),d0		* Pack Alloc
-	jsr	_LVOFreeMem(a6)		* Free the memory from the AsmRequest structure
-	movem.l	(sp)+,a2-a6
-	rts
+        movem.l a2-a6,-(sp)
+        move.l  a6,a5                   * Save AssemblyBase
+        move.l  a0,a4                   * Save AsmRequest
+        move.l  ab_ExecBase(a5),a6      * Get Exec
+        move.l  areq_SysRP(a4),a1       * System RastPort
+        move.l  -(a1),d0               * Pack Alloc
+        jsr     _LVOFreeMem(a6)
+        move.l  a4,a1                   * AsmRequest...
+        move.l  -(a1),d0               * Pack Alloc
+        jsr     _LVOFreeMem(a6)         * Free the memory from the AsmRequest structure
+        movem.l (sp)+,a2-a6
+        rts
 ```

@@ -40,49 +40,46 @@ If the new memory block is smaller than the previous one, some data may be lost.
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (29-Sep-1995) --- newmemoryBlock = ReAllocVec(oldmemoryBlock, newsize, newattr) (a0/d0/d1)
-***************************************************************************************
+; (29-Sep-1995) --- newmemoryBlock = ReAllocVec(oldmemoryBlock, newsize, newattr) (a0/d0/d1)
 _LVOReAllocVec
-	movem.l	d2-d7/a2-a6,-(sp)
-	move.l	a0,a2				* Save old memoryBlock
-	move.l	d0,d2				* Save new size
-	move.l	ab_ExecBase(a6),a6		* take exec.library base
-;;;;;;;;jsr	_LVOForbid(a6)			* multitasking off
-	addq.b  #1,TDNestCnt(A6)		* FORBID
-	tst.l	d1				* no new attributes provided
-	bne.s	MakeNewAlloc			* then use the old ones...
-	move.l	a2,a1
-	jsr	_LVOTypeOfMem(a6)		* retrieve old block attributes
-	move.l	d0,d1				* put them in D1
+        movem.l d2-d7/a2-a6,-(sp)
+        move.l  a0,a2                    ; Save old memoryBlock
+        move.l  d0,d2                    ; Save new size
+        move.l  ab_ExecBase(a6),a6       ; take exec.library base
+;;;;;;;;jsr     _LVOForbid(a6)           ; multitasking off
+        addq.b  #1,TDNestCnt(A6)         ; FORBID
+        tst.l   d1                       ; no new attributes provided
+        bne.s   MakeNewAlloc             ; then use the old ones...
+        move.l  a2,a1
+        jsr     _LVOTypeOfMem(a6)        ; retrieve old block attributes
+        move.l  d0,d1                    ; put them in D1
 MakeNewAlloc
-	addq.l	#4,d2
-	move.l	d2,d0				* new size memory block
-	jsr	_LVOAllocMem(a6)
-	tst.l	d0
-	beq.s	RAVFail
-	move.l	d0,a3				* new memory Block
-	move.l	d2,(a3)+			* make AllocVec() function...
-	;
-	move.l	-4(a2),d0			* size old memoryBlock
-	cmp.l	d2,d0				* if old <= new then
-	ble.s	CopySo				* if d0 <= d2 then
-	move.l	d2,d0				* copy as much as possible...
-	;
-CopySo	move.l	a2,a0				* old memoryBlock
-	move.l	a3,a1				* new memoryBlock
-	jsr	_LVOCopyMemQuick(a6)
-	;
-	move.l	a2,a1
-	move.l	-(a1),d0
-	jsr	_LVOFreeMem(a6)
-	jsr	_LVOPermit(a6)
-	move.l	a3,d0				* return()
-	movem.l	(sp)+,d2-d7/a2-a6
-	rts
-RAVFail	jsr	_LVOPermit(a6)
-	moveq	#0,d0
-	movem.l	(sp)+,d2-d7/a2-a6
-	rts
-***************************************************************************************
+        addq.l  #4,d2
+        move.l  d2,d0                    ; new size memory block
+        jsr     _LVOAllocMem(a6)
+        tst.l   d0
+        beq.s   RAVFail
+        move.l  d0,a3                    ; new memory Block
+        move.l  d2,(a3)+                 ; make AllocVec() function...
+
+        move.l  -4(a2),d0               ; size old memoryBlock
+        cmp.l   d2,d0                    ; if old <= new then
+        ble.s   CopySo                   ; if d0 <= d2 then
+        move.l  d2,d0                    ; copy as much as possible...
+
+CopySo  move.l  a2,a0                    ; old memoryBlock
+        move.l  a3,a1                    ; new memoryBlock
+        jsr     _LVOCopyMemQuick(a6)
+
+        move.l  a2,a1
+        move.l  -(a1),d0
+        jsr     _LVOFreeMem(a6)
+        jsr     _LVOPermit(a6)
+        move.l  a3,d0                    ; return()
+        movem.l (sp)+,d2-d7/a2-a6
+        rts
+RAVFail jsr     _LVOPermit(a6)
+        moveq   #0,d0
+        movem.l (sp)+,d2-d7/a2-a6
+        rts
 ```

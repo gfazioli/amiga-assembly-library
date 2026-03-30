@@ -35,11 +35,9 @@ Finds a pointer to an AsmGadget structure by performing a name-based search thro
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (25-Jan-1995) =Jon= ++++ asmgadget = FindAsmGadget(rei,name) (a0/a1)
-***************************************************************************************
+; (25-Jan-1995) --- asmgadget = FindAsmGadget(rei,name) (a0/a1)
 _LVOFindAsmGadget
-	lea	rei_HEADAsmGadget(a0),a0
-	FINDNAME
-	rts
+        lea     rei_HEADAsmGadget(a0),a0
+        FINDNAME
+        rts
 ```

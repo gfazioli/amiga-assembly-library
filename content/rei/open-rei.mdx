@@ -79,411 +79,409 @@ struct REI {
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (25-Jan-1995) =Jon= ** rei = OpenREIA(rei, name, taglist) (a0/a1/a2)
-***************************************************************************************
+; (25-Jan-1995) --- rei = OpenREIA(rei, name, taglist) (a0/a1/a2)
 TagReiTable
-	dc.l SRE_ESR	* Offset...
-	dc.l INITScreen,INITWindowTAG,INITScreenTAG,INITGadgetTextAttr
-	dc.l INITEmpty,INITEmpty,INITNewMenu,INITNewMenuTAG
-	dc.l INITUserData,INITLayoutCallBack,INITCustomHook
-	dc.l INITRememberPos,INITRememberSize,INITCenterHScreen,INITCenterVScreen
-	dc.l INITCenterMouse,INITNoFontSensitive,INITWindowTitle,INITWindow
-	dc.l INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty
-	dc.l INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty
-	dc.l INITDoubleClick
+        dc.l    SRE_ESR                 * Offset...
+        dc.l    INITScreen,INITWindowTAG,INITScreenTAG,INITGadgetTextAttr
+        dc.l    INITEmpty,INITEmpty,INITNewMenu,INITNewMenuTAG
+        dc.l    INITUserData,INITLayoutCallBack,INITCustomHook
+        dc.l    INITRememberPos,INITRememberSize,INITCenterHScreen,INITCenterVScreen
+        dc.l    INITCenterMouse,INITNoFontSensitive,INITWindowTitle,INITWindow
+        dc.l    INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty
+        dc.l    INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty,INITEmpty
+        dc.l    INITDoubleClick
 _LVOOpenREIA
-	movem.l	d2-d6/a2-a6,-(sp)
-	move.l	a6,a5			* Save AsmBase
-	move.l	a0,d0			* Was a REI provided??
-	bne.s	SRE_FND			* Ok, then don't search for it by name...
-	move.l	a1,d0			* if a NULL name was provided
-	beq.s	SRE_ESR			* exit...
-	move.l	ab_ExecBase(a5),a0
-	move.l	([ThisTask.w,a0],TC_Userdata.w),a0	* struct MinList *
-	move.l	a0,d0
-	beq.s	SRE_ESR
-	FINDNAME
-	move.l	d0,a4			* (struct REI *) in A4
-	move.l	a4,d0			* Check...
-	bne.s	SRE_FND			* Ok, name and node found... continue...
-SRE_ESR	movem.l	(sp)+,d2-d6/a2-a6	* Nothing, just exit
-	rts
+        movem.l d2-d6/a2-a6,-(sp)
+        move.l  a6,a5                   * Save AsmBase
+        move.l  a0,d0                   * Was a REI provided??
+        bne.s   SRE_FND                 * Ok, then don't search for it by name...
+        move.l  a1,d0                   * if a NULL name was provided
+        beq.s   SRE_ESR                 * exit...
+        move.l  ab_ExecBase(a5),a0
+        move.l  ([ThisTask.w,a0],TC_Userdata.w),a0 * struct MinList *
+        move.l  a0,d0
+        beq.s   SRE_ESR
+        FINDNAME
+        move.l  d0,a4                   * (struct REI *) in A4
+        move.l  a4,d0                   * Check...
+        bne.s   SRE_FND                 * Ok, name and node found... continue...
+SRE_ESR movem.l (sp)+,d2-d6/a2-a6      * Nothing, just exit
+        rts
 ;--------------------------------------------------------------------------------------
-SRE_FND	move.l	d0,a4			* THIS REI ALWAYS IN A4
-	moveq	#0,d0
-	BTSTL	REIB_OPENCLOSE,rei_Flags(a4)
-	bne.s	SRE_ESR
-	move.l	a2,a0			* TagItem in A1...
-	move.l	a0,d0			* Is there a TagItem list??
-	beq	REIMain
+SRE_FND move.l  d0,a4                   * THIS REI ALWAYS IN A4
+        moveq   #0,d0
+        BTSTL   REIB_OPENCLOSE,rei_Flags(a4)
+        bne.s   SRE_ESR
+        move.l  a2,a0                   * TagItem in A1...
+        move.l  a0,d0                   * Is there a TagItem list??
+        beq     REIMain
 ;--------------------------------------------------------------------------------------
 ; This part initializes a REI structure via a TagList.
 ;--------------------------------------------------------------------------------------
-TI_TAG	USETAGLIST.l	TagReiTable(pc),GO_TAG,REIMain
+TI_TAG  USETAGLIST.l TagReiTable(pc),GO_TAG,REIMain
 ;--------------------------------------------------------------------------------------
 INITScreen
-	move.l	(a0)+,rei_Screen(a4)
-	bra.s	GO_TAG
+        move.l  (a0)+,rei_Screen(a4)
+        bra.s   GO_TAG
 ;--------------------------------------------------------------------------------------
 INITWindowTAG
-	move.l	(a0)+,rei_NewWindowTAG(a4)
-	bra.s	GO_TAG
+        move.l  (a0)+,rei_NewWindowTAG(a4)
+        bra.s   GO_TAG
 ;--------------------------------------------------------------------------------------
 INITScreenTAG
-	move.l	(a0)+,rei_ScreenTAG(a4)
-	bra.s	GO_TAG
+        move.l  (a0)+,rei_ScreenTAG(a4)
+        bra.s   GO_TAG
 ;--------------------------------------------------------------------------------------
 INITGadgetTextAttr
-	move.l	(a0)+,rei_GadgetTextAttr(a4)
-	bra.s	GO_TAG
+        move.l  (a0)+,rei_GadgetTextAttr(a4)
+        bra.s   GO_TAG
 ;--------------------------------------------------------------------------------------
 INITNewMenu
-	move.l	(a0)+,rei_NewMenu(a4)
-	bra	GO_TAG
+        move.l  (a0)+,rei_NewMenu(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITNewMenuTAG
-	move.l	(a0)+,rei_NewMenuTAG(a4)
-	bra	GO_TAG
+        move.l  (a0)+,rei_NewMenuTAG(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITUserData
-	move.l	(a0)+,rei_UserData(a4)
-	bra	GO_TAG
+        move.l  (a0)+,rei_UserData(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITLayoutCallBack
-	move.l	(a0)+,rei_LayoutCallBack(a4)
-	bra	GO_TAG
+        move.l  (a0)+,rei_LayoutCallBack(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITCustomHook
-	move.l	(a0)+,rei_CustomHook(a4)
-	bra	GO_TAG
+        move.l  (a0)+,rei_CustomHook(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITRememberPos
-	move.l	(a0)+,d0
-	bne.s	RPFSET
-	BCLRL	REIB_REMEMBERPOS,rei_Flags(a4)
-	bra	GO_TAG
-RPFSET	BSETL	REIB_REMEMBERPOS,rei_Flags(a4)
-	bra	GO_TAG
+        move.l  (a0)+,d0
+        bne.s   RPFSET
+        BCLRL   REIB_REMEMBERPOS,rei_Flags(a4)
+        bra     GO_TAG
+RPFSET  BSETL   REIB_REMEMBERPOS,rei_Flags(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITRememberSize
-	move.l	(a0)+,d0
-	bne.s	RSFSET
-	BCLRL	REIB_REMEMBERSIZE,rei_Flags(a4)
-	bra	GO_TAG
-RSFSET	BSETL	REIB_REMEMBERSIZE,rei_Flags(a4)
-	bra	GO_TAG
+        move.l  (a0)+,d0
+        bne.s   RSFSET
+        BCLRL   REIB_REMEMBERSIZE,rei_Flags(a4)
+        bra     GO_TAG
+RSFSET  BSETL   REIB_REMEMBERSIZE,rei_Flags(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITCenterHScreen
-	move.l	(a0)+,d0
-	bne.s	CHFSET
-	BCLRL	REIB_CENTERHSCREEN,rei_Flags(a4)
-	bra	GO_TAG
-CHFSET	BSETL	REIB_CENTERHSCREEN,rei_Flags(a4)
-	bra	GO_TAG
+        move.l  (a0)+,d0
+        bne.s   CHFSET
+        BCLRL   REIB_CENTERHSCREEN,rei_Flags(a4)
+        bra     GO_TAG
+CHFSET  BSETL   REIB_CENTERHSCREEN,rei_Flags(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITCenterVScreen
-	move.l	(a0)+,d0
-	bne.s	CVFSET
-	BCLRL	REIB_CENTERVSCREEN,rei_Flags(a4)
-	bra	GO_TAG
-CVFSET	BSETL	REIB_CENTERVSCREEN,rei_Flags(a4)
-	bra	GO_TAG
+        move.l  (a0)+,d0
+        bne.s   CVFSET
+        BCLRL   REIB_CENTERVSCREEN,rei_Flags(a4)
+        bra     GO_TAG
+CVFSET  BSETL   REIB_CENTERVSCREEN,rei_Flags(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITCenterMouse
-	move.l	(a0)+,d0
-	bne.s	CMFSET
-	BCLRL	REIB_CENTERMOUSE,rei_Flags(a4)
-	bra	GO_TAG
-CMFSET	BSETL	REIB_CENTERMOUSE,rei_Flags(a4)
-	bra	GO_TAG
+        move.l  (a0)+,d0
+        bne.s   CMFSET
+        BCLRL   REIB_CENTERMOUSE,rei_Flags(a4)
+        bra     GO_TAG
+CMFSET  BSETL   REIB_CENTERMOUSE,rei_Flags(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITNoFontSensitive
-	move.l	(a0)+,d0
-	bne.s	NFFSET
-	BCLRL	REIB_NOFONTSENSITIVE,rei_Flags(a4)
-	bra	GO_TAG
-NFFSET	BSETL	REIB_NOFONTSENSITIVE,rei_Flags(a4)
-	bra	GO_TAG
+        move.l  (a0)+,d0
+        bne.s   NFFSET
+        BCLRL   REIB_NOFONTSENSITIVE,rei_Flags(a4)
+        bra     GO_TAG
+NFFSET  BSETL   REIB_NOFONTSENSITIVE,rei_Flags(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITWindowTitle
-	move.l	(a0)+,rei_NewWindow+nw_Title(a4)
-	bra	GO_TAG
+        move.l  (a0)+,rei_NewWindow+nw_Title(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITWindow
-	move.l	(a0)+,d0
-	beq	GO_TAG
-	move.l	d0,a0
-	move.l	wd_WScreen(a0),rei_Screen(a4)
-	bra	GO_TAG
+        move.l  (a0)+,d0
+        beq     GO_TAG
+        move.l  d0,a0
+        move.l  wd_WScreen(a0),rei_Screen(a4)
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITEmpty
-	addq.w	#4,a0
-	bra	GO_TAG
+        addq.w  #4,a0
+        bra     GO_TAG
 ;--------------------------------------------------------------------------------------
 INITDoubleClick
-	move.l	(a0)+,d0
-	bne.s	DCFSET
-	BCLRL	REIB_DOUBLECLICK,rei_Flags(a4)
-	bra	GO_TAG
-DCFSET	BSETL	REIB_DOUBLECLICK,rei_Flags(a4)
-	bra	GO_TAG
+        move.l  (a0)+,d0
+        bne.s   DCFSET
+        BCLRL   REIB_DOUBLECLICK,rei_Flags(a4)
+        bra     GO_TAG
+DCFSET  BSETL   REIB_DOUBLECLICK,rei_Flags(a4)
+        bra     GO_TAG
 
 ;--------------------------------------------------------------------------------------
 ; Let's begin... this is the actual code part.
 ;--------------------------------------------------------------------------------------
-REIMain	move.l	ab_IntuiBase(a5),a6	* Get Intuition for now...
-	move.l	rei_Screen(a4),d0	* (struct Screen *)
-	bne.s	SRE_GAI			* Get All Infos...
-	move.l	rei_ScreenTAG(a4),d0
-	beq.s	SRE_PUB			* Let's see which public screen it is, then
-	move.l	d0,a1
-	suba.l	a0,a0
-	jsr	_LVOOpenScreenTagList(a6)	* Open a CustomScreen then
-	tst.l	d0				* NULL pointer??
-	beq	SRE_EX2				* Exit... error
-	move.l	d0,rei_Screen(a4)		* Open here!
-	bra.s	SRE_GAI
-SRE_PUB	move.l	rei_PubScreenName(a4),a0
-	jsr	_LVOLockPubScreen(a6)
-	move.l	d0,a3
-	suba.l	a0,a0
-	move.l	a3,a1
-	jsr	_LVOUnlockPubScreen(a6)
-	move.l	a3,d0
+REIMain move.l  ab_IntuiBase(a5),a6     * Get Intuition for now...
+        move.l  rei_Screen(a4),d0       * (struct Screen *)
+        bne.s   SRE_GAI                 * Get All Infos...
+        move.l  rei_ScreenTAG(a4),d0
+        beq.s   SRE_PUB                 * Let's see which public screen it is, then
+        move.l  d0,a1
+        suba.l  a0,a0
+        jsr     _LVOOpenScreenTagList(a6) * Open a CustomScreen then
+        tst.l   d0                      * NULL pointer??
+        beq     SRE_EX2                 * Exit... error
+        move.l  d0,rei_Screen(a4)       * Open here!
+        bra.s   SRE_GAI
+SRE_PUB move.l  rei_PubScreenName(a4),a0
+        jsr     _LVOLockPubScreen(a6)
+        move.l  d0,a3
+        suba.l  a0,a0
+        move.l  a3,a1
+        jsr     _LVOUnlockPubScreen(a6)
+        move.l  a3,d0
 ;--------------------------------------------------------------------------------------
-SRE_GAI	move.l	d0,rei_Screen(a4)	* Save...
-	move.l	d0,a0			* Screen pointer (struct Screen *)
-	move.l	a5,a6			* AsmBase...
-	bsr	NewGetVisualInfo	* Get...
-	move.l	d0,rei_VI(a4)		* Save...
+SRE_GAI move.l  d0,rei_Screen(a4)       * Save...
+        move.l  d0,a0                   * Screen pointer (struct Screen *)
+        move.l  a5,a6                   * AsmBase...
+        bsr     NewGetVisualInfo        * Get...
+        move.l  d0,rei_VI(a4)           * Save...
 ;--------------------------------------------------------------------------------------
-	move.l	rei_Screen(a4),a0		* A0 = Screen
-	move.w	sc_Flags(a0),d0			* D0 = Flags
-	andi.w	#SCREENTYPE,d0			* D0 = Type of Screen
-	move.l	a0,rei_NewWindow+nw_Screen(a4)	* Pointer to Screen
-	move.w	d0,rei_NewWindow+nw_Type(a4)	* Type!!
+        move.l  rei_Screen(a4),a0       * A0 = Screen
+        move.w  sc_Flags(a0),d0         * D0 = Flags
+        andi.w  #SCREENTYPE,d0          * D0 = Type of Screen
+        move.l  a0,rei_NewWindow+nw_Screen(a4) * Pointer to Screen
+        move.w  d0,rei_NewWindow+nw_Type(a4) * Type!!
 ;--------------------------------------------------------------------------------------
-	jsr	_LVOAllocRastPort		* Allocate a dummy RastPort to
-	tst.l	d0
-	beq	SRE_FREEINFOS
-	move.l	d0,rei_rpGadget(a4)		* calculate pos/size of Gadgets...
-	move.l	ab_GfxBase(a5),a6
-	move.l	rei_Screen(a4),a0
-	lea	sc_RastPort(a0),a0
-	move.l	rp_Font(a0),rei_GadgetFont(a4)	* Screen TextFont - Default
-	move.l	rei_GadgetTextAttr(a4),d0	* Custom TextAttr Font for Gadget??
-	beq.s	NOFONT				* None, continue...
-	move.l	d0,a0
-	jsr	_LVOOpenFont(a6)		*
-	move.l	d0,rei_GadgetFont(a4)		* Save anyway, even if NULL...
+        jsr     _LVOAllocRastPort       * Allocate a dummy RastPort to
+        tst.l   d0
+        beq     SRE_FREEINFOS
+        move.l  d0,rei_rpGadget(a4)     * calculate pos/size of Gadgets...
+        move.l  ab_GfxBase(a5),a6
+        move.l  rei_Screen(a4),a0
+        lea     sc_RastPort(a0),a0
+        move.l  rp_Font(a0),rei_GadgetFont(a4) * Screen TextFont - Default
+        move.l  rei_GadgetTextAttr(a4),d0 * Custom TextAttr Font for Gadget??
+        beq.s   NOFONT                  * None, continue...
+        move.l  d0,a0
+        jsr     _LVOOpenFont(a6)
+        move.l  d0,rei_GadgetFont(a4)   * Save anyway, even if NULL...
 ;--------------------------------------------------------------------------------------
-NOFONT	move.l	rei_GadgetFont(a4),a0
-	move.l	rei_rpGadget(a4),a1
-	jsr	_LVOSetFont(a6)
+NOFONT  move.l  rei_GadgetFont(a4),a0
+        move.l  rei_rpGadget(a4),a1
+        jsr     _LVOSetFont(a6)
 
-	lea	rei_glist(a4),a0	* glist pointer for CreateContext()
-	move.l	ab_GadToolsBase(a5),a6	* glist = prevGad
-	jsr	_LVOCreateContext(a6)	* Already has GadToolsBase in A6
+        lea     rei_glist(a4),a0        * glist pointer for CreateContext()
+        move.l  ab_GadToolsBase(a5),a6  * glist = prevGad
+        jsr     _LVOCreateContext(a6)   * Already has GadToolsBase in A6
 ;--------------------------------------------------------------------------------------
-	move.l	rei_Screen(a4),a0
-	move.l	rei_rpGadget(a4),a1
-	BTSTL	REIB_REMEMBERSIZE,rei_Flags(a4)
-	beq.s	NoRSize
-	movem.l	rei_RemWidth(a4),d2-d3
-	tst.l	d2
-	bne.s	FontSen
+        move.l  rei_Screen(a4),a0
+        move.l  rei_rpGadget(a4),a1
+        BTSTL   REIB_REMEMBERSIZE,rei_Flags(a4)
+        beq.s   NoRSize
+        movem.l rei_RemWidth(a4),d2-d3
+        tst.l   d2
+        bne.s   FontSen
 ;--------------------------------------------------------------------------------------
-NoRSize	BTSTL	REIB_NOFONTSENSITIVE,rei_Flags(a4)
-	bne.s	UnderS			* Standard coordinates
-	move.l	rei_PropWidth(a4),d2
-	move.l	rei_PropHeight(a4),d3
-FontSen	move.w	rp_TxWidth(a1),d0
-	move.w	rp_TxHeight(a1),d1
-	move.w	d2,d4
-	swap	d2
-	mulu.w	d2,d0
-	add.w	d4,d0
-	move.w	d3,d4
-	swap	d3
-	mulu.w	d3,d1
-	add.w	d4,d1
-	movem.w	d0-d1,rei_NewWindow+nw_Width(a4)
-	movem.w	d0-d1,rei_NewWindow+nw_MinWidth(a4)
+NoRSize BTSTL   REIB_NOFONTSENSITIVE,rei_Flags(a4)
+        bne.s   UnderS                  * Standard coordinates
+        move.l  rei_PropWidth(a4),d2
+        move.l  rei_PropHeight(a4),d3
+FontSen move.w  rp_TxWidth(a1),d0
+        move.w  rp_TxHeight(a1),d1
+        move.w  d2,d4
+        swap    d2
+        mulu.w  d2,d0
+        add.w   d4,d0
+        move.w  d3,d4
+        swap    d3
+        mulu.w  d3,d1
+        add.w   d4,d1
+        movem.w d0-d1,rei_NewWindow+nw_Width(a4)
+        movem.w d0-d1,rei_NewWindow+nw_MinWidth(a4)
 ;--------------------------------------------------------------------------------------
-UnderS	BTSTL	REIB_UNDERSCREEN,rei_Flags(a4)
-	beq.s	Center
-	move.l	d0,rei_NewWindow+nw_LeftEdge(a4)	* Start from here, under the Screen
-	movem.w	([rei_Screen.w,a4],sc_Width.w),d1-d2	* Width and Height of the screen
-	sub.w	d0,d2
-	movem.w d1-d2,rei_NewWindow+nw_Width(a4)
-	bra	OPENWSO
-Center	BTSTL	REIB_REMEMBERPOS,rei_Flags(a4)
-	beq.s	NoRem
-	movem.w	rei_RemLeft(a4),d0-d1
-	movem.w	d0-d1,rei_NewWindow+nw_LeftEdge(a4)
-	bra.s	OpenWin
-NoRem	BTSTL	REIB_CENTERHSCREEN,rei_Flags(a4)
-	beq.s	ReiCenV
-	move.w	([rei_Screen.w,a4],sc_Width.w),d0
-	sub.w	rei_NewWindow+nw_Width(a4),d0
-	asr.w	#1,d0
-	move.w	d0,rei_NewWindow+nw_LeftEdge(a4)
-ReiCenV	BTSTL	REIB_CENTERVSCREEN,rei_Flags(a4)
-	beq.s	FLMouse
-	move.w	([rei_Screen.w,a4],sc_Height.w),d0
-	sub.w	rei_NewWindow+nw_Height(a4),d0
-	asr.w	#1,d0
-	move.w	d0,rei_NewWindow+nw_TopEdge(a4)
-FLMouse	BTSTL	REIB_CENTERMOUSE,rei_Flags(a4)
-	beq.s	OpenWin
-	movem.w	([rei_Screen.w,a4],sc_MouseY.w),d0-d1
-	exg.l	d0,d1
-	movem.w	rei_NewWindow+nw_Width(a4),d2-d3
-	asr.w	#1,d2
-	asr.w	#1,d3
-	sub.w	d2,d0
-	bge.s	FLOk01
-	moveq	#0,d0
-FLOk01	sub.w	d3,d1
-	bge.s	FLSave
-	moveq	#0,d1
-FLSave	movem.w	d0-d1,rei_NewWindow+nw_LeftEdge(a4)
+UnderS  BTSTL   REIB_UNDERSCREEN,rei_Flags(a4)
+        beq.s   Center
+        move.l  d0,rei_NewWindow+nw_LeftEdge(a4) * Start from here, under the Screen
+        movem.w ([rei_Screen.w,a4],sc_Width.w),d1-d2 * Width and Height of the screen
+        sub.w   d0,d2
+        movem.w d1-d2,rei_NewWindow+nw_Width(a4)
+        bra     OPENWSO
+Center  BTSTL   REIB_REMEMBERPOS,rei_Flags(a4)
+        beq.s   NoRem
+        movem.w rei_RemLeft(a4),d0-d1
+        movem.w d0-d1,rei_NewWindow+nw_LeftEdge(a4)
+        bra.s   OpenWin
+NoRem   BTSTL   REIB_CENTERHSCREEN,rei_Flags(a4)
+        beq.s   ReiCenV
+        move.w  ([rei_Screen.w,a4],sc_Width.w),d0
+        sub.w   rei_NewWindow+nw_Width(a4),d0
+        asr.w   #1,d0
+        move.w  d0,rei_NewWindow+nw_LeftEdge(a4)
+ReiCenV BTSTL   REIB_CENTERVSCREEN,rei_Flags(a4)
+        beq.s   FLMouse
+        move.w  ([rei_Screen.w,a4],sc_Height.w),d0
+        sub.w   rei_NewWindow+nw_Height(a4),d0
+        asr.w   #1,d0
+        move.w  d0,rei_NewWindow+nw_TopEdge(a4)
+FLMouse BTSTL   REIB_CENTERMOUSE,rei_Flags(a4)
+        beq.s   OpenWin
+        movem.w ([rei_Screen.w,a4],sc_MouseY.w),d0-d1
+        exg.l   d0,d1
+        movem.w rei_NewWindow+nw_Width(a4),d2-d3
+        asr.w   #1,d2
+        asr.w   #1,d3
+        sub.w   d2,d0
+        bge.s   FLOk01
+        moveq   #0,d0
+FLOk01  sub.w   d3,d1
+        bge.s   FLSave
+        moveq   #0,d1
+FLSave  movem.w d0-d1,rei_NewWindow+nw_LeftEdge(a4)
 ;--------------------------------------------------------------------------------------
-OpenWin	lea	rei_NewWindow(a4),a0		* NewWindow Structure
-	move.l	rei_STDWindowTAG(a4),d0		* Get Standard Window TagItem List
-	move.l	d0,a1
-	beq	OPENWSO
-	tst.l	rei_NewWindowTAG(a4)		* Does a personal extension exist?
-	beq	OPENOOO
+OpenWin lea     rei_NewWindow(a4),a0    * NewWindow Structure
+        move.l  rei_STDWindowTAG(a4),d0 * Get Standard Window TagItem List
+        move.l  d0,a1
+        beq     OPENWSO
+        tst.l   rei_NewWindowTAG(a4)    * Does a personal extension exist?
+        beq     OPENOOO
 ;--------------------------------------------------------------------------------------
-	move.l	rei_NewWindowTAG(a4),a1		* Extra...
-SFIW	move.l	a1,a0				* reset Tag_Item list
-	move.l	#WA_InnerWidth,d1
-	FINDTAG
-	beq.s	SFIH
-	move.l	4(a0),d4			* Wants a new InnerWidth
-SFIH	move.l	a1,a0
-	move.l	#WA_InnerHeight,d1
-	FINDTAG
-	beq.s	ENDSER
-	move.l	4(a0),d5			* Wants a new InnerHeight
-ENDSER	lea	rei_NewWindow(a4),a0		* NewWindow Structure
-	move.l	rei_STDWindowTAG(a4),d0		* Get Standard Window TagItem List
-	move.l	d0,a1
-	movem.w	d4-d5,nw_Width(a0)
+        move.l  rei_NewWindowTAG(a4),a1 * Extra...
+SFIW    move.l  a1,a0                   * reset Tag_Item list
+        move.l  #WA_InnerWidth,d1
+        FINDTAG
+        beq.s   SFIH
+        move.l  4(a0),d4               * Wants a new InnerWidth
+SFIH    move.l  a1,a0
+        move.l  #WA_InnerHeight,d1
+        FINDTAG
+        beq.s   ENDSER
+        move.l  4(a0),d5               * Wants a new InnerHeight
+ENDSER  lea     rei_NewWindow(a4),a0    * NewWindow Structure
+        move.l  rei_STDWindowTAG(a4),d0 * Get Standard Window TagItem List
+        move.l  d0,a1
+        movem.w d4-d5,nw_Width(a0)
 ;--------------------------------------------------------------------------------------
-OPENOOO	move.w	nw_Width(a0),6(a1)
-	move.w	nw_Height(a0),14(a1)
-	move.l	rei_NewWindowTAG(a4),28(a1)	* TAG_MORE
+OPENOOO move.w  nw_Width(a0),6(a1)
+        move.w  nw_Height(a0),14(a1)
+        move.l  rei_NewWindowTAG(a4),28(a1) * TAG_MORE
 ;--------------------------------------------------------------------------------------
-OPENWSO	move.l	ab_IntuiBase(a5),a6
-	jsr	_LVOOpenWindowTagList(a6)
-	tst.l	d0				* Some error??
-	beq	SRE_FREEFONT			* Then Exit
-	move.l	d0,rei_Window(a4)		* Save Pointer in REI
-	move.l	d0,a0
-	move.l	a4,wd_UserData(a0)		* Put Addr of this REI
+OPENWSO move.l  ab_IntuiBase(a5),a6
+        jsr     _LVOOpenWindowTagList(a6)
+        tst.l   d0                      * Some error??
+        beq     SRE_FREEFONT            * Then Exit
+        move.l  d0,rei_Window(a4)       * Save Pointer in REI
+        move.l  d0,a0
+        move.l  a4,wd_UserData(a0)      * Put Addr of this REI
 ;--------------------------------------------------------------------------------------
-	move.l	rei_LayoutCallBack(a4),d0	* CallBack Hook
-	beq	SRECOX
-	move.l	d0,a1
-	move.l	([rei_Window.w,a4],wd_RPort.w),a0
-	move.l	rp_Layer(a0),a0			* Layer
-	move.l	ab_LayersBase(a5),a6
-	jsr	_LVOInstallLayerHook(a6)
-	move.l	d0,rei_OldHook(a4)
-	move.l	rei_Window(a4),a0		* Window
-	move.l	a5,a6				* AsmBase
-	pea	SRECOX(pc)
-	bra	_LVOEraseInternalRect
+        move.l  rei_LayoutCallBack(a4),d0 * CallBack Hook
+        beq     SRECOX
+        move.l  d0,a1
+        move.l  ([rei_Window.w,a4],wd_RPort.w),a0
+        move.l  rp_Layer(a0),a0         * Layer
+        move.l  ab_LayersBase(a5),a6
+        jsr     _LVOInstallLayerHook(a6)
+        move.l  d0,rei_OldHook(a4)
+        move.l  rei_Window(a4),a0       * Window
+        move.l  a5,a6                   * AsmBase
+        pea     SRECOX(pc)
+        bra     _LVOEraseInternalRect
 ;--------------------------------------------------------------------------------------
-SRECOX	move.l	([rei_HEADAsmGadget.w,a4]),d0	* HEAD / TAIL
-	beq.s	AddGad			* Add CreateContext() anyway and always
-	move.l	rei_glist(a4),a2	* PrevGadget
-	move.l	rei_HEADAsmGadget(a4),a3	* A3 = 1st AsmGadget Node...
-	move.l	a5,a6
-	bsr	LayoutAsmGList		* A4=REI, A3=AsmGList, A2=PrevGadget
+SRECOX  move.l  ([rei_HEADAsmGadget.w,a4]),d0 * HEAD / TAIL
+        beq.s   AddGad                  * Add CreateContext() anyway and always
+        move.l  rei_glist(a4),a2        * PrevGadget
+        move.l  rei_HEADAsmGadget(a4),a3 * A3 = 1st AsmGadget Node...
+        move.l  a5,a6
+        bsr     LayoutAsmGList          * A4=REI, A3=AsmGList, A2=PrevGadget
 ;--------------------------------------------------------------------------------------
-AddGad	move.l	rei_Window(a4),a0	* As you can see, the PrevGad is always
-	move.l	rei_glist(a4),a1	* added to the Window, even if no
-	moveq	#-1,d0			* AsmGadget structures are present.
-	moveq	#-1,d1
-	suba.l	a2,a2
-	move.l	ab_IntuiBase(a5),a6
-	jsr	_LVOAddGList(a6)
-	move.l	rei_glist(a4),a0	* Refresh all added Gadgets
-	move.l	rei_Window(a4),a1
-	suba.l	a2,a2
-	moveq	#-1,d0
-	jsr	_LVORefreshGList(a6)
-	move.l	ab_GadToolsBase(a5),a6
-	move.l	rei_Window(a4),a0
-	suba.l	a1,a1
-	jsr	_LVOGT_RefreshWindow(a6)
+AddGad  move.l  rei_Window(a4),a0       * As you can see, the PrevGad is always
+        move.l  rei_glist(a4),a1        * added to the Window, even if no
+        moveq   #-1,d0                  * AsmGadget structures are present.
+        moveq   #-1,d1
+        suba.l  a2,a2
+        move.l  ab_IntuiBase(a5),a6
+        jsr     _LVOAddGList(a6)
+        move.l  rei_glist(a4),a0        * Refresh all added Gadgets
+        move.l  rei_Window(a4),a1
+        suba.l  a2,a2
+        moveq   #-1,d0
+        jsr     _LVORefreshGList(a6)
+        move.l  ab_GadToolsBase(a5),a6
+        move.l  rei_Window(a4),a0
+        suba.l  a1,a1
+        jsr     _LVOGT_RefreshWindow(a6)
 ;--------------------------------------------------------------------------------------
-SRE_MNU	move.l	rei_NewMenu(a4),d0	* Are there Menus?
-	beq.s	CU_HOOK			* CustomHook...
-	move.l	d0,a0
-	move.l	rei_NewMenuTAG(a4),a1
-	move.l	ab_GadToolsBase(a5),a6
-	jsr	_LVOCreateMenusA(a6)
-	move.l	d0,rei_Menu(a4)
-	move.l	d0,a0
-	move.l	rei_VI(a4),a1
-	suba.l	a2,a2
-	jsr	_LVOLayoutMenusA(a6)
-	move.l	rei_Window(a4),a0
-	move.l	rei_Menu(a4),a1
-	move.l	ab_IntuiBase(a5),a6
-	jsr	_LVOSetMenuStrip(a6)
+SRE_MNU move.l  rei_NewMenu(a4),d0      * Are there Menus?
+        beq.s   CU_HOOK                 * CustomHook...
+        move.l  d0,a0
+        move.l  rei_NewMenuTAG(a4),a1
+        move.l  ab_GadToolsBase(a5),a6
+        jsr     _LVOCreateMenusA(a6)
+        move.l  d0,rei_Menu(a4)
+        move.l  d0,a0
+        move.l  rei_VI(a4),a1
+        suba.l  a2,a2
+        jsr     _LVOLayoutMenusA(a6)
+        move.l  rei_Window(a4),a0
+        move.l  rei_Menu(a4),a1
+        move.l  ab_IntuiBase(a5),a6
+        jsr     _LVOSetMenuStrip(a6)
 ;--------------------------------------------------------------------------------------
-CU_HOOK	move.l	rei_CustomHook(a4),d0
-	beq.s	SRE_ASL
-	move.l	d0,a0
-	suba.l	a1,a1
-	move.l	rei_Window(a4),a2
-	move.l	a5,a6
-	move.l	h_Entry(a0),a3
-	jsr	(a3)
+CU_HOOK move.l  rei_CustomHook(a4),d0
+        beq.s   SRE_ASL
+        move.l  d0,a0
+        suba.l  a1,a1
+        move.l  rei_Window(a4),a2
+        move.l  a5,a6
+        move.l  h_Entry(a0),a3
+        jsr     (a3)
 ;--------------------------------------------------------------------------------------
 SRE_ASL
-	BTSTL	REIB_REQUEST,rei_Flags(a4)
-	beq.s	SRE_PEX
-	move.l	ab_IntuiBase(a5),a6
-	move.l	rei_Screen(a4),a0
-	jsr	_LVOScreenToFront(a6)
-SRE_PEX	BSETL	REIB_OPENCLOSE,rei_Flags(a4)		* This REI is OPEN
-	move.l	a4,d0					* Exit All OK... D0 = REI
-SRE_EXT	movem.l	(sp)+,d2-d6/a2-a6
-	rts
-ClearREI	ds.l 8
+        BTSTL   REIB_REQUEST,rei_Flags(a4)
+        beq.s   SRE_PEX
+        move.l  ab_IntuiBase(a5),a6
+        move.l  rei_Screen(a4),a0
+        jsr     _LVOScreenToFront(a6)
+SRE_PEX BSETL   REIB_OPENCLOSE,rei_Flags(a4) * This REI is OPEN
+        move.l  a4,d0                   * Exit All OK... D0 = REI
+SRE_EXT movem.l (sp)+,d2-d6/a2-a6
+        rts
+ClearREI ds.l   8
 ;--------------------------------------------------------------------------------------
 SRE_FREEGADGETS
-	move.l	rei_glist(a4),a0	* = CreateContext()
-	move.l	ab_GadToolsBase(a5),a6
-	jsr	_LVOFreeGadgets(a6)
+        move.l  rei_glist(a4),a0        * = CreateContext()
+        move.l  ab_GadToolsBase(a5),a6
+        jsr     _LVOFreeGadgets(a6)
 SRE_FREEFONT
-	move.l	rei_GadgetTextAttr(a4),d0
-	beq.s	NoFOP
-	move.l	ab_GfxBase(a5),a6
-	move.l	d0,a1
-	jsr	_LVOCloseFont(a6)
-NoFOP	move.l	ab_ExecBase(a5),a6
-	move.l	rei_rpGadget(a4),a1
-	move.l	-(a1),d0
-	jsr	_LVOFreeMem(a6)
-SRE_FREEINFOS				* Free VI & DrawInfo
-	move.l	rei_VI(a4),a0
-	move.l	a5,a6
-	bsr	NewFreeVisualInfo
-SRE_CLOSESCREEN				* Close Screen
-	move.l	rei_ScreenTAG(a4),d0	* The CUSTOM screen is always and only
-	beq.s	SRE_EX2			* opened if a TagList exists.
-	move.l	rei_Screen(a4),a0
-	move.l	ab_IntuiBase(a5),a6
-	jsr	_LVOCloseScreen(a6)
-	moveq	#0,d0			* NULL to return an error.
-SRE_EX2	movem.l	(sp)+,d2-d6/a2-a6
-	rts
+        move.l  rei_GadgetTextAttr(a4),d0
+        beq.s   NoFOP
+        move.l  ab_GfxBase(a5),a6
+        move.l  d0,a1
+        jsr     _LVOCloseFont(a6)
+NoFOP   move.l  ab_ExecBase(a5),a6
+        move.l  rei_rpGadget(a4),a1
+        move.l  -(a1),d0
+        jsr     _LVOFreeMem(a6)
+SRE_FREEINFOS                           * Free VI & DrawInfo
+        move.l  rei_VI(a4),a0
+        move.l  a5,a6
+        bsr     NewFreeVisualInfo
+SRE_CLOSESCREEN                         * Close Screen
+        move.l  rei_ScreenTAG(a4),d0    * The CUSTOM screen is always and only
+        beq.s   SRE_EX2                 * opened if a TagList exists.
+        move.l  rei_Screen(a4),a0
+        move.l  ab_IntuiBase(a5),a6
+        jsr     _LVOCloseScreen(a6)
+        moveq   #0,d0                   * NULL to return an error.
+SRE_EX2 movem.l (sp)+,d2-d6/a2-a6
+        rts
 ```

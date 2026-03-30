@@ -34,85 +34,83 @@ Opens an AsmRequest containing information about the interface. The information 
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (24-Jun-1995) =Jon= --- succ = InterfaceInfo(rei) (a0)
-***************************************************************************************
+; (24-Jun-1995) --- succ = InterfaceInfo(rei) (a0)
 _LVOInterfaceInfo
-	move.l	ab_ExecBase(a6),a1
-	move.l	([ThisTask.w,a1],TC_Userdata.w),d0	* struct MinList *
-	bne.s	IICont
-	rts
-IICont	movem.l	a2-a6,-(sp)
-	move.l	d0,a5				* Save MinList == (Struct Interface *)
+        move.l  ab_ExecBase(a6),a1
+        move.l  ([ThisTask.w,a1],TC_Userdata.w),d0 * struct MinList *
+        bne.s   IICont
+        rts
+IICont  movem.l a2-a6,-(sp)
+        move.l  d0,a5                   * Save MinList == (Struct Interface *)
 ;--------------------------------------------------------------------------------------
-	move.l	a0,a4				* Save....
-	lea	ObjectI(pc),a0
-	move.l	a0,d0
-	move.l	sp,a3				* Save the stack (24.Jun.95)
-	pea	TAG_DONE
-	pea	16
-	pea	PDTA_NumColors
-	pea	0
-	pea	PDTA_Remap
-	move.l	sp,a0
-	bsr	_LVOLoadNewDTObjectA
-	move.l	a3,sp				* Reset Stack...
-	move.l	d0,a3
-	move.l	a4,a0
+        move.l  a0,a4                   * Save....
+        lea     ObjectI(pc),a0
+        move.l  a0,d0
+        move.l  sp,a3                   * Save the stack (24.Jun.95)
+        pea     TAG_DONE
+        pea     16
+        pea     PDTA_NumColors
+        pea     0
+        pea     PDTA_Remap
+        move.l  sp,a0
+        bsr     _LVOLoadNewDTObjectA
+        move.l  a3,sp                   * Reset Stack...
+        move.l  d0,a3
+        move.l  a4,a0
 ;--------------------------------------------------------------------------------------
-	move.l	sp,a4				* Save Stack...
-	pea	0				* TAG_DONE
-	pea	1
-	pea	AREQ_CenterVScreen
-	pea	1
-	pea	AREQ_CenterHScreen
-	move.l	a0,-(sp)
-	pea	AREQ_REI
-	move.l	a0,-(sp)
-	pea	AREQ_LockREI
-	pea	ITitle(pc)
-	pea	AREQ_Title
-	move.l	a3,-(sp)
-	pea	AREQ_Object
+        move.l  sp,a4                   * Save Stack...
+        pea     0                       * TAG_DONE
+        pea     1
+        pea     AREQ_CenterVScreen
+        pea     1
+        pea     AREQ_CenterHScreen
+        move.l  a0,-(sp)
+        pea     AREQ_REI
+        move.l  a0,-(sp)
+        pea     AREQ_LockREI
+        pea     ITitle(pc)
+        pea     AREQ_Title
+        move.l  a3,-(sp)
+        pea     AREQ_Object
 
-	move.l	sp,a0
-	bsr	_LVOAllocAsmRequestA
-	move.l	a4,sp
-	tst.l	d0
-	beq.s	IIExit
-	move.l	d0,a4
-	move.l	a4,a0
-	lea	IIText(pc),a1
-	suba.l	a2,a2
-	exg.l	a5,a3
-	lea	int_IName(a3),a3
-	bsr	_LVOAsmRequestArgs
-	move.l	a4,a0
-	bsr	_LVOFreeAsmRequest
-	move.l	a5,d0
-	beq.s	NoPree
-	move.l	d0,a0
-	move.l	ab_DataTypesBase(a6),a6
-	jsr	_LVODisposeDTObject(a6)
-NoPree	moveq	#1,d0
-NoFree	movem.l	(sp)+,a2-a6
-	rts
-IIExit	move.l	a3,d0
-	beq.s	NoFree
-	move.l	d0,a0
-	move.l	ab_DataTypesBase(a6),a6
-	jsr	_LVODisposeDTObject(a6)
-	moveq	#0,d0
-	movem.l	(sp)+,a2-a6
-	rts
+        move.l  sp,a0
+        bsr     _LVOAllocAsmRequestA
+        move.l  a4,sp
+        tst.l   d0
+        beq.s   IIExit
+        move.l  d0,a4
+        move.l  a4,a0
+        lea     IIText(pc),a1
+        suba.l  a2,a2
+        exg.l   a5,a3
+        lea     int_IName(a3),a3
+        bsr     _LVOAsmRequestArgs
+        move.l  a4,a0
+        bsr     _LVOFreeAsmRequest
+        move.l  a5,d0
+        beq.s   NoPree
+        move.l  d0,a0
+        move.l  ab_DataTypesBase(a6),a6
+        jsr     _LVODisposeDTObject(a6)
+NoPree  moveq   #1,d0
+NoFree  movem.l (sp)+,a2-a6
+        rts
+IIExit  move.l  a3,d0
+        beq.s   NoFree
+        move.l  d0,a0
+        move.l  ab_DataTypesBase(a6),a6
+        jsr     _LVODisposeDTObject(a6)
+        moveq   #0,d0
+        movem.l (sp)+,a2-a6
+        rts
 ;--------------------------------------------------------------------------------------
-ITitle	STRING "Informations..."
-IIText	dc.b "Name: %s",10
-	dc.b "Version: %s",10
-	dc.b "Author: %s",10
-	dc.b "Address: %s",10
-	dc.b "Date: %s",10
-	dc.b "Comment: %s",0
-	even
-ObjectI	STRING "Interface.bsh"
+ITitle  STRING  "Informations..."
+IIText  dc.b    "Name: %s",10
+        dc.b    "Version: %s",10
+        dc.b    "Author: %s",10
+        dc.b    "Address: %s",10
+        dc.b    "Date: %s",10
+        dc.b    "Comment: %s",0
+        even
+ObjectI STRING  "Interface.bsh"
 ```

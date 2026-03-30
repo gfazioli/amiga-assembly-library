@@ -35,27 +35,26 @@ Creates a copy of a RastPort structure. It allocates a new RastPort and copies t
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (25-Oct-1994) =JON= --- clonerp = CloneRastPort (rp) (a0)
-***************************************************************************************
+; (25-Oct-1994) --- clonerp = CloneRastPort(rp) (a0)
 _LVOCloneRastPort
-	movem.l	d2/a3-a6,-(sp)
-	move.l	a0,a3
-	move.l	#4+rp_SIZEOF,d0		* Alloc My Raster Port structure
-	move.l	d0,d2
-	moveq	#1,d1
-	swap	d1
-	move.l	ab_ExecBase(a5),a6
-	jsr	_LVOAllocMem(a6)
-	tst.l	d0
-	beq.s	CRP_EXT
-	move.l	d0,a4
-	move.l	d2,(a4)+
-	move.l	a4,a0
-	REPT	(rp_SIZEOF/2)
-	move.w	(a3)+,(a0)+
-	ENDR
-	move.l	a4,d0
-CRP_EXT	movem.l	(sp)+,d2/a3-a6
-	rts
+        movem.l d2/a3-a6,-(sp)
+        move.l  a0,a3
+        move.l  #4+rp_SIZEOF,d0        ; Alloc My Raster Port structure
+        move.l  d0,d2
+        moveq   #1,d1
+        swap    d1
+        move.l  ab_ExecBase(a5),a6
+        jsr     _LVOAllocMem(a6)
+        tst.l   d0
+        beq.s   CRP_EXT
+        move.l  d0,a4
+        move.l  d2,(a4)+
+        move.l  a4,a0
+        REPT    (rp_SIZEOF/2)
+        move.w  (a3)+,(a0)+
+        ENDR
+        move.l  a4,d0
+
+CRP_EXT movem.l (sp)+,d2/a3-a6
+        rts
 ```

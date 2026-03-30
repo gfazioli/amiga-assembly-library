@@ -41,33 +41,31 @@ The error text is linked to the system LOCALE, so the error string is in the lan
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (02-Mar-1995) Make up --- error = CheckFile(filename,buffer) (a0/a1)
-***************************************************************************************
+; (02-Mar-1995) --- error = CheckFile(filename,buffer) (a0/a1)
 _LVOCheckFile
-	movem.l	d2-d6/a6,-(sp)
-	move.l	a1,d6			* Save Buffer
-	move.l	ab_DosBase(a6),a6
-	move.l	a0,d1
-	lea	MODE_OLDFILE.W,A0
-	move.l	a0,d2
-	jsr	_LVOOpen(a6)
-	tst.l	d0
-	bne.s	CK_CLO
-	jsr	_LVOIoErr(a6)
-	move.l	d0,d5
-CKGOERR	move.l	d6,d3		* output buffer
-	beq.s	CK_NTX
-	move.l	d5,d1		* Error code
-	moveq	#0,d2		* header buffer null
-	moveq	#80,d4
-	jsr	_LVOFault(a6)
-	move.l	d5,d0
-CK_NTX 	movem.l	(sp)+,d2-d6/a6
-	rts
-CK_CLO	move.l	d0,d1
-	jsr	_LVOClose(a6)
-	moveq	#0,d0
-	movem.l	(sp)+,d2-d6/a6
-	rts
+        movem.l d2-d6/a6,-(sp)
+        move.l  a1,d6                    ; Save Buffer
+        move.l  ab_DosBase(a6),a6
+        move.l  a0,d1
+        lea     MODE_OLDFILE.W,A0
+        move.l  a0,d2
+        jsr     _LVOOpen(a6)
+        tst.l   d0
+        bne.s   CK_CLO
+        jsr     _LVOIoErr(a6)
+        move.l  d0,d5
+CKGOERR move.l  d6,d3                    ; output buffer
+        beq.s   CK_NTX
+        move.l  d5,d1                    ; Error code
+        moveq   #0,d2                    ; header buffer null
+        moveq   #80,d4
+        jsr     _LVOFault(a6)
+        move.l  d5,d0
+CK_NTX  movem.l (sp)+,d2-d6/a6
+        rts
+CK_CLO  move.l  d0,d1
+        jsr     _LVOClose(a6)
+        moveq   #0,d0
+        movem.l (sp)+,d2-d6/a6
+        rts
 ```

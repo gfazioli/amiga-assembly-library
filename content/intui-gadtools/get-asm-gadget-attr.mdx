@@ -49,92 +49,90 @@ For `LISTVIEW_KIND` (scrolling list) gadgets:
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (24-Feb-1995) - value = GetAsmGadgetAttr(rei,AsmGadget,name, attribute) (A0/A1/A2/D0)
-***************************************************************************************
+; (24-Feb-1995) --- value = GetAsmGadgetAttr(rei,AsmGadget,name, attribute) (A0/A1/A2/D0)
 GAGTable
-	dc.l GAGExit,GAGNewHook
-	dc.l GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit
-	dc.l GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit
-	dc.l GAGSelNode
+        dc.l    GAGExit,GAGNewHook
+        dc.l    GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit
+        dc.l    GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit,GAGExit
+        dc.l    GAGSelNode
 ;--------------------------------------------------------------------------------------
 _LVOGetAsmGadgetAttr
-	movem.l	d6-d7/a2-a6,-(sp)
-	move.l	d0,d6			* Attribute NULL??
-	beq.s	GAGExit			* then exit...
-	move.l	a0,d0
-	bne.s	GAGFind			* Ok, there is a rei, so operate on this one...
-GAGExit	movem.l	(sp)+,d6-d7/a2-a6
-	rts
-GAGFind	move.l	ab_GadToolsBase(a6),a6	* Only This...
-	move.l	d0,a4			* Save i (REI)
-	move.l	a1,d7			* Was the AsmGadget address passed?
-	bne.s	GAGGad			* yes...
-	move.l	a2,a1			* search it via name...
-	lea	rei_HEADAsmGadget(a4),a0	* List
-	FINDNAME
-	move.l	d0,d7			* D7 = (struct AsmGadget *)
-	beq.s	GAGExit
-GAGGad	move.l	d7,a5			* A5 = (struct AsmGadget *)
-	move.l	d6,d0			* attribute...
-	swap	d0
-	andi.w	#~$8000,d0		* can I handle it myself...??
-	bne.s	GGADROU			* No, then use GT_GetGadgetAttrsA()
+        movem.l d6-d7/a2-a6,-(sp)
+        move.l  d0,d6                   * Attribute NULL??
+        beq.s   GAGExit                 * then exit...
+        move.l  a0,d0
+        bne.s   GAGFind                 * Ok, there is a rei, so operate on this one...
+GAGExit movem.l (sp)+,d6-d7/a2-a6
+        rts
+GAGFind move.l  ab_GadToolsBase(a6),a6  * Only This...
+        move.l  d0,a4                   * Save i (REI)
+        move.l  a1,d7                   * Was the AsmGadget address passed?
+        bne.s   GAGGad                  * yes...
+        move.l  a2,a1                   * search it via name...
+        lea     rei_HEADAsmGadget(a4),a0 * List
+        FINDNAME
+        move.l  d0,d7                   * D7 = (struct AsmGadget *)
+        beq.s   GAGExit
+GAGGad  move.l  d7,a5                   * A5 = (struct AsmGadget *)
+        move.l  d6,d0                   * attribute...
+        swap    d0
+        andi.w  #~$8000,d0             * can I handle it myself...??
+        bne.s   GGADROU                 * No, then use GT_GetGadgetAttrsA()
 ;--------------------------------------------------------------------------------------
-	swap	d0
-	lea	GAGTable(pc),a1
-	jmp	([a1,d0.w*4])
+        swap    d0
+        lea     GAGTable(pc),a1
+        jmp     ([a1,d0.w*4])
 ;--------------------------------------------------------------------------------------
-GGADROU	suba.l	a2,a2				* Request
-	move.l	a2,-(sp)			* Hole... this space addr not needed
-	move.l	sp,d7				* &list
-	move.l	a2,-(sp)			* TAG_DONE
-	move.l	d7,-(sp)			* &list
-	move.l	d6,-(sp)			* attribute to read
-	move.l	sp,a3				* TagList
-	move.l	rei_Window(a4),a1		* Window
-	move.l	agg_Gadget(a5),a0		* Gadget
-	jsr	_LVOGT_GetGadgetAttrsA(a6)
-	move.l	12(sp),d0			* RESULT...
-	lea	16(sp),sp			* restore Stack...
-	movem.l	(sp)+,d6-d7/a2-a6
-	rts
+GGADROU suba.l  a2,a2                   * Request
+        move.l  a2,-(sp)               * Hole... this space addr not needed
+        move.l  sp,d7                   * &list
+        move.l  a2,-(sp)               * TAG_DONE
+        move.l  d7,-(sp)               * &list
+        move.l  d6,-(sp)               * attribute to read
+        move.l  sp,a3                   * TagList
+        move.l  rei_Window(a4),a1       * Window
+        move.l  agg_Gadget(a5),a0       * Gadget
+        jsr     _LVOGT_GetGadgetAttrsA(a6)
+        move.l  12(sp),d0               * RESULT...
+        lea     16(sp),sp               * restore Stack...
+        movem.l (sp)+,d6-d7/a2-a6
+        rts
 ;--------------------------------------------------------------------------------------
 GAGNewHook
-	move.l	agg_NewGadget+gng_UserData(a5),d0
-	movem.l	(sp)+,d6-d7/a2-a6
-	rts
+        move.l  agg_NewGadget+gng_UserData(a5),d0
+        movem.l (sp)+,d6-d7/a2-a6
+        rts
 ;--------------------------------------------------------------------------------------
 GAGSelNode
-	suba.l	a2,a2				* Request
-	move.l	a2,-(sp)			* Hole... this space addr not needed
-	move.l	sp,d7				* &attr
-	move.l	a2,-(sp)			* TAG_DONE
-	move.l	d7,-(sp)			* &attr
-	pea	GTLV_Labels			* first read the labels...
-	move.l	sp,a3				* TagList
-	move.l	rei_Window(a4),a1		* Window
-	move.l	agg_Gadget(a5),a0		* Gadget
-	jsr	_LVOGT_GetGadgetAttrsA(a6)
-	move.l	12(sp),d0			* RESULT...
-	lea	16(sp),sp			* restore Stack...
-	move.l	d0,d6
-	beq.s	GAGFine				* there are no Lists attached to the gadget
-	move.l	a2,-(sp)			* Hole... this space addr not needed
-	move.l	sp,d7				* &attr
-	move.l	a2,-(sp)			* TAG_DONE
-	move.l	d7,-(sp)			* &attr
-	pea	GTLV_Selected			* first read the labels...
-	move.l	sp,a3				* TagList
-	move.l	rei_Window(a4),a1		* Window
-	move.l	agg_Gadget(a5),a0		* Gadget
-	jsr	_LVOGT_GetGadgetAttrsA(a6)
-	move.l	12(sp),d1			* Ordinal number selected...
-	lea	16(sp),sp			* restore Stack..
-	move.l	d6,a0				* Labels (struct List *)
-NNode	move.l	LN_SUCC(a0),d0
-	move.l	d0,a0
-	dbf	d1,NNode
-GAGFine	movem.l	(sp)+,d6-d7/a2-a6
-	rts
+        suba.l  a2,a2                   * Request
+        move.l  a2,-(sp)               * Hole... this space addr not needed
+        move.l  sp,d7                   * &attr
+        move.l  a2,-(sp)               * TAG_DONE
+        move.l  d7,-(sp)               * &attr
+        pea     GTLV_Labels             * first read the labels...
+        move.l  sp,a3                   * TagList
+        move.l  rei_Window(a4),a1       * Window
+        move.l  agg_Gadget(a5),a0       * Gadget
+        jsr     _LVOGT_GetGadgetAttrsA(a6)
+        move.l  12(sp),d0               * RESULT...
+        lea     16(sp),sp               * restore Stack...
+        move.l  d0,d6
+        beq.s   GAGFine                 * there are no Lists attached to the gadget
+        move.l  a2,-(sp)               * Hole... this space addr not needed
+        move.l  sp,d7                   * &attr
+        move.l  a2,-(sp)               * TAG_DONE
+        move.l  d7,-(sp)               * &attr
+        pea     GTLV_Selected           * first read the labels...
+        move.l  sp,a3                   * TagList
+        move.l  rei_Window(a4),a1       * Window
+        move.l  agg_Gadget(a5),a0       * Gadget
+        jsr     _LVOGT_GetGadgetAttrsA(a6)
+        move.l  12(sp),d1               * Ordinal number selected...
+        lea     16(sp),sp               * restore Stack..
+        move.l  d6,a0                   * Labels (struct List *)
+NNode   move.l  LN_SUCC(a0),d0
+        move.l  d0,a0
+        dbf     d1,NNode
+GAGFine movem.l (sp)+,d6-d7/a2-a6
+        rts
 ```

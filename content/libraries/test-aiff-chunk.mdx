@@ -33,20 +33,21 @@ Validates whether the data at the current position represents a valid IFF chunk.
 The original 68020 assembly implementation:
 
 ```asm
-* Rel.1.1 * Last save: Jul 29 09:10 1991 =JON=
+; Rel.1.1 - Jul 29 1991 --- TestAIFFChunk()
 _LVOTestAIFFChunk
-	move.l	a1,-(sp)
-	move.l	(a0),d0
-	lea	"AAAA",a1
-	cmp.l	a1,d0
-	bmi.s	CheckAChunk_Error
-	lea	"ZZZZ",a1
-	cmp.l	a1,d0
-	bhi.s	CheckAChunk_Error
-	move.l	(sp)+,a1
-	rts
+        move.l  a1,-(sp)
+        move.l  (a0),d0
+        lea     "AAAA",a1
+        cmp.l   a1,d0
+        bmi.s   CheckAChunk_Error
+        lea     "ZZZZ",a1
+        cmp.l   a1,d0
+        bhi.s   CheckAChunk_Error
+        move.l  (sp)+,a1
+        rts
+
 CheckAChunk_Error
-	moveq	#0,d0
-	move.l	(sp)+,a1
-	rts
+        moveq   #0,d0
+        move.l  (sp)+,a1
+        rts
 ```

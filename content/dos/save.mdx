@@ -38,7 +38,7 @@ The file is opened in `MODE_READWRITE`, so if the filename already exists on the
 
 APTR mybuffer = Load("Work:page.txt", NULL, MEMF_PUBLIC);
 
-    /* Your READ or WRITE operation */
+/* Your READ or WRITE operation */
 
 ULONG len = Save("Work:page.txt", mybuffer, NULL);
 ```
@@ -52,31 +52,29 @@ ULONG len = Save("Work:page.txt", mybuffer, NULL);
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (15-Feb-1995) Meke up --- Save (filename,buffer,len) (a0/a1/d0)
-***************************************************************************************
+; (15-Feb-1995) --- Save(filename,buffer,len) (a0/a1/d0)
 _LVOSave
-	movem.l	d2-d4/a2/a6,-(sp)
-	move.l	a1,a2			* Save Pointer to buffer
-	move.l	d0,d3			* Save byte len...
-	move.l	ab_DosBase(a6),a6
-	move.l	a0,d1
-	lea	MODE_READWRITE.W,a0
-	move.l	a0,d2
-	jsr	_LVOOpen(a6)
-	tst.l	d0
-	beq.s	NSSEXIT
-	move.l	d0,d4			* Save BCPL handle
-	tst.l	d3
-	bne.s	UseThis
-	move.l	-4(a2),d3		* byte TOT
-	subq.l	#4,d3			* byte data to write
-UseThis	move.l	d4,d1			* handle
-	move.l	a2,d2
-	jsr	_LVOWrite(a6)
-	move.l	d4,d1
-	jsr	_LVOClose(a6)
-	move.l	d3,d0
-NSSEXIT	movem.l	(sp)+,d2-d4/a2/a6
-	rts
+        movem.l d2-d4/a2/a6,-(sp)
+        move.l  a1,a2                    ; Save Pointer to buffer
+        move.l  d0,d3                    ; Save byte len...
+        move.l  ab_DosBase(a6),a6
+        move.l  a0,d1
+        lea     MODE_READWRITE.W,a0
+        move.l  a0,d2
+        jsr     _LVOOpen(a6)
+        tst.l   d0
+        beq.s   NSSEXIT
+        move.l  d0,d4                    ; Save BCPL handle
+        tst.l   d3
+        bne.s   UseThis
+        move.l  -4(a2),d3               ; byte TOT
+        subq.l  #4,d3                    ; byte data to write
+UseThis move.l  d4,d1                    ; handle
+        move.l  a2,d2
+        jsr     _LVOWrite(a6)
+        move.l  d4,d1
+        jsr     _LVOClose(a6)
+        move.l  d3,d0
+NSSEXIT movem.l (sp)+,d2-d4/a2/a6
+        rts
 ```

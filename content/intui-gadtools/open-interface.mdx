@@ -68,67 +68,65 @@ A recommended method for supporting multiple interfaces is to have the applicati
 The original 68020 assembly implementation:
 
 ```asm
-***************************************************************************************
-* (07-Mar-1995) =Jon= --- [i = OpenInterface(name) (a0) ]
-***************************************************************************************
+; (07-Mar-1995) --- i = OpenInterface(name) (a0)
 _LVOOpenInterface
-	movem.l	a2-a6,-(sp)
-	move.l	a0,d0			* Name NULL???
-	bne.s	OPRCont			* No, then continue...
-	movem.l	(sp)+,a2-a6
-	rts
+        movem.l a2-a6,-(sp)
+        move.l  a0,d0                   * Name NULL???
+        bne.s   OPRCont                 * No, then continue...
+        movem.l (sp)+,a2-a6
+        rts
 
-OPRCont	move.l	d0,a3			* Save FileName...
-	move.l	a6,a5			* save asmbase...
-	move.l	ab_DosBase(a5),a6	* get dos...
+OPRCont move.l  d0,a3                   * Save FileName...
+        move.l  a6,a5                   * save asmbase...
+        move.l  ab_DosBase(a5),a6       * get dos...
 ;--------------------------------------------------------------------------------------
-	move.l	a3,d1			* try to load the .rei file, with the full
-	jsr	_LVOLoadSeg(a6)		* path passed in the Inputs...
-	tst.l	d0
-	bne.s	OPROk			* Ok... found...
+        move.l  a3,d1                   * try to load the .rei file, with the full
+        jsr     _LVOLoadSeg(a6)         * path passed in the Inputs...
+        tst.l   d0
+        bne.s   OPROk                   * Ok... found...
 ;--------------------------------------------------------------------------------------
-	move.l	a3,d1			* Extract only the filename, i.e. the last
-	jsr	_LVOFilePart(a6)	* part of the path...
-	move.l	d0,a3			* A3 now points only to the filename...
+        move.l  a3,d1                   * Extract only the filename, i.e. the last
+        jsr     _LVOFilePart(a6)        * part of the path...
+        move.l  d0,a3                   * A3 now points only to the filename...
 ;--------------------------------------------------------------------------------------
-	move.l	([ab_ExecBase.w,a5],ThisTask.w),a0	* A0 = (struct Task *)
-	move.l	pr_HomeDir(a0),d1	* move to the application directory
-	jsr	_LVOCurrentDir(a6)
-	move.l	d0,a4			* Old directory
-	move.l	a3,d1			* retry loading...
-	jsr	_LVOLoadSeg(a6)
-	move.l	d0,a2
-	move.l	a4,d1			* reset old directory
-	jsr	_LVOCurrentDir(a6)
-	move.l	a2,d0
-	tst.l	d0
-	bne.s	OPROk
+        move.l  ([ab_ExecBase.w,a5],ThisTask.w),a0 * A0 = (struct Task *)
+        move.l  pr_HomeDir(a0),d1       * move to the application directory
+        jsr     _LVOCurrentDir(a6)
+        move.l  d0,a4                   * Old directory
+        move.l  a3,d1                   * retry loading...
+        jsr     _LVOLoadSeg(a6)
+        move.l  d0,a2
+        move.l  a4,d1                   * reset old directory
+        jsr     _LVOCurrentDir(a6)
+        move.l  a2,d0
+        tst.l   d0
+        bne.s   OPROk
 ;--------------------------------------------------------------------------------------
-	movem.l	(sp)+,a2-a6		* otherwise exit...
-	rts
+        movem.l (sp)+,a2-a6            * otherwise exit...
+        rts
 ;--------------------------------------------------------------------------------------
-OPROk	add.l	d0,d0			* BCPL to ADDR
-	add.l	d0,d0
-	addq.l	#4,d0
+OPROk   add.l   d0,d0                   * BCPL to ADDR
+        add.l   d0,d0
+        addq.l  #4,d0
 ;--------------------------------------------------------------------------------------
-	move.l	d0,a0
-	cmpi.l	#"FORM",int_FORM(a0)
-	bne.s	FailFre
-	move.l	int_REI0(a0),d1
-	andi.l	#$FFFFFF00,d1
-	cmpi.l	#("REI "-32),d1
-	bne.s	FailFre
+        move.l  d0,a0
+        cmpi.l  #"FORM",int_FORM(a0)
+        bne.s   FailFre
+        move.l  int_REI0(a0),d1
+        andi.l  #$FFFFFF00,d1
+        cmpi.l  #("REI "-32),d1
+        bne.s   FailFre
 ;--------------------------------------------------------------------------------------
-	move.l	([ab_ExecBase.w,a5],ThisTask.w),a0	* A0 = (struct Task *)
-	move.l	d0,TC_Userdata(a0)	* Put List in UserData of this Task...
-	movem.l	(sp)+,a2-a6
-	rts
+        move.l  ([ab_ExecBase.w,a5],ThisTask.w),a0 * A0 = (struct Task *)
+        move.l  d0,TC_Userdata(a0)      * Put List in UserData of this Task...
+        movem.l (sp)+,a2-a6
+        rts
 ;--------------------------------------------------------------------------------------
-FailFre	move.l	d0,d1
-	subq.l	#4,d1
-	asr.l	#2,d1
-	jsr	_LVOUnLoadSeg(a6)
-	moveq	#0,d0
-	movem.l	(sp)+,a2-a6
-	rts
+FailFre move.l  d0,d1
+        subq.l  #4,d1
+        asr.l   #2,d1
+        jsr     _LVOUnLoadSeg(a6)
+        moveq   #0,d0
+        movem.l (sp)+,a2-a6
+        rts
 ```
