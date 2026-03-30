@@ -1,12 +1,15 @@
 @import 'nextra-theme-docs/dist/style.css' layer(nextra);
 
+@font-face {
+  font-family: 'Topaz a1200';
+  src: url('/fonts/Topaz_a1200_v1.0.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /**
  * Custom styles
- *
- * You can add your own custom styles here. This file will be imported after the theme styles.
- * This is a great place to add your own utility classes or override styles.
- *
- * In this case we're going to fix a glitch with the text size in the code blocks.
  */
 @layer overwrite {
   :root {
@@ -19,6 +22,31 @@
 
   :where(.dark) {
     --x-color-neutral-800: var(--mantine-color-dark-6);
+  }
+
+  /* Apply Topaz a1200 font everywhere */
+  html,
+  body {
+    font-family: 'Topaz a1200', monospace !important;
+  }
+
+  /* Nextra content area */
+  .nextra-content,
+  article,
+  nav,
+  aside,
+  .nextra-sidebar-container,
+  .nextra-toc {
+    font-family: 'Topaz a1200', monospace !important;
+  }
+
+  /* Code blocks - Shiki/Nextra */
+  pre,
+  code,
+  pre code,
+  [data-rehype-pretty-code-figure] pre,
+  [data-rehype-pretty-code-figure] code {
+    font-family: 'Topaz a1200', monospace !important;
   }
 
   .x\:text-sm {
