@@ -50,8 +50,6 @@ export default {
    * Nextra Layout component configuration
    */
   nextraLayout: {
-    docsRepositoryBase:
-      'https://github.com/gfazioli/amiga-68020-library/tree/main/amiga-assembly-library/content/',
     sidebar: {
       defaultMenuCollapseLevel: 1,
     },
@@ -65,24 +63,6 @@ export default {
       nonce: '8IBTHwOdqNKAWeKl7plt8g==',
     },
   },
-  /**
-   * GitHub API configuration
-   * @see https://docs.github.com/en/rest/reference/repos#releases
-   */
-  gitHub: {
-    repo: 'gfazioli/amiga-68020-library',
-    apiUrl: 'https://api.github.com',
-    releasesUrl: 'https://api.github.com/repos/gfazioli/amiga-68020-library/releases',
-  },
-
-  /**
-   * Release notes configuration
-   */
-  releaseNotes: {
-    url: 'https://github.com/gfazioli/amiga-68020-library/releases',
-    maxReleases: 10,
-  },
-
   /**
    * Search configuration (for pagefind)
    * @see /app/api/search/route.ts

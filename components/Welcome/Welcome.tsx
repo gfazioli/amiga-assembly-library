@@ -1,7 +1,6 @@
 'use client';
 
 import { TextAnimate } from '@gfazioli/mantine-text-animate';
-import { IconBrandGithub, IconExternalLink } from '@tabler/icons-react';
 import { Badge, Button, Center, Group, Paper, Text, Title } from '@mantine/core';
 import classes from './Welcome.module.css';
 
@@ -76,10 +75,8 @@ export function Welcome() {
 
       <Center>
         <Button
-          href="https://github.com/gfazioli/amiga-68020-library"
+          href="/docs/getting-started"
           component="a"
-          rightSection={<IconExternalLink />}
-          leftSection={<IconBrandGithub />}
           variant="outline"
           color="orange"
           px={32}
@@ -88,7 +85,7 @@ export function Welcome() {
           mx="auto"
           mt="xl"
         >
-          View on GitHub
+          Get Started
         </Button>
       </Center>
 

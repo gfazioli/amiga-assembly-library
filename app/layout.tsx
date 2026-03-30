@@ -49,7 +49,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             }
             navbar={<MantineNavBar />}
             pageMap={pageMap}
-            docsRepositoryBase={nextraLayout.docsRepositoryBase}
+            editLink={null}
+            feedback={{ content: null }}
             footer={<MantineFooter />}
             sidebar={nextraLayout.sidebar}
           >
