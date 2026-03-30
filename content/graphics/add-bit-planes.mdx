@@ -1,0 +1,42 @@
+# AddBitPlanes
+
+## Synopsis
+
+```asm
+num = AddBitPlanes(bm, num)
+D0                 A0  D0
+```
+
+## C Prototype
+
+```c
+ULONG AddBitPlanes(struct BitMap *bm, ULONG num);
+```
+
+## Description
+
+Adds one or more bitplanes to a BitMap structure. The BitMap must already be initialized, as it must contain all the necessary data for the bitplane addition. The allocated bitplanes are cleared and placed in CHIP RAM.
+
+(V41.1) -- AddBitPlanes() now checks that the total number of planes does not exceed 8. Eight is the maximum number of planes that can be added. If a BitMap already has 6 bitplanes and you attempt to add 3 planes, NO planes will be added to the BitMap, and the function returns NULL indicating an error.
+
+## Inputs
+
+- **bm** -- Address of an initialized BitMap structure.
+- **num** -- Number of bitplanes to add. The BitMap cannot have more than eight (8) planes, so this value must be chosen carefully, taking into account the planes currently present in the BitMap.
+
+## Result
+
+- **num** -- If NULL, no bitplanes were added. Otherwise, returns the number of bitplanes that could be allocated. Usually this value matches the `num` passed in the inputs. If it differs, it means there was not enough CHIP RAM to allocate the requested bitplanes, or the number of bitplanes to add was too high relative to those supported by the BitMap.
+
+## Notes
+
+An easy way to verify the number of planes being allocated is to check the `bm_Depth` field of the BitMap structure. This can be done in two ways: by reading the `bm_Depth` field directly in the BitMap structure, or by using (as recommended by Commodore) `graphics.library/GetBitMapAttr()`.
+
+The allocated bitplanes are inserted into the BitMap structure starting from the position considered empty. This is determined based on the bitplanes currently present in the BitMap.
+
+This function currently does not use `graphics.library/GetBitMapAttr()` -- it will be updated in future versions of the library.
+
+## See Also
+
+- [RemoveBitPlanes](/graphics/remove-bit-planes)
+- `graphics.library/AllocBitMap()`, `AllocRaster()`, `GetBitMapAttr()`

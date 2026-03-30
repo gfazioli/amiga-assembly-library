@@ -1,6 +1,75 @@
-import { Marquee } from '@gfazioli/mantine-marquee';
-import { Anchor } from 'nextra/components';
-import { Button, Divider, Stack, Title } from '@mantine/core';
+'use client';
+
+import {
+  IconBrain,
+  IconCode,
+  IconCpu,
+  IconDatabase,
+  IconFileText,
+  IconMath,
+  IconPalette,
+  IconWindow,
+} from '@tabler/icons-react';
+import { Anchor, Card, Divider, SimpleGrid, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+
+const modules = [
+  {
+    icon: IconCpu,
+    title: 'Exec',
+    description: 'Memory management, linked lists, and node operations.',
+    href: '/docs/exec',
+    color: 'red',
+  },
+  {
+    icon: IconFileText,
+    title: 'DOS',
+    description: 'File I/O, disk info, checksums, and line input.',
+    href: '/docs/dos',
+    color: 'blue',
+  },
+  {
+    icon: IconPalette,
+    title: 'Graphics',
+    description: 'BitPlanes, RastPort, drawing, color maps, and formatted text.',
+    href: '/docs/graphics',
+    color: 'green',
+  },
+  {
+    icon: IconDatabase,
+    title: 'Libraries',
+    description: 'String processing, character filtering, and IFF/AIFF support.',
+    href: '/docs/libraries',
+    color: 'violet',
+  },
+  {
+    icon: IconMath,
+    title: 'Math',
+    description: 'Decimal, hexadecimal, and binary conversions.',
+    href: '/docs/math',
+    color: 'yellow',
+  },
+  {
+    icon: IconWindow,
+    title: 'Intuition & GadTools',
+    description: 'UI gadgets, custom requesters, and interface management.',
+    href: '/docs/intui-gadtools',
+    color: 'cyan',
+  },
+  {
+    icon: IconBrain,
+    title: 'REI Interface',
+    description: 'Custom windowing system with event-driven messaging.',
+    href: '/docs/rei',
+    color: 'orange',
+  },
+  {
+    icon: IconCode,
+    title: 'C Interface',
+    description: 'Full C prototypes and pragma declarations for SAS/C.',
+    href: '/docs/c-interface',
+    color: 'gray',
+  },
+];
 
 export const Content = () => {
   return (
@@ -8,64 +77,42 @@ export const Content = () => {
       <Divider my="md" />
       <Stack align="center" my={32}>
         <Title order={2} ta="center">
-          You may use third-party components in your project
+          Library Modules
         </Title>
 
-        <Anchor href="https://mantine-extensions.vercel.app/">
-          Visit the Mantine Extension Hub for more components
+        <Text c="dimmed" ta="center" maw={500}>
+          The Assembly Library is organized into specialized modules, each providing a focused set of
+          functions.
+        </Text>
+
+        <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="lg" mt="md">
+          {modules.map((mod) => (
+            <Card
+              key={mod.title}
+              component="a"
+              href={mod.href}
+              shadow="sm"
+              padding="lg"
+              radius="md"
+              withBorder
+              style={{ textDecoration: 'none', cursor: 'pointer' }}
+            >
+              <ThemeIcon size={40} radius="md" color={mod.color} variant="light">
+                <mod.icon size={24} />
+              </ThemeIcon>
+              <Text fw={600} mt="sm">
+                {mod.title}
+              </Text>
+              <Text size="sm" c="dimmed" mt={4}>
+                {mod.description}
+              </Text>
+            </Card>
+          ))}
+        </SimpleGrid>
+
+        <Anchor href="/docs/getting-started" mt="md">
+          Get started with the Assembly Library →
         </Anchor>
-
-        <Marquee fadeEdges pauseOnHover>
-          <Button
-            size="xl"
-            component="a"
-            href="https://gfazioli.github.io/mantine-marquee/"
-            target="_blank"
-          >
-            Mantine Marquee
-          </Button>
-          <Button
-            size="xl"
-            component="a"
-            href="https://gfazioli.github.io/mantine-reflection/"
-            target="_blank"
-          >
-            Mantine Reflection
-          </Button>
-          <Button
-            size="xl"
-            component="a"
-            href="https://gfazioli.github.io/mantine-split-pane/"
-            target="_blank"
-          >
-            Mantine Split Pane
-          </Button>
-          <Button
-            size="xl"
-            component="a"
-            href="https://gfazioli.github.io/mantine-spinner/"
-            target="_blank"
-          >
-            Mantine Spinner
-          </Button>
-          <Button
-            size="xl"
-            component="a"
-            href="https://gfazioli.github.io/mantine-parallax/"
-            target="_blank"
-          >
-            Mantine Parallax
-          </Button>
-        </Marquee>
-
-        {/* <TextAnimate.Typewriter
-          multiline
-          value={[
-            'Hello, World! Mantine Typewriter component',
-            'That was a long time ago',
-            'But it was fun',
-          ]}
-        /> */}
       </Stack>
     </>
   );

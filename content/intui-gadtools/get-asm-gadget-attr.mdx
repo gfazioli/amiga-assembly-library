@@ -1,0 +1,45 @@
+# GetAsmGadgetAttr
+
+## Synopsis
+
+```asm
+value = GetAsmGadgetAttr(rei, AsmGadget, name, attribute)
+ D0                       A0      A1       A2      D0
+```
+
+## C Prototype
+
+```c
+ULONG GetAsmGadgetAttr(struct REI *, struct AsmGadget *, STRPTR, ULONG);
+```
+
+## Description
+
+Retrieves information about the elements that make up an AsmGadget. This function allows querying a single attribute at a time, unlike `GetREIAttrsA()` which can query multiple attributes. This design choice follows boopsi conventions (write operations are far more common than reads) and results in faster execution in terms of clock cycles.
+
+## Inputs
+
+- **rei** — Pointer to a REI structure.
+- **AsmGadget** — Pointer to the AsmGadget to query. If NULL, the `name` parameter will be used to locate the AsmGadget.
+- **name** — Pointer to a null-terminated string indicating the name of the AsmGadget to query. This parameter is only considered if `AsmGadget` is NULL.
+- **attribute** — The `ti_Tag` of the attribute to read.
+
+## Tags
+
+All `gadtools.library` tags are accepted, plus:
+
+- **AGAT_AsmGadgetHook** (struct Hook \*) — Address of the Hook attached to this AsmGadget.
+
+For `LISTVIEW_KIND` (scrolling list) gadgets:
+
+- **AGATLV_SelectedNode** (struct Node \*) — Returns the address of the currently selected node. Returns NULL if no element in the listview is currently selected.
+
+## Result
+
+- **value** — The value of the requested attribute. **Warning:** This result cannot be checked for errors, because the value represents the content of the requested tag, which can legitimately be 0 (NULL). All possible values are valid as a result.
+
+## See Also
+
+[SetAsmGadgetAttrsA](/intui-gadtools/set-asm-gadget-attrs)
+
+`<libraries/gadtools.h>`

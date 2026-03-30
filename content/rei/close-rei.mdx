@@ -1,0 +1,33 @@
+# CloseREI
+
+## Synopsis
+
+```asm
+rei = CloseREI(rei, name)
+D0              A0   A1
+```
+
+## C Prototype
+
+```c
+struct REI *CloseREI(struct REI *, STRPTR);
+```
+
+## Description
+
+Closes a specific REI, identified either by the address of the REI to close, or if the `rei` parameter is NULL, by its name. Both parameters cannot be NULL at the same time, otherwise the function fails and returns NULL.
+
+`CloseREI()` does NOT free the memory of the REI structure. It only stops the display of a given REI. To resume the display of a REI, simply call `OpenREIA()` again, passing the address returned by `CloseREI()`.
+
+## Inputs
+
+- **rei** — Pointer to a currently displayed REI structure. Can be NULL, in which case the `name` parameter will be used to search for the REI in the system list.
+- **name** — Pointer to a null-terminated string containing the name of the REI to hide. This parameter is only considered when `rei` is NULL.
+
+## Result
+
+- **rei** — Address of the hidden REI, or NULL if the REI was not found or could not be properly hidden.
+
+## See Also
+
+[FindREI](/rei/find-rei), [OpenREIA](/rei/open-rei)

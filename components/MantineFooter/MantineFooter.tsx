@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  IconBrandGithubFilled,
-  IconBrandMantine,
-  IconBrandX,
-  IconMailHeart,
-} from '@tabler/icons-react';
+import { IconBrandGithubFilled, IconBrandX, IconMailHeart } from '@tabler/icons-react';
 import {
   ActionIcon,
   Anchor,
@@ -19,7 +14,6 @@ import {
   Title,
 } from '@mantine/core';
 import { Logo } from '@/components/Logo/Logo';
-import packageJson from '../../package.json';
 import { AnimateBadge } from './AnimateBadge';
 import { ecosystem, highlights, resources } from './links';
 import classes from './MantineFooter.module.css';
@@ -63,24 +57,9 @@ export const MantineFooter = () => {
                 <Logo />
               </ThemeIcon>
               <Text fz={13} mr={64}>
-                This is a template for Next.js + Mantine + Nextra documentation sites. Feel free to
-                use it and{' '}
-                <Anchor fz={13} href={`https://github.com/gfazioli/next-app-nextra-template`}>
-                  contribute to it
-                </Anchor>
-                . Don't forget to star it on{' '}
-                <Anchor fz={13} href={`https://github.com/gfazioli/next-app-nextra-template`}>
-                  GitHub
-                </Anchor>
-                . And if you wish, you can also follow me on{' '}
-                <Anchor fz={13} href="https://twitter.com/gfazioli">
-                  Twitter
-                </Anchor>
-                . Obviously, you can also{' '}
-                <Anchor fz={13} href="https://github.com/sponsors/gfazioli">
-                  donate
-                </Anchor>{' '}
-                to support the development of this project.
+                The Amiga Assembly Library is a shared library for Commodore Amiga written in
+                Motorola 68020 assembly language. Version 41.21, Public Domain Software. Compatible
+                with KickStart 3.0+.
               </Text>
               <Group>
                 <ActionIcon variant="subtle" component="a" href="https://github.com/gfazioli">
@@ -98,7 +77,7 @@ export const MantineFooter = () => {
           <Grid.Col className={classes.column} span={2}>
             <Stack gap="xs">
               <Title className={classes.title} order={6}>
-                HIGHLIGHTS
+                DOCUMENTATION
               </Title>
               <VerticalLinks list={highlights} />
             </Stack>
@@ -114,7 +93,7 @@ export const MantineFooter = () => {
           <Grid.Col className={classes.column} span={2}>
             <Stack gap="xs">
               <Title className={classes.title} order={6}>
-                ECOSYSTEM
+                MODULES
               </Title>
               <VerticalLinks list={ecosystem} />
             </Stack>
@@ -124,18 +103,13 @@ export const MantineFooter = () => {
         <Divider my={16} className={classes.lastDivider} />
 
         <Group justify="space-between">
-          <iframe
-            src="https://github.com/sponsors/gfazioli/button"
-            title="Sponsor gfazioli"
-            height="32"
-            width="114"
-            style={{ border: 0 }}
-            sandbox="allow-popups allow-forms allow-scripts"
-          />
+          <Text fz={12} inline>
+            Amiga Assembly Library v41.21 — Public Domain Software
+          </Text>
 
           <Group justify="right">
             <Text fz={12} inline>
-              Made with ❤️ by{' '}
+              Made with care by{' '}
               <Anchor fz={13} href="https://undolog.com/">
                 Undolog
               </Anchor>
@@ -143,22 +117,10 @@ export const MantineFooter = () => {
             <Divider orientation="vertical" />
             <Text fz={12} inline>
               <Group gap={4} component="span">
-                Hosted on{' '}
-                <Anchor fz={13} href="https://github.com/">
+                Source on{' '}
+                <Anchor fz={13} href="https://github.com/gfazioli/amiga-68020-library">
                   <Group gap={4} component="span">
-                    <IconBrandGithubFilled size={16} /> GitHub.com
-                  </Group>
-                </Anchor>
-              </Group>
-            </Text>
-            <Divider orientation="vertical" />
-            <Text fz={12} inline>
-              <Group gap={4} component="span" justify="flex-start">
-                Built with{' '}
-                <Anchor fz={13} href="https://mantine.dev/">
-                  <Group gap={4} component="span">
-                    <IconBrandMantine size={16} /> Mantine v
-                    {packageJson.dependencies['@mantine/core']}
+                    <IconBrandGithubFilled size={16} /> GitHub
                   </Group>
                 </Anchor>
               </Group>

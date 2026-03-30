@@ -27,7 +27,7 @@
   }
 
   .x\:bg-primary-100 {
-    background-color: var(--mantine-color-blue-6) !important;
+    background-color: var(--mantine-color-orange-6) !important;
   }
 
   .x\:text-primary-800 {
@@ -38,7 +38,7 @@
     li {
       a.x\:text-primary-600 {
         position: relative;
-        color: var(--mantine-color-blue-6) !important;
+        color: var(--mantine-color-orange-6) !important;
       }
 
       a.x\:text-primary-600::before {
@@ -46,7 +46,7 @@
         display: block;
         width: 2px;
         height: 100%;
-        background: var(--mantine-color-blue-6);
+        background: var(--mantine-color-orange-6);
         position: absolute;
         left: -8px;
         top: 0;

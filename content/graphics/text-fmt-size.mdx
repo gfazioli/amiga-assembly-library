@@ -1,0 +1,47 @@
+# TextFmtSizeArgs
+
+## Synopsis
+
+```asm
+TextFmtSizeArgs(rp, ibox, TextFmt, ArgList)
+                A1  A3    A0       A2
+```
+
+## C Prototype
+
+```c
+void TextFmtSizeArgs(struct RastPort *rp, struct IBox *ibox, STRPTR TextFmt, APTR args);
+```
+
+Varargs stub:
+
+```c
+void TextFmtSize(struct RastPort *rp, struct IBox *ibox, STRPTR TextFmt, ...);
+```
+
+## Description
+
+Determines the area occupied by the formatted text `TextFmt` in the given RastPort. The results are written into an IBox structure, describing the width and height in pixels of the text, using (0, 0) as the LeftEdge and TopEdge coordinates. The first two WORDs of the IBox structure are always zeroed; you simply need to add `ibox_Width` and `ibox_Height` to your initial coordinates.
+
+## Inputs
+
+- **rp** -- Address of the same RastPort where the text will be printed.
+- **ibox** -- Address of an IBox structure.
+- **TextFmt** -- Address of a C-style format string.
+- **ArgList** -- Array of arguments for the format commands.
+
+## Result
+
+The IBox structure passed in the inputs is filled as follows:
+
+- `ibox_Left` = NULL
+- `ibox_Top` = NULL
+- `ibox_Width` = width of the text, in pixels.
+- `ibox_Height` = height of the text, in pixels.
+
+## See Also
+
+- [TextFmtRastPortArgs](/graphics/text-fmt-rast-port)
+- `graphics.library/TextExtent()`, `TextFit()`, `TextLength()`
+- `graphics/text.h`, `graphics/rastport.h`
+- `intuition/intuition.h`

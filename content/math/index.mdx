@@ -1,0 +1,21 @@
+# Math
+
+The Math module provides number format conversion functions. These routines convert between string representations (decimal, hexadecimal, binary) and numeric values, and vice versa.
+
+## String to Value
+
+| Function | Description |
+|----------|-------------|
+| [StringDecToValue](/docs/math/string-dec-to-value) | Convert a decimal string to a LONG value |
+| [StringHexToValue](/docs/math/string-hex-to-value) | Convert a hexadecimal string to a LONG value |
+| [StringBinToValue](/docs/math/string-bin-to-value) | Convert a binary string to a LONG value |
+
+## Value to String
+
+| Function | Description |
+|----------|-------------|
+| [ValueToStringDec](/docs/math/value-to-string-dec) | Convert a LONG value to a decimal string |
+| [ValueToStringHex](/docs/math/value-to-string-hex) | Convert a LONG value to a hexadecimal string |
+| [ValueToStringBin](/docs/math/value-to-string-bin) | Convert a LONG value to a binary string |
+
+All conversion functions operate on 32-bit signed LONG values and use fast lookup tables for optimal performance on the 68020 processor.

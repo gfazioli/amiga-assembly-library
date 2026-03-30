@@ -1,0 +1,46 @@
+# SetAsmGadgetAttrsA
+
+## Synopsis
+
+```asm
+success = SetAsmGadgetAttrsA(rei, AsmGadget, name, taglist)
+  D0                          A0      A1       A2     A3
+```
+
+## C Prototype
+
+```c
+BOOL SetAsmGadgetAttrsA(struct REI *, struct AsmGadget *, STRPTR, struct TagItem *);
+
+/* Varargs stub */
+BOOL SetAsmGadgetAttrs(struct REI *, struct AsmGadget *, STRPTR, Tag, ...);
+```
+
+## Description
+
+Changes the attributes of an AsmGadget. The gadget can be identified either by its pointer or by name. All standard `gadtools.library` tags are accepted, plus additional tags specific to the assembly.library.
+
+This function is also used to attach Hook callbacks to gadgets, enabling automatic invocation by `WaitREIMsg()` when the gadget is activated.
+
+## Inputs
+
+- **rei** — Pointer to a REI structure.
+- **AsmGadget** — Pointer to the AsmGadget to modify. If NULL, the `name` parameter will be used to locate the AsmGadget.
+- **name** — Pointer to a null-terminated string indicating the name of the AsmGadget to modify. This parameter is only considered if `AsmGadget` is NULL.
+- **taglist** — Pointer to a TagItem list.
+
+## Tags
+
+All `gadtools.library` tags are accepted, plus:
+
+- **SGAT_AsmGadgetHook** (struct Hook \*) — Attaches a new Hook (or NULL) to the gadget. When this gadget is released, `WaitREIMsg()` will invoke this Hook. If NULL is passed, no Hook is attached, and when the gadget is released, `WaitREIMsg()` returns control to the task.
+
+## Result
+
+- **success** — TRUE if the attributes were set successfully.
+
+## See Also
+
+[GetAsmGadgetAttr](/intui-gadtools/get-asm-gadget-attr), [SetREIAttrsA](/rei/set-rei-attrs)
+
+`<libraries/gadtools.h>`

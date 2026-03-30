@@ -1,0 +1,54 @@
+# StringHexToValue
+
+## Synopsis
+
+```asm
+value = StringHexToValue(string)
+ D0                       A0
+
+LONG StringHexToValue(STRPTR);
+```
+
+## C Prototype
+
+```c
+LONG Hex2Val(STRPTR);
+```
+
+## Description
+
+Converts a hexadecimal ASCII string into a numeric value. The returned value occupies at most a LONG (32 bits), so the maximum convertible value is `$FFFFFFFF`.
+
+The following special characters are permitted in the input string:
+
+- `$` — Optional prefix indicator for hexadecimal values. Has no effect on conversion.
+- `+` — Indicates positive conversion (already the default). Has no effect on conversion.
+- `-` — Makes the result negative.
+
+## Inputs
+
+- **string** — Pointer to a null-terminated string containing the ASCII hexadecimal value to convert.
+
+## Result
+
+- **value** — The converted LONG value.
+
+## Example
+
+```asm
+; Conversion examples:
+; string = "$C000"   --> value = 0000C000
+; string = "+Bfe0aA" --> value = 00BFE0AA
+; string = "$-100"   --> value = FFFFFF00
+; string = "-100"    --> value = FFFFFF00
+; string = "-$100"   --> value = FFFFFF00
+; string = "-+$100"  --> value = FFFFFF00
+```
+
+## Notes
+
+If the `-` character is present, it always overrides the `+` character regardless of position.
+
+## See Also
+
+[StringBinToValue](/docs/math/string-bin-to-value), [StringDecToValue](/docs/math/string-dec-to-value), [ValueToStringHex](/docs/math/value-to-string-hex)

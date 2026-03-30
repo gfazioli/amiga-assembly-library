@@ -1,0 +1,32 @@
+# ActiveREI
+
+## Synopsis
+
+```asm
+rei = ActiveREI()
+D0
+```
+
+## C Prototype
+
+```c
+struct REI *ActiveREI(void);
+```
+
+## Description
+
+Returns a pointer to the currently active REI structure. This is the REI associated with the currently active Window.
+
+This function requires that a Window is selected and active. In the unlikely case that the REI consists only of a screen (edge case), this function will FAIL.
+
+## Inputs
+
+None.
+
+## Result
+
+- **rei** — Address of a REI structure. If NULL, the currently active Window was not opened by the REI system, indicating an error.
+
+## See Also
+
+[FindREI](/rei/find-rei), [OpenREIA](/rei/open-rei)

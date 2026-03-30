@@ -1,0 +1,56 @@
+# ValueToStringDec
+
+## Synopsis
+
+```asm
+ValueToStringDec(buffer, value, optlen)
+                   A0    D0:32    D1
+
+void ValueToStringDec(APTR, LONG, ULONG);
+```
+
+## C Prototype
+
+```c
+void ConvDec(APTR, LONG);
+void ConvDecZ(APTR, LONG, ULONG);
+```
+
+## Description
+
+Converts a signed 32-bit LONG value into a decimal ASCII string.
+
+If the input value is negative, a `-` character is prepended to the output string.
+
+The function has two conversion modes depending on the `optlen` parameter, which determines the length of the output string by padding with `0` characters when necessary.
+
+## Inputs
+
+- **buffer** — Pointer to a buffer that will contain the output string.
+- **value** — The LONG value to convert.
+- **optlen** — Number of characters to place in the output buffer. If NULL, the number of characters is determined directly by the conversion (no padding).
+
+## Result
+
+The buffer is filled with the decimal string representation.
+
+## Example
+
+```asm
+; Using the optlen parameter:
+;
+; value=255    optlen=NULL      buffer = "255"
+; value=255    optlen=4         buffer = "0255"
+; value=255    optlen=5         buffer = "00255"
+; value=4      optlen=5         buffer = "00004"
+;
+; Negative number conversion:
+;
+; value=5      optlen=10        buffer = "0000000005"
+; value=-5     optlen=10        buffer = "-0000000005"
+; value=-5     optlen=NULL      buffer = "-5"
+```
+
+## See Also
+
+[StringDecToValue](/docs/math/string-dec-to-value), [ValueToStringBin](/docs/math/value-to-string-bin), [ValueToStringHex](/docs/math/value-to-string-hex)

@@ -1,0 +1,37 @@
+# FreeNodeName
+
+## Synopsis
+
+```asm
+FreeNodeName(list, node)
+              A0    A1
+```
+
+## C Prototype
+
+```c
+void FreeNodeName(struct List *list, struct Node *node);
+```
+
+## Description
+
+`FreeNodeName()` is entirely similar to `FreeNode()`, with one difference: if the `LN_NAME` field in the `Node` structure is not NULL, that address is freed assuming it was previously allocated via `exec/AllocVec()`. If the `LN_NAME` field is NULL, `FreeNodeName()` behaves identically to `FreeNode()`.
+
+## Inputs
+
+- **list** — Address of the list that contains the node.
+- **node** — Address of the node to remove.
+
+## Result
+
+None.
+
+## Notes
+
+`FreeNodeName()` assumes that the name pointer in `LN_NAME` was allocated using `exec/AllocVec()`. This is intended to encourage the use of `exec/AllocVec()` instead of the classic `exec/AllocMem()`, considering the ease of use of the former and the now-obsolete nature of the latter.
+
+## See Also
+
+[FreeList](/exec/free-list), [FreeListName](/exec/free-list-name), [FreeNode](/exec/free-node)
+
+`exec/Remove()`, `exec/FreeVec()`

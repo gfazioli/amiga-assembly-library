@@ -1,0 +1,36 @@
+# RemoveBitPlanes
+
+## Synopsis
+
+```asm
+num = RemoveBitPlanes(bm, num)
+D0                    A0  D0
+```
+
+## C Prototype
+
+```c
+ULONG RemoveBitPlanes(struct BitMap *bm, ULONG num);
+```
+
+## Description
+
+Removes a specified number of bitplanes from a BitMap structure. The planes are physically removed from the BitMap structure, and the memory they occupied is freed. For each plane removed, the `bm_Depth` field of the BitMap is decremented, and the plane pointer is cleared.
+
+## Inputs
+
+- **bm** -- Address of an initialized BitMap structure.
+- **num** -- Number of bitplanes to remove. This can be equal to the total number of planes present in the BitMap, meaning all planes can be removed. The important thing is that `num` must be equal to or less than the value in the `bm_Depth` field; otherwise, this function fails.
+
+## Result
+
+- **num** -- If NULL, no planes were removed, or the number of planes to remove was too high relative to the `bm_Depth` field. Otherwise, indicates the number of planes that were successfully removed.
+
+## Notes
+
+This function currently does not use `graphics.library/GetBitMapAttr()` -- it will be updated in future versions of the library.
+
+## See Also
+
+- [AddBitPlanes](/graphics/add-bit-planes)
+- `graphics.library/FreeBitMap()`, `FreeRaster()`, `GetBitMapAttr()`

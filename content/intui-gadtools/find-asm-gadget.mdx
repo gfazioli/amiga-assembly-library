@@ -1,0 +1,31 @@
+# FindAsmGadget
+
+## Synopsis
+
+```asm
+asmgad = FindAsmGadget(rei, name)
+  D0                    A0    A1
+```
+
+## C Prototype
+
+```c
+struct AsmGadget *FindAsmGadget(struct REI *, STRPTR);
+```
+
+## Description
+
+Finds a pointer to an AsmGadget structure by performing a name-based search through the internal lists. This function was written to simplify the workflow for C programmers.
+
+## Inputs
+
+- **rei** — Address of the REI that contains the AsmGadget to search for.
+- **name** — Pointer to a null-terminated string indicating the name of the gadget to find.
+
+## Result
+
+- **asmgad** — If NULL, no AsmGadget with that name exists in this REI. Otherwise, returns the address of the matching AsmGadget structure.
+
+## See Also
+
+[SetAsmGadgetAttrsA](/intui-gadtools/set-asm-gadget-attrs), [GetAsmGadgetAttr](/intui-gadtools/get-asm-gadget-attr)

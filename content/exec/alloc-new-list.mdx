@@ -1,0 +1,34 @@
+# AllocNewList
+
+## Synopsis
+
+```asm
+list = AllocNewList()
+ D0
+```
+
+## C Prototype
+
+```c
+struct List *AllocNewList(void);
+```
+
+## Description
+
+Allocates a `List` structure and prepares it for use. This function is convenient for both C and Assembly programmers, as it includes the `NEWLIST` macro internally.
+
+`AllocNewList()` was written to dynamically manage system lists, especially since they are used by the LISTVIEW gadgets from `gadtools.library`.
+
+## Inputs
+
+None.
+
+## Result
+
+- **list** — Address of a `List` structure. If NULL, an error occurred.
+
+## See Also
+
+[AllocNode](/exec/alloc-node), [FreeList](/exec/free-list), [FreeNode](/exec/free-node)
+
+`exec/lists.i`, `exec/lists.h`

@@ -1,0 +1,30 @@
+# CloseInterface
+
+## Synopsis
+
+```asm
+CloseInterface(i)
+               A0
+```
+
+## C Prototype
+
+```c
+void CloseInterface(struct Interface *);
+```
+
+## Description
+
+Frees all resources allocated by `OpenInterface()`.
+
+## Inputs
+
+- **i** — Pointer to an Interface structure, returned by `OpenInterface()`.
+
+## Result
+
+None.
+
+## See Also
+
+[CloseREI](/rei/close-rei), [OpenInterface](/intui-gadtools/open-interface)

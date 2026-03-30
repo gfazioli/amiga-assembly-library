@@ -1,0 +1,38 @@
+# CheckSum
+
+## Synopsis
+
+```asm
+CheckSum(buffer, type)
+           A0     D0
+```
+
+## C Prototype
+
+```c
+void CheckSum(APTR buffer, ULONG type);
+```
+
+## Description
+
+This command calculates the checksum of the data present in the provided buffer. Currently, the command supports two different types of checksum: BootBlock and DataBlock. Once the checksum is calculated, it is automatically inserted into the buffer at the appropriate offset.
+
+## Inputs
+
+- **buffer** — Pointer to the buffer containing the data.
+- **type** — Specifies the type of checksum to calculate. Currently, the following types are defined:
+  - `TCS_BOOTBLOCK` — BootBlock checksum.
+  - `TCS_DATABLOCK` — DataBlock checksum.
+  - `TCS_FILEBLOCK` — FileBlock checksum.
+
+## Result
+
+None. The checksum is written directly into the buffer at the appropriate offset.
+
+## Notes
+
+This command does not modify any registers; it returns A0 and D0 intact.
+
+## See Also
+
+`assembly/asmdos.h`

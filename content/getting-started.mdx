@@ -1,0 +1,173 @@
+import { Callout, Steps } from 'nextra/components'
+
+# Getting Started
+
+## System Requirements
+
+- **CPU**: Motorola 68020 or higher (68030, 68040, 68060)
+- **OS**: AmigaOS with KickStart 3.0 (V39) or later
+- **Assembler** (for assembly development): HiSoft DevPac or compatible 68k assembler
+- **C Compiler** (for C development): SAS/C, DICE, or compatible Amiga C compiler
+- **Memory**: Sufficient chip/fast RAM for your application
+
+## Installation
+
+<Steps>
+### Copy the library
+
+Copy `assembly.library` to the system `LIBS:` directory:
+
+```
+copy assembly.library LIBS:
+```
+
+### Copy the include files
+
+For **Assembly** development, copy the assembler include files to your include path:
+
+```
+copy assembly/assemblybase.i INCLUDE_I:assembly/
+```
+
+For **C** development, copy the C header files:
+
+```
+copy assembly/assembly.h INCLUDE:assembly/
+copy clib/ASSEMBLY.H INCLUDE:clib/
+```
+</Steps>
+
+## Opening the Library from Assembly
+
+To use the library from 68k assembly (DevPac syntax), open it with the standard `OpenLibrary` call.
+The library name is `assembly.library` and the minimum version is **41**:
+
+```asm
+    include include_I:assembly/assemblybase.i
+
+    SECTION main,CODE
+
+Start:
+    ; Open assembly.library v41+
+    move.l  4.w,a6                  ; ExecBase
+    lea     AssemblyName(pc),a1     ; library name
+    moveq   #41,d0                  ; minimum version
+    jsr     _LVOOpenLibrary(a6)
+    move.l  d0,_AssemblyBase
+    beq     .NoLibrary
+
+    ; --- Your code here ---
+    ; The library is now open. You can call any library function.
+    ; Sub-libraries (graphics, intuition, dos, etc.) are already
+    ; opened and available through the AssemblyBase structure.
+
+    ; Close the library when done
+    move.l  4.w,a6
+    move.l  _AssemblyBase,a1
+    jsr     _LVOCloseLibrary(a6)
+
+.NoLibrary:
+    moveq   #0,d0
+    rts
+
+AssemblyName:
+    dc.b    "assembly.library",0
+    even
+
+    SECTION data,BSS
+_AssemblyBase:
+    ds.l    1
+```
+
+## Opening the Library from C
+
+The following example shows how to open `assembly.library` from a C program.
+Note how the `AssemblyBase` structure provides pre-opened pointers to all major system libraries:
+
+```c
+#include <exec/exec.h>
+#include <graphics/gfx.h>
+#include <dos/dosextens.h>
+#include <intuition/screens.h>
+#include <libraries/locale.h>
+
+#include <clib/exec_protos.h>
+#include <clib/dos_protos.h>
+#include <clib/graphics_protos.h>
+#include <clib/intuition_protos.h>
+
+#include <assembly/assembly.h>
+#include <clib/assembly_protos.h>
+
+/* Global library base pointers */
+struct AssemblyBase *AssemblyBase;
+struct Library *DosBase, *IntuitionBase, *GfxBase;
+struct Library *AslBase, *IconBase, *GadToolsBase;
+struct Library *LocaleBase, *DataTypesBase, *WorkbenchBase;
+
+struct AssemblyBase *OpenLibs(void)
+{
+    /* Open assembly.library -- minimum version 41 */
+    AssemblyBase = (struct AssemblyBase *)
+        OpenLibrary(ASSEMBLYNAME, ASSEMBLY_MINIMUM);
+
+    if (AssemblyBase)
+    {
+        /* All sub-libraries are already opened by assembly.library.
+         * Just grab the cached pointers from AssemblyBase: */
+        DosBase        = AssemblyBase->ab_DosBase;
+        IntuitionBase  = AssemblyBase->ab_IntuiBase;
+        GfxBase        = AssemblyBase->ab_GfxBase;
+        AslBase        = AssemblyBase->ab_AslBase;
+        IconBase       = AssemblyBase->ab_IconBase;
+        GadToolsBase   = AssemblyBase->ab_GadToolsBase;
+        LocaleBase     = AssemblyBase->ab_LocaleBase;
+        DataTypesBase  = AssemblyBase->ab_DataTypesBase;
+        WorkbenchBase  = AssemblyBase->ab_WorkbenchBase;
+    }
+
+    return AssemblyBase;
+}
+
+void main(int argc, char **argv)
+{
+    if (OpenLibs())
+    {
+        /* --- Your code here --- */
+
+        CloseLibrary((struct Library *)AssemblyBase);
+    }
+}
+```
+
+<Callout type="info">
+  The constants `ASSEMBLYNAME` (`"assembly.library"`) and `ASSEMBLY_MINIMUM` (`41`) are defined in the `assembly/assembly.h` header file.
+</Callout>
+
+## The AssemblyBase Structure
+
+When `assembly.library` is opened, it automatically opens and caches pointers to all the major Amiga system libraries.
+This means you do **not** need to open them yourself -- simply read the pointers from the `AssemblyBase` structure:
+
+| Field               | Library                  | Description                          |
+|---------------------|--------------------------|--------------------------------------|
+| `ab_ExecBase`       | `exec.library`           | Exec (memory, tasks, signals)        |
+| `ab_DosBase`        | `dos.library`            | DOS (file I/O, processes)            |
+| `ab_GfxBase`        | `graphics.library`       | Graphics (rendering, bitmaps)        |
+| `ab_IntuiBase`      | `intuition.library`      | Intuition (windows, screens, input)  |
+| `ab_AslBase`        | `asl.library`            | ASL (file/font/screen requesters)    |
+| `ab_GadToolsBase`   | `gadtools.library`       | GadTools (standard gadget toolkit)   |
+| `ab_IconBase`       | `icon.library`           | Icon (Workbench icon management)     |
+| `ab_WorkbenchBase`  | `workbench.library`      | Workbench (AppWindow, AppIcon)       |
+| `ab_DataTypesBase`  | `datatypes.library`      | DataTypes (multimedia file support)  |
+| `ab_UtilityBase`    | `utility.library`        | Utility (tag lists, hooks)           |
+| `ab_LayersBase`     | `layers.library`         | Layers (clipping, layer management)  |
+| `ab_LocaleBase`     | `locale.library`         | Locale (internationalization)        |
+| `ab_LowLevelBase`   | `lowlevel.library`       | LowLevel (joypad, keyboard raw)     |
+| `ab_RealTimeBase`   | `realtime.library`       | RealTime (timing, MIDI sync)         |
+
+<Callout type="warning">
+  The `ab_UtilityBase` and `ab_LayersBase` fields are obtained indirectly from the `graphics.library` base structure, not opened separately.
+</Callout>
+
+The structure also contains library preferences such as default pen colors for requesters (`ab_FgPenRequest`, `ab_BgPenRequest`), draw mode (`ab_DrMdRequest`), pre-built images for requester icons (`ab_QuestionImage`, `ab_WarningImage`, `ab_DangerImage`), and a default `Locale` pointer (`ab_Locale`).

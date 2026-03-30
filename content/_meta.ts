@@ -1,20 +1,29 @@
 export default {
   index: 'Introduction',
-  '##': {
+  '---': {
     type: 'separator',
   },
-  markdown: '',
-  mantine: '',
-  api: '',
-
-  '###': {
+  'getting-started': 'Getting Started',
+  '----': {
     type: 'separator',
-    // title: 'My Items', // Title is optional
+    title: 'Modules',
   },
-  versioning: {
-    theme: {
-      toc: false,
-    },
+  exec: 'Exec',
+  dos: 'DOS',
+  graphics: 'Graphics',
+  libraries: 'Libraries',
+  math: 'Math',
+  'intui-gadtools': 'Intuition & GadTools',
+  rei: 'REI Interface',
+  '-----': {
+    type: 'separator',
+    title: 'Reference',
   },
+  'c-interface': 'C Interface',
+  'include-files': 'Include Files',
+  '------': {
+    type: 'separator',
+  },
+  examples: 'Examples',
   'release-notes': '',
 };

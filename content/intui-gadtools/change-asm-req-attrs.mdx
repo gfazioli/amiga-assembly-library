@@ -1,0 +1,36 @@
+# ChangeAsmReqAttrsA
+
+## Synopsis
+
+```asm
+ChangeAsmReqAttrsA(areq, attrs)
+                    A0     A1
+```
+
+## C Prototype
+
+```c
+void ChangeAsmReqAttrsA(struct AsmRequest *, struct TagItem *);
+
+/* Varargs stub */
+void ChangeAsmReqAttrs(struct AsmRequest *, Tag, ...);
+```
+
+## Description
+
+Changes the attributes of an already allocated AsmRequest. This allows reusing a single AsmRequest structure for different requester configurations, by modifying its attributes between calls to `AsmRequestArgs()`.
+
+## Inputs
+
+- **areq** — Address of an AsmRequest structure, previously allocated by `AllocAsmRequestA()`.
+- **attrs** — A TagItem array describing the attributes to modify. All tags supported by `AllocAsmRequestA()` can be modified.
+
+## Result
+
+None.
+
+## See Also
+
+[AllocAsmRequestA](/intui-gadtools/alloc-asm-request)
+
+`assembly/asmintuition.h`

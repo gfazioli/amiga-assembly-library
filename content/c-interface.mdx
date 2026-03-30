@@ -1,0 +1,374 @@
+import { Callout } from 'nextra/components'
+
+# C Interface
+
+The Assembly Library can be used from C programs compiled with SAS/C, DICE, or any compatible Amiga C compiler. This page describes the header files required, the pragma declarations for direct library calls, and how to set up a minimal C project.
+
+## Header Files
+
+To call Assembly Library functions from C, you need two header files:
+
+1. **`clib/assembly_protos.h`** -- Contains C function prototypes for all library functions.
+2. **`protos/assembly_protos.h`** -- Contains SAS/C `#pragma` declarations that map each function to the correct library vector offset and register assignment.
+
+You also need the main include file **`assembly/assembly.h`** (or `assembly/assemblybase.h`) which defines the `AssemblyBase` structure, version constants, and the library name string.
+
+## C Function Prototypes
+
+The following header declares all available C prototypes. Include it as `<clib/assembly_protos.h>`:
+
+```c
+#ifndef  CLIB_ASSEMBLY_PROTOS_H
+#define  CLIB_ASSEMBLY_PROTOS_H
+
+/*
+**  $VER: assembly_protos.h 41.6 (29.Sep.1995)
+**  Includes Release 41.1
+**
+**  C prototypes. For use with 32 bit integers only.
+**
+**      (No) Copyrights, Public Domain Software
+**              Nothing Rights Reserved
+*/
+
+#ifndef  ASSEMBLY_ASSEMBLY_H
+#include <assembly/assembly.h>
+#endif
+
+/*--- Assembly.lib C support ---*/
+
+void HookEntry(void);
+
+/*--- DOS support functions ---*/
+
+struct FileInfoBlock *FileInfo(STRPTR filename);
+APTR Load(STRPTR filename, APTR buffer, ULONG typeofmem);
+ULONG Save(STRPTR filename, APTR buffer, ULONG len);
+void CheckSum(APTR buffer, ULONG type);
+ULONG LineInput(APTR, ULONG, BPTR);
+struct InfoData *UnitInfo(STRPTR volumename);
+LONG CheckFile(STRPTR filename, STRPTR errorstring);
+
+/*--- Exec support functions ---*/
+void FreeNodeName(struct List *, struct Node *);
+void FreeListName(struct List *);
+void FreeNode(struct List *, struct Node *);
+void RevertMem(APTR, APTR, ULONG);
+struct List *AllocNewList(void);
+struct Node *AllocNode(struct List *, STRPTR, ULONG, LONG);
+void FreeList(struct List *);
+
+/*--- Graphics primitive support functions ---*/
+
+struct RastPort *AllocRastPort(void);
+struct RastPort *CloneRastPort(struct RastPort *rp);
+PLANEPTR NewAllocRaster(ULONG width, ULONG height);
+ULONG AddBitPlanes(struct BitMap *bm, ULONG);
+ULONG RemoveBitPlanes(struct BitMap *bm, ULONG);
+APTR TextFmtRastPortArgs(struct RastPort *rp, STRPTR, LONG, LONG, LONG, APTR args);
+APTR TextFmtRastPort(struct RastPort *rp, STRPTR, LONG, LONG, LONG, ... );
+void DrawBox(struct RastPort *rp, LONG, LONG, LONG, LONG);
+void DrawFrameStateA(struct REI *, ULONG, ULONG, ULONG, ULONG, ULONG, struct TagItem *);
+void DrawFrameState(struct REI *, ULONG, ULONG, ULONG, ULONG, ULONG, Tag, ...);
+void EraseInternalRect(struct Window *win);
+
+/*--- Intuition primitive support functions ---*/
+
+struct Interface *OpenInterface(STRPTR);
+void CloseInterface(struct Interface *i);
+struct REI *OpenREIA(struct REI *, STRPTR, struct TagItem * );
+struct REI *OpenREI(struct REI *, STRPTR, Tag,...);
+struct REI *CloseREI(struct REI *, STRPTR );
+struct REI *ActiveREI(void);
+struct REI *FindREI(STRPTR);
+void RefreshREI(struct REI *);
+struct REIMessage *WaitREIMsg(struct REI *, LONG);
+struct REI *LockREI(struct REI *, STRPTR);
+BOOL UnlockREI(struct REI *, STRPTR);
+APTR AS_MenuAddress(struct REI *, ULONG, ULONG, ULONG);
+BOOL SetREIAttrsA(struct REI *, STRPTR, struct TagItem *);
+void SetREIAttrs(struct REI *, STRPTR, Tag,...);
+ULONG *GetREIAttrsA(struct REI *, STRPTR, struct TagItem *);
+ULONG *GetREIAttrs(struct REI *, STRPTR, Tag,...);
+struct AsmGadget *FindAsmGadget(struct REI *, STRPTR);
+void TextFmtSizeArgs(struct RastPort *, struct IBox *, STRPTR, APTR);
+void TextFmtSize(struct RastPort *, struct IBox *, STRPTR, ...);
+
+/*--- Requester functions ---*/
+struct AsmRequest *AllocAsmRequestA (struct TagItem *);
+struct AsmRequest *AllocAsmRequest (Tag, ...);
+void FreeAsmRequest (struct AsmRequest *);
+LONG AsmRequestArgs (struct AsmRequest *, STRPTR, STRPTR, APTR);
+LONG AsmRequest (struct AsmRequest *, STRPTR, STRPTR, ...);
+void ChangeAsmReqAttrsA(struct AsmRequest *, struct TagItem *);
+void ChangeAsmReqAttrs(struct AsmRequest *, Tag, ...);
+BOOL SetAsmGadgetAttrsA(struct REI *,struct AsmGadget *,STRPTR, struct TagItem *);
+BOOL SetAsmGadgetAttrs(struct REI *,struct AsmGadget *,STRPTR, Tag, ...);
+ULONG GetAsmGadgetAttr(struct REI *,struct AsmGadget *,STRPTR, ULONG);
+ULONG InterfaceInfo(struct REI *);
+
+/*--- Math functions ---*/
+
+LONG Bin2Val(STRPTR, LONG);
+void ConvBin(APTR, LONG, ULONG);
+void ConvDecZ(APTR, LONG, ULONG);
+void ConvHex (APTR, LONG, LONG, BOOL);
+LONG Dec2Val(STRPTR);
+LONG Hex2Val(STRPTR);
+void ConvDec(APTR, LONG);
+
+/*--- String and generic utility functions ---*/
+
+ULONG ChangeChar(STRPTR, ULONG, ULONG, ULONG);
+void FilterChars(STRPTR, ULONG, ULONG, ULONG, ULONG);
+void StringToLower(struct Locale *, STRPTR, LONG);
+void StringToUpper(struct Locale *, STRPTR, LONG);
+ULONG *ReAllocVec(ULONG *, ULONG, ULONG);
+
+#endif   /* CLIB_ASSEMBLY_PROTOS_H */
+```
+
+## Pragma Declarations
+
+The pragma file maps each C function call to the corresponding library vector offset and register convention. This file is used by SAS/C and compatible compilers to generate direct library calls without linker stubs.
+
+```c
+/*--- functions in V41.1 or higher (Release 1.0) ---*/
+
+/* --- DOS support functions ---*/
+
+#pragma libcall AssemblyBase FileInfoBlock 1e 801
+#pragma libcall AssemblyBase Load 30 09803
+#pragma libcall AssemblyBase Save 36 09803
+#pragma libcall AssemblyBase CheckSum 3c 0802
+#pragma libcall AssemblyBase LineInput 48  10803
+#pragma libcall AssemblyBase UnitInfo 4e 801
+#pragma libcall AssemblyBase CheckFile 5a 9802
+
+/* --- Exec support functions ---*/
+#pragma libcall AssemblyBase FreeNodeName 60 9802
+#pragma libcall AssemblyBase FreeListName 66 801
+#pragma libcall AssemblyBase FreeNode 6c 9802
+#pragma libcall AssemblyBase RevertMem 72 09803
+#pragma libcall AssemblyBase AllocNewList 78 0
+#pragma libcall AssemblyBase AllocNode 7e 109804
+#pragma libcall AssemblyBase FreeList 84 801
+
+/* --- Graphics primitive support functions ---*/
+
+#pragma libcall AssemblyBase AllocRastPort 8a 0
+#pragma libcall AssemblyBase CloneRastPort 90 801
+#pragma libcall AssemblyBase NewAllocRaster 96 1002
+#pragma libcall AssemblyBase AddBitPlanes 9c 0802
+#pragma libcall AssemblyBase RemoveBitPlanes a2 0802
+#pragma libcall AssemblyBase TextFmtRastPortArgs a8 A2108906
+#pragma tagcall AssemblyBase TextFmtRastPort a8 A2108906
+#pragma libcall AssemblyBase DrawBox ae 3210805
+#pragma libcall AssemblyBase DrawFrameStateA b4 943210807
+#pragma tagcall AssemblyBase DrawFrameState b4 943210807
+#pragma libcall AssemblyBase EraseInternalRect ba 801
+
+/* --- Intuition primitive support functions ---*/
+
+#pragma libcall AssemblyBase OpenInterface c6 801
+#pragma libcall AssemblyBase CloseInterface cc 801
+#pragma libcall AssemblyBase OpenREIA d2 A9803
+#pragma tagcall AssemblyBase OpenREI d2 A9803
+#pragma libcall AssemblyBase CloseREI d8 9802
+#pragma libcall AssemblyBase ActiveREI de 0
+#pragma libcall AssemblyBase FindREI e4 901
+#pragma libcall AssemblyBase RefreshREI ea 801
+#pragma libcall AssemblyBase WaitREIMsg f0 0801
+#pragma libcall AssemblyBase LockREI f6 9802
+#pragma libcall AssemblyBase UnlockREI fc 9802
+#pragma libcall AssemblyBase AS_MenuAddress 114 210804
+#pragma libcall AssemblyBase SetREIAttrsA 11a A9803
+#pragma tagcall AssemblyBase SetREIAttrs 11a A9803
+#pragma libcall AssemblyBase GetREIAttrsA 120 A9803
+#pragma tagcall AssemblyBase GetREIAttrs 120 A9803
+#pragma libcall AssemblyBase FindAsmGadget 12c 9802
+#pragma libcall AssemblyBase TextFmtSizeArgs 132 A8B904
+#pragma tagcall AssemblyBase TextFmtSize 132 A8B904
+#pragma libcall AssemblyBase AllocAsmRequestA 138 801
+#pragma tagcall AssemblyBase AllocAsmRequest 138 801
+#pragma libcall AssemblyBase FreeAsmRequest 13E 801
+#pragma libcall AssemblyBase AsmRequestArgs 144 BA9804
+#pragma tagcall AssemblyBase AsmRequest 144 BA9804
+#pragma libcall AssemblyBase ChangeAsmReqAttrsA 14A 9802
+#pragma tagcall AssemblyBase ChangeAsmReqAttrs 14A 9802
+#pragma libcall AssemblyBase SetAsmGadgetAttrsA 150 BA9804
+#pragma tagcall AssemblyBase SetAsmGadgetAttrs 150 BA9804
+#pragma libcall AssemblyBase GetAsmGadgetAttr 156 0A9804
+#pragma libcall AssemblyBase InterfaceInfo 168 801
+
+/*--- Math functions ---*/
+
+#pragma libcall AssemblyBase StringDecToValue 1a4 801
+#pragma libcall AssemblyBase StringHexToValue 1aa 801
+#pragma libcall AssemblyBase StringBinToValue 1b0 0802
+#pragma libcall AssemblyBase ValueToStringDec 1b6 10803
+#pragma libcall AssemblyBase ValueToStringHex 1bc 210804
+#pragma libcall AssemblyBase ValueToStringBin 1c2 10803
+
+/* --- String and generic utility functions ---*/
+
+#pragma libcall AssemblyBase ChangeChar 1ce 210804
+#pragma libcall AssemblyBase FilterChars 1d4 3210805
+#pragma libcall AssemblyBase StringToLower 1da 09803
+#pragma libcall AssemblyBase StringToUpper 1e0 09803
+#pragma libcall AssemblyBase ReAllocVec 1e6 10803
+```
+
+<Callout type="info">
+  Functions with both a `#pragma libcall` and a `#pragma tagcall` entry support both a tag array variant (suffix `A`) and a varargs variant. For example, `OpenREIA()` takes a `struct TagItem *`, while `OpenREI()` accepts tags directly as variadic arguments.
+</Callout>
+
+## How to Include and Link
+
+### Include paths
+
+Your compiler's include path must contain the Assembly Library headers. With SAS/C, this is typically done by copying the files into the system include directory or using the `IDIR` option:
+
+```
+sc IDIR=Assembly-Library/inc IDIR=Assembly-Library/clib IDIR=Assembly-Library/protos myprogram.c
+```
+
+### Required includes in your source file
+
+At minimum, include the following in your C source:
+
+```c
+#include <exec/exec.h>
+#include <assembly/assemblybase.h>      /* AssemblyBase structure and constants */
+#include <clib/assembly_protos.h>       /* C function prototypes */
+```
+
+The `assemblybase.h` header defines:
+- The `AssemblyBase` structure with all cached library pointers
+- `ASSEMBLYNAME` -- the library name string (`"assembly.library"`)
+- `ASSEMBLY_MINIMUM` -- the minimum required version (`41`)
+
+### Linking
+
+The pragma declarations allow SAS/C to generate direct library calls at compile time, so no additional link library is needed beyond the standard startup code. Simply compile and link as usual:
+
+```
+sc myprogram.c LINK
+```
+
+## Minimal C Example
+
+The following is a basic template for any C program using the Assembly Library. It demonstrates how to open the library, retrieve sub-library base pointers, and clean up on exit:
+
+```c
+#include <exec/exec.h>
+#include <graphics/gfx.h>
+#include <graphics/view.h>
+#include <dos/dosextens.h>
+#include <dos/doshunks.h>
+#include <intuition/classusr.h>
+#include <intuition/screens.h>
+#include <intuition/icclass.h>
+#include <libraries/locale.h>
+#include <workbench/workbench.h>
+#include <workbench/startup.h>
+
+#include <clib/datatypes_protos.h>
+#include <clib/alib_protos.h>
+#include <clib/exec_protos.h>
+#include <clib/asl_protos.h>
+#include <clib/dos_protos.h>
+#include <clib/icon_protos.h>
+#include <clib/locale_protos.h>
+#include <clib/graphics_protos.h>
+#include <clib/intuition_protos.h>
+#include <clib/utility_protos.h>
+#include <clib/wb_protos.h>
+
+/* Global library base pointers */
+struct AssemblyBase *AssemblyBase;
+struct Library *DosBase, *IntuitionBase, *GfxBase, *AslBase, *IconBase;
+struct Library *GadToolsBase, *LocaleBase, *DataTypesBase, *WorkbenchBase;
+struct Library *DiskfontBase;
+struct Catalog *catalog;
+
+/* Forward declarations */
+struct AssemblyBase *OpenLibs(void);
+
+VOID main(int argc, char **argv)
+{
+    if (AssemblyBase = OpenLibs())
+    {
+        /* --- Your application code here --- */
+
+        CloseLibrary((struct Library *)AssemblyBase);
+    }
+}
+
+/*
+ * OpenLibs() -- Open assembly.library and retrieve all sub-library pointers.
+ * When assembly.library is opened, it automatically opens and caches pointers
+ * to the major Amiga system libraries. We simply read them from AssemblyBase.
+ */
+struct AssemblyBase *OpenLibs()
+{
+    AssemblyBase = (struct AssemblyBase *)
+        OpenLibrary(ASSEMBLYNAME, ASSEMBLY_MINIMUM);
+
+    if (AssemblyBase)
+    {
+        DosBase       = AssemblyBase->ab_DosBase;
+        IconBase      = AssemblyBase->ab_IconBase;
+        IntuitionBase = AssemblyBase->ab_IntuiBase;
+        GfxBase       = AssemblyBase->ab_GfxBase;
+        AslBase       = AssemblyBase->ab_AslBase;
+        GadToolsBase  = AssemblyBase->ab_GadToolsBase;
+        LocaleBase    = AssemblyBase->ab_LocaleBase;
+        DataTypesBase = AssemblyBase->ab_DataTypesBase;
+        WorkbenchBase = AssemblyBase->ab_WorkbenchBase;
+
+        /* Additional libraries not cached by AssemblyBase */
+        DiskfontBase  = OpenLibrary("diskfont.library", 0L);
+        catalog       = OpenCatalogA(NULL, "MyApp.catalog", NULL);
+    }
+
+    return AssemblyBase;
+}
+
+/* Workbench startup entry point */
+VOID wbmain(wbmsg)
+{
+    main(0, (struct WBStartup *)wbmsg);
+    exit(0);
+}
+```
+
+<Callout type="warning">
+  Always check that `OpenLibrary()` returns a non-NULL pointer before accessing any `AssemblyBase` fields. If the library is not installed or the version is too old, the pointer will be NULL.
+</Callout>
+
+## The HookEntry Glue Function
+
+The `HookEntry()` function is a special glue routine provided for C programs that need to use Amiga `struct Hook` callbacks. Since hooks are called with registers set up in a specific way by the operating system, `HookEntry` acts as a bridge between the register-based calling convention and the stack-based convention used by C functions.
+
+To use it, set your hook's `h_Entry` field to `HookEntry` and your actual C callback in `h_SubEntry`:
+
+```c
+#include <utility/hooks.h>
+
+/* Your C callback function */
+ULONG __saveds __asm MyCallback(
+    register __a0 struct Hook *hook,
+    register __a2 Object *obj,
+    register __a1 APTR msg)
+{
+    /* Handle the callback */
+    return 0;
+}
+
+/* Setting up the hook */
+struct Hook myHook;
+myHook.h_Entry    = (HOOKFUNC)HookEntry;
+myHook.h_SubEntry = (HOOKFUNC)MyCallback;
+myHook.h_Data     = NULL;  /* optional user data */
+```

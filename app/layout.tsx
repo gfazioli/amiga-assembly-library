@@ -41,9 +41,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <MantineProvider theme={theme} defaultColorScheme={head.mantine.defaultColorScheme}>
           <Layout
             banner={
-              <Banner storageKey={`release-notes-${pack.version}`}>
-                ✨ v{pack.version} Released -{' '}
-                <a href="/docs/release-notes">See the release notes</a>
+              <Banner storageKey={`amiga-asm-lib-${pack.version}`}>
+                Amiga Assembly Library v41.21 — Motorola 68020 shared library for Commodore Amiga
               </Banner>
             }
             navbar={<MantineNavBar />}

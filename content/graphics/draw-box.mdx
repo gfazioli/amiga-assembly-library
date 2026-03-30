@@ -1,0 +1,34 @@
+# DrawBox
+
+## Synopsis
+
+```asm
+DrawBox(rp, left, top, width, height)
+        A1  D0    D1   D2     D3
+```
+
+## C Prototype
+
+```c
+void DrawBox(struct RastPort *rp, LONG left, LONG top, LONG width, LONG height);
+```
+
+## Description
+
+Draws a rectangle outline on a RastPort in an extremely fast manner. Particularly useful for C programmers.
+
+## Inputs
+
+- **rp** -- Address of a RastPort structure.
+- **left** -- X coordinate of the upper-left corner.
+- **top** -- Y coordinate of the upper-left corner.
+- **width** -- Width of the rectangle.
+- **height** -- Height of the rectangle.
+
+## Result
+
+None.
+
+## See Also
+
+- `graphics.library/Draw()`

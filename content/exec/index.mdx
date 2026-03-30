@@ -1,0 +1,17 @@
+# Exec Module
+
+The Exec module provides memory management and linked list utility functions that extend the capabilities of the Amiga's `exec.library`. These functions simplify common tasks such as reversing memory blocks, reallocating memory, and dynamically managing Exec-style linked lists with nodes.
+
+## Memory Functions
+
+- **[RevertMem](/exec/revert-mem)** — Reverses the contents of a memory area, operating on bytes, words, or longwords.
+- **[ReAllocVec](/exec/realloc-vec)** — Reallocates a memory block previously allocated via `exec/AllocVec()`, allowing resizing and attribute changes.
+
+## Linked List Functions
+
+- **[AllocNewList](/exec/alloc-new-list)** — Allocates and initializes a new `List` structure, ready for use.
+- **[AllocNode](/exec/alloc-node)** — Allocates and initializes a `Node` structure, optionally inserting it into a list by priority.
+- **[FreeNode](/exec/free-node)** — Removes a node from a list and frees the memory it occupies.
+- **[FreeList](/exec/free-list)** — Frees an entire list including all its nodes.
+- **[FreeNodeName](/exec/free-node-name)** — Removes a node and frees both the node and the memory pointed to by `LN_NAME`.
+- **[FreeListName](/exec/free-list-name)** — Frees an entire list, including the `LN_NAME` memory for each node.

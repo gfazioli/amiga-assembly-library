@@ -1,0 +1,25 @@
+# Graphics Module
+
+The Graphics module provides primitive graphics support functions that extend the capabilities of the Amiga's `graphics.library`. These functions simplify common tasks such as managing bitplanes, allocating and cloning RastPort structures, drawing shapes, rendering formatted text, and working with frame objects.
+
+## BitMap Functions
+
+- **[AddBitPlanes](/graphics/add-bit-planes)** — Adds one or more bitplanes to an initialized BitMap structure.
+- **[RemoveBitPlanes](/graphics/remove-bit-planes)** — Removes and frees a specified number of bitplanes from a BitMap structure.
+- **[NewAllocRaster](/graphics/new-alloc-raster)** — Allocates a pre-cleared bitplane in CHIP RAM.
+
+## RastPort Functions
+
+- **[AllocRastPort](/graphics/alloc-rast-port)** — Allocates and initializes a new RastPort structure.
+- **[CloneRastPort](/graphics/clone-rast-port)** — Creates an exact copy of an existing RastPort structure.
+
+## Drawing Functions
+
+- **[DrawBox](/graphics/draw-box)** — Draws a rectangle outline on a RastPort.
+- **[DrawFrameStateA](/graphics/draw-frame-state)** — Draws a BOOPSI "frameiclass" object on a REI with configurable state.
+- **[EraseInternalRect](/graphics/erase-internal-rect)** — Clears the interior of a Window using its current BackFill Hook.
+
+## Text Functions
+
+- **[TextFmtRastPortArgs](/graphics/text-fmt-rast-port)** — Prints a C-style formatted string onto a RastPort with justification options.
+- **[TextFmtSizeArgs](/graphics/text-fmt-size)** — Calculates the bounding rectangle of a C-style formatted string.

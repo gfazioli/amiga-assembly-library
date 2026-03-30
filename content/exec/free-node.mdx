@@ -1,0 +1,39 @@
+# FreeNode
+
+## Synopsis
+
+```asm
+FreeNode(list, node)
+          A0    A1
+```
+
+## C Prototype
+
+```c
+void FreeNode(struct List *list, struct Node *node);
+```
+
+## Description
+
+Removes a node from a list and frees the memory it occupies. The node must have been previously added using `AllocNode()`. Only nodes allocated through `AllocNode()` should be passed to this function.
+
+## Inputs
+
+- **list** — Address of the list that contains the node.
+- **node** — Address of the node to remove.
+
+## Result
+
+None.
+
+## Notes
+
+If you only want to remove the node from the list without freeing its memory, use `Remove()` or the `REMOVE` macro for assembly programmers.
+
+To find a node by name, use `exec.library/FindName()`.
+
+## See Also
+
+[FreeList](/exec/free-list), [FreeNodeName](/exec/free-node-name)
+
+`exec/Remove()`

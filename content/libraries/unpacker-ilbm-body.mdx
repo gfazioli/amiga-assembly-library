@@ -1,0 +1,42 @@
+# UnPackerILBMBODY
+
+## Synopsis
+
+```asm
+UnPackerILBMBODY(source, bitmap)
+                 A0      A1
+```
+
+## C Prototype
+
+There is no direct C prototype exported for this function. It is called internally from assembly.
+
+## Description
+
+Unpacks compressed ILBM BODY chunk data into the bitplanes of a BitMap structure. Supports up to 8 bitplanes (256 colors). The function implements the standard Electronic Arts PackBits decompression algorithm used in IFF ILBM files.
+
+The unpacker reads the compressed data from the source buffer and writes the decompressed pixel data directly into the bitplane memory pointed to by the BitMap structure. It handles interleaved bitplane data, advancing through each bitplane row by row.
+
+The decompression algorithm works as follows:
+- Byte values 0-127: Copy the next N+1 bytes literally.
+- Byte value 128: No-op (skip).
+- Byte values 129-255: Replicate the next byte (-N+1) times.
+
+## Inputs
+
+- **source** (A0) -- Pointer to the compressed BODY chunk data (past the chunk header).
+- **bitmap** (A1) -- Pointer to an initialized BitMap structure with allocated bitplanes. The `bm_Depth`, `bm_BytesPerRow`, and `bm_Rows` fields must be correctly set, and the `bm_Planes` array must point to allocated memory.
+
+## Result
+
+- The bitplanes in the BitMap are filled with the decompressed image data.
+- If an error occurs, A0 is cleared to NULL.
+
+## Notes
+
+The unpacker supports up to 8 bitplanes (256 colors). The BitMap must be fully initialized with allocated planes before calling this function. The optional height parameter (passed on the stack) allows limiting the number of rows to unpack; if zero, `bm_Rows` from the BitMap is used.
+
+## See Also
+
+- [FindAIFFChunk](/libraries/find-aiff-chunk)
+- [UnPackerILBMCMAP](/libraries/unpacker-ilbm-cmap)

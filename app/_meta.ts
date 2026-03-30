@@ -10,13 +10,13 @@ export default {
     title: 'Community',
     type: 'menu',
     items: {
-      blog: {
-        title: 'Blog',
-        href: 'https://undolog.com/',
+      eab: {
+        title: 'English Amiga Board',
+        href: 'https://eab.abime.net/',
       },
-      medium: {
-        title: 'Medium',
-        href: 'https://medium.com/@giovambattista.fazioli',
+      aminet: {
+        title: 'Aminet',
+        href: 'https://aminet.net/',
       },
     },
   },
@@ -24,10 +24,5 @@ export default {
     type: 'page',
     title: 'About',
     href: 'https://github.com/gfazioli',
-  },
-  sponsor: {
-    type: 'page',
-    title: 'Sponsors',
-    href: 'https://github.com/sponsors/gfazioli?o=esb',
   },
 };

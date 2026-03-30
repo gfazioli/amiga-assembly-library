@@ -1,0 +1,30 @@
+# UnitInfo
+
+## Synopsis
+
+```asm
+info = UnitInfo(volumename)
+ D0                A0
+```
+
+## C Prototype
+
+```c
+struct InfoData *UnitInfo(STRPTR volumename);
+```
+
+## Description
+
+This command returns an `InfoData` structure for the specified volume name. The returned structure is the same as that returned by `dos.library/Info()`.
+
+## Inputs
+
+- **volumename** — Name of the volume. For example: `"DF0:"`, `"DF1:"`, or `"Work:"`, etc.
+
+## Result
+
+- **info** — Address of an `InfoData` structure, the same as returned by `dos.library/Info()`. If NULL, an error occurred.
+
+## See Also
+
+`dos.library/Info()`, `exec.library/FreeVec()`

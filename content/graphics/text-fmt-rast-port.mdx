@@ -1,0 +1,50 @@
+# TextFmtRastPortArgs
+
+## Synopsis
+
+```asm
+next = TextFmtRastPortArgs(rp, TextFmt, left, top, flags, ArgList)
+D0                         A1  A0       D0    D1   D2     A2
+```
+
+## C Prototype
+
+```c
+APTR TextFmtRastPortArgs(struct RastPort *rp, STRPTR TextFmt, LONG left, LONG top, LONG flags, APTR args);
+```
+
+Varargs stub:
+
+```c
+APTR TextFmtRastPort(struct RastPort *rp, STRPTR TextFmt, LONG left, LONG top, LONG flags, ...);
+```
+
+## Description
+
+Prints a C-style formatted string onto a RastPort. This command allows you to use the string formatting style of the standard C `printf` function. `TextFmtRastPortArgs()` uses `exec.library/RawDoFmt()` to format the string; see the exec.library/RawDoFmt() autodocs for details on format specifiers.
+
+The function supports multiline text (using `\n` as a line separator) and offers text justification options.
+
+## Inputs
+
+- **rp** -- Pointer to a RastPort structure.
+- **TextFmt** -- Address of a C-style format string.
+- **left** -- X coordinate of the text starting position.
+- **top** -- Y coordinate of the text starting position.
+- **flags** -- Additional text display parameters:
+  - `ASJ_LEFT` -- Left-justify the text.
+  - `ASJ_RIGHT` -- Right-justify the text.
+  - `ASJ_CENTER` -- Center the text.
+  - If NULL, `ASJ_LEFT` is used as the default. In this version, only justification flags are supported.
+- **ArgList** -- Array of arguments for the format commands.
+
+## Result
+
+- **next** -- Returns a pointer to the end of the DataStream just processed, allowing the same DataStream to be used for multiple formatting operations using sequential data.
+
+## See Also
+
+- [TextFmtSizeArgs](/graphics/text-fmt-size)
+- `assembly/asmgraphics.h`
+- `exec.library/RawDoFmt()`
+- `intuition.library/EasyRequest()`

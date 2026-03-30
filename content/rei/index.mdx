@@ -1,0 +1,28 @@
+# REI Interface Module
+
+REI (Requester/Interface) is a custom windowing and interface system built on top of Intuition. It manages windows, screens, gadgets, menus, and provides a message-based event system. REI interfaces are designed with the REI-Editor tool and loaded at runtime, allowing the separation of UI layout from application logic.
+
+The REI system provides automatic event handling, including keyboard shortcuts for gadgets, double-click detection, and Hook-based callback dispatching through the `WaitREIMsg()` event loop.
+
+## Window Lifecycle Functions
+
+- **[OpenREIA](/rei/open-rei)** — Opens and displays a specific REI on screen, with optional tag-based attribute overrides.
+- **[CloseREI](/rei/close-rei)** — Hides a REI without freeing its memory, allowing it to be reopened later.
+- **[FindREI](/rei/find-rei)** — Finds a REI structure by name in the internal list.
+- **[ActiveREI](/rei/active-rei)** — Returns the REI associated with the currently active window.
+
+## Window State Functions
+
+- **[LockREI](/rei/lock-rei)** — Blocks all user input on a REI, setting the mouse pointer to the busy state.
+- **[UnlockREI](/rei/unlock-rei)** — Restores user input on a previously locked REI.
+- **[RefreshREI](/rei/refresh-rei)** — Redraws all gadgets, borders, and window elements of a REI.
+
+## Event Handling
+
+- **[WaitREIMsg](/rei/wait-rei-msg)** — Main event loop that processes all REI events, including automatic gadget keyboard control and Hook dispatch.
+
+## Information and Attributes
+
+- **[InterfaceInfo](/rei/interface-info)** — Displays an information requester about the current interface.
+- **[SetREIAttrsA](/rei/set-rei-attrs)** — Dynamically sets the attributes of a currently displayed REI.
+- **[GetREIAttrsA](/rei/get-rei-attrs)** — Retrieves the attributes of a REI into a tag list.

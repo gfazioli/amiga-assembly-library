@@ -1,0 +1,30 @@
+# NextIFFChunk
+
+## Synopsis
+
+```asm
+chunkSize = NextIFFChunk(data)
+D0                       A0
+```
+
+## C Prototype
+
+There is no direct C prototype exported for this function. It is called internally from assembly.
+
+## Description
+
+Advances the data pointer to the next chunk in an IFF data structure. The function reads the size field of the current chunk (at offset 4 from the chunk header), then moves the pointer forward by 8 bytes (header size) plus the chunk data size, positioning it at the beginning of the next chunk.
+
+## Inputs
+
+- **data** (A0) -- Pointer to the current IFF chunk header. On return, A0 is updated to point to the next chunk.
+
+## Result
+
+- **chunkSize** (D0) -- The size of the next chunk's data.
+- **A0** -- Updated to point to the next chunk header.
+
+## See Also
+
+- [FindAIFFChunk](/libraries/find-aiff-chunk)
+- [TestAIFFChunk](/libraries/test-aiff-chunk)
