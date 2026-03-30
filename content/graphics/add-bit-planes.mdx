@@ -40,3 +40,42 @@ This function currently does not use `graphics.library/GetBitMapAttr()` -- it wi
 
 - [RemoveBitPlanes](/graphics/remove-bit-planes)
 - `graphics.library/AllocBitMap()`, `AllocRaster()`, `GetBitMapAttr()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (06-10-1994) =JON= --- num = AddBitPlanes (bm, num) (a0,d0)
+***************************************************************************************
+_LVOAddBitPlanes
+	movem.l	d2-d4/a2-a6,-(sp)
+	moveq	#0,d3
+	subq.w	#1,d0
+	move.w	d0,d4			* num of raster...
+	add.b	bm_Depth(a0),d0
+	subq.b	#8,d0
+	bge.s	FalExit
+	movem.w	bm_BytesPerRow(a0),d2-d3
+	mulu.w	d3,d2			* D2 = amount of memory to allocate
+	lea	bm_Depth(a0),a3		* A3^Point to depth field
+	move.b	(a3),d3
+	ext.w	d3
+	lea	bm_Planes(a0,d3.w*4),a2	* Start to added bitplanes...
+	moveq	#0,d3			* bitplanes counter
+	lea	MEMF_CHIP|MEMF_CLEAR,a4
+	move.l	ab_ExecBase(a6),a6
+ADB_LOP	move.l	d2,d0
+	move.l	a4,d1
+	jsr	_LVOAllocMem(a6)
+	tst.l	d0
+	beq.s	FalExit
+	move.l	d0,(a2)+
+	addq.b	#1,(a3)
+	addq.b	#1,d3
+	dbf	d4,ADB_LOP
+FalExit	move.l	d3,d0
+	movem.l	(sp)+,d2-d4/a2-a6
+	rts
+```

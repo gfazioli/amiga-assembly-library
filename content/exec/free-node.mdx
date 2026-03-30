@@ -37,3 +37,23 @@ To find a node by name, use `exec.library/FindName()`.
 [FreeList](/exec/free-list), [FreeNodeName](/exec/free-node-name)
 
 `exec/Remove()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (13-Jan-1995) --- FreeNode(list,node) (a0/a1)
+***************************************************************************************
+_LVOFreeNode
+	movem.l	a5-a6,-(sp)
+	move.l	a1,a5			* A5 = struct Node *
+	REMOVE				* exec MACROS
+	lea	-4(a5),a1
+	moveq	#4+LN_SIZE,d0
+	move.l	ab_ExecBase(a6),a6
+	jsr	_LVOFreeMem(a6)
+	movem.l	(sp)+,a5-a6
+	rts
+```

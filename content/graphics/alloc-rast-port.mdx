@@ -29,3 +29,31 @@ None.
 
 - [CloneRastPort](/graphics/clone-rast-port)
 - `exec.library/FreeVec()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (25-Oct-1994) =JON= --- rp = AllocRastPort()
+***************************************************************************************
+_LVOAllocRastPort
+	movem.l	d2/a4-a6,-(sp)
+	move.l	#4+rp_SIZEOF,d0		* Alloc My Raster Port structure
+	move.l	d0,d2
+	moveq	#1,d1
+	swap	d1
+	move.l	ab_ExecBase(a5),a6
+	jsr	_LVOAllocMem(a6)
+	tst.l	d0
+	beq.s	ARP_FIN
+	move.l	d0,a4
+	move.l	d2,(a4)+
+	move.l	a4,a1
+	move.l	ab_GfxBase(a5),a6
+	jsr	_LVOInitRastPort(a6)
+	move.l	a4,d0
+ARP_FIN	movem.l	(sp)+,d2/a4-a6
+	rts
+```

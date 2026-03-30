@@ -31,3 +31,32 @@ None. The string is converted in place.
 
 - [StringToLower](/libraries/string-to-lower)
 - `locale.library/ConvToUpper()`, `ConvToLower()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+*******************
+* 26-Nov-1994, Ok *
+*******************
+_LVOStringToUpper
+	movem.l	d2/a4-a6,-(sp)
+	move.l	a0,a4
+	move.l	ab_Locale(a6),a5
+	move.l	ab_LocaleBase(a6),a6
+	move.l	d0,d2
+	bne.s	SkLen
+	moveq	#-1,d2
+CalLen	tst.b	(a0)+
+	dbeq	d2,CalLen
+	neg.l	d2
+SkLen	subq.l	#1,d2
+TLop	move.b	(a4),d0
+	move.l	a5,a0
+	jsr	_LVOConvToUpper(a6)
+	move.b	d0,(a4)+
+	dbeq	d2,TLop
+SU_End	movem.l	(sp)+,d2/a4-a6
+	rts
+```

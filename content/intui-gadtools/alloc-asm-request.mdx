@@ -79,3 +79,283 @@ Buttons are ordered the same way as `intuition.library/EasyRequest()`: the leftm
 [AsmRequestArgs](/intui-gadtools/asm-request-args), [ChangeAsmReqAttrsA](/intui-gadtools/change-asm-req-attrs), [FreeAsmRequest](/intui-gadtools/free-asm-request)
 
 `assembly/asmintuition.h`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+** (13-May-1995) =Jon= --- AllocAsmRequestA(taglist) (a0)
+***************************************************************************************
+STDICM	EQU	IDCMP_REFRESHWINDOW|IDCMP_CLOSEWINDOW|BUTTONIDCMP|IDCMP_ACTIVEWINDOW|IDCMP_IDCMPUPDATE
+SIDCMP	EQU	STDICM|IDCMP_VANILLAKEY|IDCMP_NEWSIZE|LISTVIEWIDCMP
+
+STADFL	EQU	WFLG_CLOSEGADGET|WFLG_ACTIVATE|WFLG_RMBTRAP|WFLG_DRAGBAR|WFLG_DEPTHGADGET
+SFLAGS	EQU	STADFL		*** |WFLG_SIZEGADGET|WFLG_SIZEBBOTTOM|WFLG_SIMPLE_REFRESH
+
+REIFLAGS	EQU	REIF_REQUEST|REIF_NOFONTSENSITIVE
+
+AsmRequestTable
+	dc.l AR_EXT,ARQLeft,ARQTop,ARQREI,ARQWindow,ARQScreen,ARQTitle,ARQIDCMP
+	dc.l ARQIDCMPHook,ARQLockREI,ARQJust,ARQObject,ARQSound
+	dc.l AR_TAGG,AR_TAGG 				** RESERVED
+	dc.l ARQCenterH,ARQCenterV,ARQCenterM,ARQUnderObject
+	dc.l ARQAPenPattern,ARQBPenPattern,ARQPubScreenName,ARQNewLookBackFill
+	dc.l ARQReturnKey,ARQFrameOnly,ARQWindowFlags,ARQButtomHook
+;--------------------------------------------------------------------------------------
+_LVOAllocAsmRequestA
+	movem.l	d2-d3/a2-a6,-(sp)
+	move.l	a6,a5				* Save AssemblyBase...
+	suba.l	a4,a4				* AllocMem()...
+	move.l	a0,a2				* Save TagList...
+	move.l	#4+areq_SIZEOF,d2		* memory for the AsmRequest structure
+	move.l	d2,d0
+	moveq	#1,d1
+	swap	d1				* MEMF_CLEAR
+	move.l	ab_ExecBase(a5),a6
+	jsr	_LVOAllocMem(a6)
+	move.l	d0,a4				* all ok??
+	tst.l	d0
+	bne.s	AR_Cont				* Ok, continue...
+AR_EXT	move.l	a4,d0
+	movem.l	(sp)+,d2-d3/a2-a6
+	rts
+;--------------------------------------------------------------------------------------
+; Before jumping to the Tags, we perform standard initializations; if modified via Tags
+; they will be changed, otherwise these defaults will remain if no Tags are provided...
+;--------------------------------------------------------------------------------------
+AR_Cont	move.l	d2,(a4)+			* D2 = true SizeOF - AllocVec() ;)
+	move.l	a5,a6
+	bsr	_LVOAllocRastPort			* Allocate for calculations...
+	move.l	d0,areq_SysRP(a4)			* System RastPort
+	move.l	#SIDCMP,rei_NewWindow+nw_IDCMPFlags(a4)	* Set IDCMP
+	move.l	#SFLAGS,rei_NewWindow+nw_Flags(a4)	* Set Flags
+	moveq	#-1,d0
+	move.l	d0,rei_NewWindow+nw_MaxHeight(a4)
+	move.l	d0,rei_NewWindow+nw_MaxWidth(a4)
+	move.l	#REIFLAGS,rei_Flags(a4)			* Mode Requester... for REI
+	lea	areq_Hook(a4),a0			* Default LayoutCallBack Hook
+	lea	LayFill(pc),a1				* routine...
+	movem.l	a1/a4/a5,h_Entry(a0)			* Init...
+	move.l	a0,rei_LayoutCallBack(a4)		* Use Default standard Hook...
+	move.l	#$00020000,areq_FgPatternPen(a4)	* Default Pattern Color
+	move.w	#ARQF_RETURNKEY,areq_Flags(a4)		* Set ON Return Key... default
+	lea	areq_STDWindowTAG(a4),a0
+	move.l	#WA_InnerWidth,(a0)		* Build the Standard Window TAG
+	move.l	#WA_InnerHeight,8(a0)
+	move.l	#WA_AutoAdjust,16(a0)
+	move.l	#1,20(a0)
+	move.l	#TAG_MORE,24(a0)
+	moveq	#0,d0				* Clear these Tags for safety...
+	move.l	d0,28(a0)
+	move.l	d0,32(a0)
+	move.l	a0,rei_STDWindowTAG(a4)
+;--------------------------------------------------------------------------------------
+	move.l	ab_IntuiBase(a5),a6		* Get by default, the address
+	suba.l	a0,a0				* of the public screen... passing
+	jsr	_LVOLockPubScreen(a6)		* NAME = NULL.
+	move.l	d0,rei_Screen(a4)		* Then get the RastPort of
+	move.l	d0,a1				* this screen, and save it...
+	lea	sc_RastPort(a1),a0
+	move.l	a0,areq_ScreenRP(a4)
+	suba.l	a0,a0
+	jsr	_LVOUnlockPubScreen(a6)		* Unlock the screen...
+;--------------------------------------------------------------------------------------
+	move.l	a2,a0				* Address of the TagList...
+;--------------------------------------------------------------------------------------
+AR_PTAG	USETAGLIST.s	AsmRequestTable(pc),AR_TAGG,AR_EXT2
+AR_EXT2	move.l	a4,d0
+	movem.l	(sp)+,d2-d3/a2-a6
+	rts
+;--------------------------------------------------------------------------------------
+ARQLeft	move.l	(a0)+,d0
+	move.w	d0,areq_LeftEdge(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQTop	move.l	(a0)+,d0
+	move.w	d0,areq_TopEdge(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQREI	move.l	(a0)+,d0			* Get the REI structure
+	beq	AR_TAGG
+	move.l	(rei_Screen.w,d0.l),a2		* (struct Screen *)
+	move.l	a2,rei_Screen(a4)		* Same screen, thanks...
+	lea	sc_RastPort(a2),a2		* (struct RastPort *)
+	move.l	a2,areq_ScreenRP(a4)		* Save it...
+	tst.l	rei_NewWindow+nw_Title(a4)
+	bne	AR_TAGG
+	move.l	(rei_Window.w,d0.l),a2		*
+	move.l	wd_Title(a2),d1			* Title of the reference Window...
+	beq	AR_TAGG
+	move.l	d1,rei_NewWindow+nw_Title(a4)	* Set Req Title...
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQWindow
+	move.l	(a0)+,d0			* Window/Screen output...
+	beq	AR_TAGG				* Ok, use the default pubscreen...
+	move.l	(wd_WScreen.w,d0.l),a2		* Window's Screen...
+	move.l	a2,rei_Screen(a4)		* In AsmRequest.. which starts with the REI
+	lea	sc_RastPort(a2),a2		* Get the RastPort of the output screen
+	move.l	a2,areq_ScreenRP(a4)		* of output
+	bra	AR_TAGG				* Start again...
+;--------------------------------------------------------------------------------------
+ARQScreen
+	move.l	(a0)+,a2			* (struct Screen *)
+	move.l	a2,rei_Screen(a4)		* Set ScreenPtr Output
+	lea	sc_RastPort(a2),a2		* (struct RastPort *)
+	move.l	a2,areq_ScreenRP(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQTitle
+	move.l	(a0)+,d0			* Check for NULL Title...
+	move.l	d0,a2
+	bne.s	okSet
+	lea	defStr(pc),a2			* Get the Default Title for safety
+	move.l	rei_Window(a4),d0		* Is there a reference Window??
+	beq.s	okSet				* No, use the default...
+	move.l	(wd_Title.w,d0.l),d1		* Title of the reference Window...
+	beq.s	okSet
+	move.l	d1,a2
+okSet	move.l	a2,rei_NewWindow+nw_Title(a4)	* Set Req Title...
+	bra	AR_TAGG
+defStr	STRING <"System Request">
+;--------------------------------------------------------------------------------------
+ARQIDCMP
+	move.l	#SIDCMP,rei_NewWindow+nw_IDCMPFlags(a4)	* Set IDCMP
+	move.l	(a0)+,d0
+	or.l	d0,rei_NewWindow+nw_IDCMPFlags(a4)	* Add IDCMPFlags...
+	move.l	d0,areq_IDCMPFlags(a4)			* Save them for checking...
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQIDCMPHook
+	move.l	(a0)+,areq_IDCMPHook(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQLockREI
+	move.l	(a0)+,areq_LockREI(a4)			* REI to lock...
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQJust	move.l	(a0)+,d0
+	move.w	d0,areq_TextFlags(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQObject					* Insert the Object into our
+	move.l	(a0)+,d0
+	move.l	d0,areq_Object(a4)		* set it anyway
+	beq	AR_TAGG				* If NULL exit...
+	move.l	a0,d2
+	move.l	d0,a0				* Object *
+	move.l	sp,d3				* save the stack
+	subq.w	#8,sp
+	move.l	sp,a3				* request information about the
+	pea	TAG_DONE			* dimensions of this object
+	move.l	a3,-(sp)			* and store them in a ULONG
+	pea	DTA_NominalVert			* for later use...
+	addq.w	#4,a3
+	move.l	a3,-(sp)
+	pea	DTA_NominalHoriz
+	move.l	sp,a2				* Attrs
+	move.l	ab_DataTypesBase(a5),a6
+	jsr	_LVOGetDTAttrsA(a6)		* get info...
+	move.l	(a3),areq_ObjectWidth(a4)	* save dimensions in the AsmRequest
+	subq.w	#4,a3
+	move.l	(a3),areq_ObjectHeight(a4)
+	move.l	d3,sp				* Restore StackPointer....
+	move.l	d2,a0
+	bra	AR_PTAG
+;--------------------------------------------------------------------------------------
+ARQSound
+	move.l	(a0)+,areq_Sound(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQCenterH
+	move.l	(a0)+,d0
+	bne.s	ACHFSET
+	BCLRL	REIB_CENTERHSCREEN,rei_Flags(a4)
+	bra	AR_TAGG
+ACHFSET	BSETL	REIB_CENTERHSCREEN,rei_Flags(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQCenterV
+	move.l	(a0)+,d0
+	bne.s	ACVFSET
+	BCLRL	REIB_CENTERVSCREEN,rei_Flags(a4)
+	bra	AR_TAGG
+ACVFSET	BSETL	REIB_CENTERVSCREEN,rei_Flags(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQCenterM
+	move.l	(a0)+,d0
+	bne.s	ACMFSET
+	BCLRL	REIB_CENTERMOUSE,rei_Flags(a4)
+	bra	AR_TAGG
+ACMFSET	BSETL	REIB_CENTERMOUSE,rei_Flags(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQUnderObject
+	BCLRW	ARQB_TEXTUNDEROBJECT,areq_Flags(a4)
+	move.l	(a0)+,d0
+	beq	AR_TAGG
+	BSETW	ARQB_TEXTUNDEROBJECT,areq_Flags(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQAPenPattern
+	move.l	(a0)+,d0
+	move.w	d0,areq_FgPatternPen(a4)	* Default Pattern Color
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQBPenPattern
+	move.l	(a0)+,d0
+	move.w	d0,areq_BgPatternPen(a4)	* Default Pattern Color
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQPubScreenName
+	move.l	(a0)+,d2			* public screen name
+	exg.l	a0,d2
+	move.l	ab_IntuiBase(a5),a6		*
+	jsr	_LVOLockPubScreen(a6)		*
+	move.l	d0,rei_Screen(a4)		* Then get the RastPort of
+	move.l	d0,a1
+	lea	sc_RastPort(a1),a0
+	move.l	a0,areq_ScreenRP(a4)
+	suba.l	a0,a0
+	jsr	_LVOUnlockPubScreen(a6)		* Unlock the screen...
+	move.l	d2,a0
+	bra	AR_PTAG
+;--------------------------------------------------------------------------------------
+ARQNewLookBackFill
+	lea	LayFill(pc),a2
+	move.l	(a0)+,d0
+	beq.s	StaDefH
+	lea	NewLookLayFill(pc),a2
+StaDefH	lea	areq_Hook(a4),a1
+	move.l	a2,h_Entry(a1)
+	bra	AR_PTAG
+;--------------------------------------------------------------------------------------
+ARQReturnKey
+	BCLRW	ARQB_RETURNKEY,areq_Flags(a4)
+	move.l	(a0)+,d0
+	beq	AR_TAGG
+	BSETW	ARQB_RETURNKEY,areq_Flags(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+FONLY	SET	WFLG_CLOSEGADGET|WFLG_DRAGBAR|WFLG_DEPTHGADGET
+ARQFrameOnly
+	move.l	(a0)+,d0
+	beq.s	FONLOFF
+	andi.l	#~FONLY,rei_NewWindow+nw_Flags(a4)
+	move.l	#0,rei_NewWindow+nw_Title(a4)
+	bra	AR_TAGG
+FONLOFF	ori.l	#FONLY,rei_NewWindow+nw_Flags(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQWindowFlags
+	move.l	(a0)+,d0
+	or.l	d0,rei_NewWindow+nw_Flags(a4)
+	bra	AR_TAGG
+;--------------------------------------------------------------------------------------
+ARQButtomHook
+	move.l	(a0)+,areq_ButtomHook(a4)
+	bra	AR_TAGG
+```

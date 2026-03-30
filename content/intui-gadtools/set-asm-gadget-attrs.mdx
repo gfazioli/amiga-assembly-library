@@ -44,3 +44,99 @@ All `gadtools.library` tags are accepted, plus:
 [GetAsmGadgetAttr](/intui-gadtools/get-asm-gadget-attr), [SetREIAttrsA](/rei/set-rei-attrs)
 
 `<libraries/gadtools.h>`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (14-Feb-1995) --- SetAsmGadgetAttrsA(rei, AsmGadget, name, taglist) (A0/A1/A2/A3)
+***************************************************************************************
+SAGTable
+	dc.l SAGExit
+	dc.l SAGNewHook,SAGExit,SAGExit,SAGExit,SAGExit,SAGExit,SAGExit,SAGExit
+	dc.l SAGExit,SAGExit,SAGExit,SAGExit,SAGExit,SAGExit,SAGExit,SAGHighLight
+	dc.l SAGExit,SAGExit,SAGExit,SAGExit
+;--------------------------------------------------------------------------------------
+_LVOSetAsmGadgetAttrsA
+	movem.l	d2-d7/a2-a6,-(sp)
+	move.l	a3,d0			* TagList NULL??
+	beq.s	SAGExit			* then exit...
+	move.l	a0,d0
+	bne.s	SAGFind			* Ok, there is a rei, so operate on this one...
+SAGExit	movem.l	(sp)+,d2-d7/a2-a6
+	rts
+SAGFind	move.l	a6,a5			* Save AsmBase in A5
+	move.l	d0,a4			* Save i (REI)
+	move.l	a1,d7			* Was the AsmGadget address passed?
+	bne.s	SAGGad			* yes...
+	move.l	a2,a1			* search it via name...
+	lea	rei_HEADAsmGadget(a4),a0	* List
+	FINDNAME
+	move.l	d0,d7			* D7 = (struct AsmGadget *)
+	beq.s	SAGExit
+SAGGad	move.l	a3,a0			* A0 = (struct TagItem *)
+TII_TAG	MIXTAGLIST.s	SAGTable(pc),GOI_TAG,SAGExit,8000,GADROU
+;--------------------------------------------------------------------------------------
+GADROU	move.l	a0,-(sp)		* Save A0 = (struct TagItem *)
+	move.l	(a0),d1			* D1 = ti_Tag to search for...
+	move.l	(agg_TagList.w,d7.l),a0	* Get the pointer to my StdTagList...
+	FINDTAG
+	beq.s	NoTags			* The ti_Tag does not exist...
+	move.l	([sp],4.w),4(a0)	* ti_Data in ti_Data
+	move.l	sp,d5			* save the Stack
+	suba.l	a2,a2
+	move.l	a2,-(sp)
+	move.l	4(a0),-(sp)
+	move.l	(a0),-(sp)
+	move.l	(agg_Gadget.w,d7.l),a0
+	move.l	rei_Window(a4),a1
+	move.l	sp,a3
+	move.l	ab_GadToolsBase(a5),a6
+	jsr	_LVOGT_SetGadgetAttrsA(a6)
+	move.l	d5,sp
+NoTags	move.l	(sp)+,a0
+	addq.l	#8,a0
+	bra	TII_TAG
+;--------------------------------------------------------------------------------------
+SAGNewHook
+	move.l	(a0)+,d0		* Address of the new Hook...
+	move.l	d0,(agg_NewGadget+gng_UserData.w,d7.l)
+	bra	TII_TAG
+;--------------------------------------------------------------------------------------
+SAGHighLight
+	move.l	(a0)+,d0
+	beq.s	NoHighLight
+	move.l	a0,-(sp)
+	move.l	([rei_Window.w,a4],wd_RPort.w),a1		* Rport
+	moveq	#3,d0						* Color 3
+	move.l	ab_GfxBase(a5),a6				* GfxBase
+	jsr	_LVOSetAPen(a6)					* SetAPen()
+	move.l	([rei_Window.w,a4],wd_RPort.w),a1		* RPort
+	move.l	d7,a0
+	move.l	agg_Gadget(a0),a0
+	movem.w	gg_LeftEdge(a0),d0-d3				* Coordinates
+	subq.w	#1,d1
+	addq.w	#1,d3
+	move.l	a5,a6						* AsmBase
+	bsr	_LVODrawBox					* DrawBox()
+	move.l	(sp)+,a0
+	bra	TII_TAG
+NoHighLight
+	move.l	a0,-(sp)
+	move.l	([rei_Window.w,a4],wd_RPort.w),a1		* Rport
+	moveq	#0,d0						* Color 3
+	move.l	ab_GfxBase(a5),a6				* GfxBase
+	jsr	_LVOSetAPen(a6)					* SetAPen()
+	move.l	([rei_Window.w,a4],wd_RPort.w),a1		* RPort
+	move.l	d7,a0
+	move.l	agg_Gadget(a0),a0
+	movem.w	gg_LeftEdge(a0),d0-d3				* Coordinates
+	subq.w	#1,d1
+	addq.w	#1,d3
+	move.l	a5,a6						* AsmBase
+	bsr	_LVODrawBox
+	move.l	(sp)+,a0
+	bra	TII_TAG
+```

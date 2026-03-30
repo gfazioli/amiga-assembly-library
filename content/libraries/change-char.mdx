@@ -35,3 +35,37 @@ If you set `fchar` to ASCII code 0 (zero) and at the same time set `len` to NULL
 ## See Also
 
 - [FilterChars](/libraries/filter-chars)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+*******************
+* 26-Nov-1994, Ok *
+*******************
+_LVOChangeChar
+	movem.l	d0-d5/a0,-(sp)
+	moveq	#0,d5
+	move.w	d0,d4
+	subq.w	#1,d4
+CC_CMPtwo
+	tst.w	d0
+	bne.s	CC_CMP
+CC_TestZero
+	moveq	#1,d4
+	tst.b	(a0)
+	beq.s	CC_Exit
+CC_CMP	move.b	(a0),d3
+	cmp.b	d1,d3
+	bne.s	CC_NoFind
+	move.b	d2,(a0)
+	addq.w	#1,d5
+CC_NoFind
+	addq.w	#1,a0
+	dbf	d4,CC_CMPtwo
+CC_Exit	move.l	d5,(sp)
+	movem.l	(sp)+,d0-d5/a0
+	move.l	d0,d0
+	rts
+```

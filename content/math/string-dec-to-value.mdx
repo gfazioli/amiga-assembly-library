@@ -50,3 +50,48 @@ If the `-` character is present, it always overrides the `+` character regardles
 ## See Also
 
 [StringBinToValue](/docs/math/string-bin-to-value), [StringHexToValue](/docs/math/string-hex-to-value), [ValueToStringDec](/docs/math/value-to-string-dec)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (20-Feb-1995) --- value = StringDecToValue(buffer) (a0)
+***************************************************************************************
+_LVOStringDecToValue
+	movem.l	d1-d7/a0-a2,-(sp)
+	movem.w	DecClearRegs(pc),d0-d7
+	moveq	#"0",d5		* fasting Code
+D2V_Skp	cmp.b	(a0),d5			* Check Jolly Char
+	ble.s	D2V_Con
+	cmpi.b	#"#",(a0)+		* Jolly...
+	beq.s	D2V_Skp
+	cmpi.b	#"+",-1(a0)		* Pos
+	beq.s	D2V_Skp
+	cmpi.b	#"-",-1(a0)		* NOT... triggers something...
+	bne.s	D2V_Skp
+	moveq	#1,d4			* Set Mark Negative
+	bra.s	D2V_Skp
+D2V_Con	STRLEN	a0,d3
+	subq.w	#1,d3			* for dbf operation...
+	lea	D2V_TableDec(pc),a2
+D2V_Lop	move.b	(a0,d3.w),d1
+	sub.b	d5,d1
+	beq.s	D2V_Nex
+	subq.b	#1,d1
+D2V_Squ	add.l	(a2),d2
+	dbf	d1,D2V_Squ
+	add.l	d2,d0
+	moveq	#0,d2
+	moveq	#0,d1
+D2V_Nex	addq.w	#4,a2
+	dbf	d3,D2V_Lop
+	tst.l	d4
+	beq.s	D2V_Ext
+	neg.l	d0
+D2V_Ext	movem.l	(sp)+,d1-d7/a0-a2
+	rts
+DecClearRegs
+	ds.w 8
+```

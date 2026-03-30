@@ -28,3 +28,49 @@ This command allocates a `FileInfoBlock` structure in memory and fills it with i
 ## See Also
 
 `dos.library/Examine()`, `exec.library/FreeVec()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (15-Feb-1995) Make up ---  FileInfoBlock = FileInfo(filename) (a0)
+***************************************************************************************
+_LVOFileInfo
+	movem.l	d2-d4/a2-a6,-(sp)
+	move.l	a0,d4
+	move.l	a6,a5
+	move.l	ab_ExecBase(a5),a6
+	move.l	#fib_SIZEOF+4,d0
+	move.l	d0,d2
+	moveq	#MEMF_PUBLIC,d1
+	jsr	_LVOAllocMem(a6)
+	tst.l	d0			* Rel.2.0
+	beq.s	FileInfo_Exit
+	move.l	d0,a4
+	move.l	d2,(a4)+		* AllocVec()
+	move.l	ab_DosBase(a5),a6
+	move.l	d4,d1
+	moveq	#ACCESS_READ,d2
+	jsr	_LVOLock(a6)
+	move.l	d0,d4
+	beq.s	FileInfo_Error
+	move.l	d0,d1
+	move.l	a4,d2
+	jsr	_LVOExamine(a6)
+	move.l	d4,d1
+	jsr	_LVOUnLock(a6)
+	move.l	a4,d0
+FileInfo_Exit
+	movem.l	(sp)+,d2-d4/a2-a6
+	rts
+FileInfo_Error
+	move.l	ab_ExecBase(a5),a6
+	move.l	a4,a1
+	move.l	-(a1),d0
+	jsr	_LVOFreeMem(a6)
+	moveq	#0,d0
+	movem.l	(sp)+,d2-d4/a2-a6
+	rts
+```

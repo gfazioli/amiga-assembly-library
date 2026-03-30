@@ -48,3 +48,189 @@ The function supports multiline text (using `\n` as a line separator) and offers
 - `assembly/asmgraphics.h`
 - `exec.library/RawDoFmt()`
 - `intuition.library/EasyRequest()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (01-Jan-1995) -- TextFmtRastPortArgs(rp,TextFmt,x,y,flgs,ArgList) (a1,a0,d0,d1,d2,a2)
+***************************************************************************************
+ STRUCTURE ASMTEXT,0
+ 	WORD	atx_Left	; Passed in INPUTS via D0
+ 	WORD	atx_Top		; Passed in INPUTS via D1
+ 	UWORD	atx_Flags	; Passed in INPUTS via D2
+ 	APTR	atx_TextFmt	; Text passed in Inputs/Alloc A0
+ 	APTR	atx_DataStream	; DataStream passed in Inputs via A2
+ 	APTR	atx_RastPort	; RastPort passed in Inputs via A1
+	WORD	atx_MaxWidth	; Width of the longest string RESULT private
+	WORD	atx_MaxHeight	; Height of all rows RESULT private
+	LABEL	atx_SIZEOF
+;--------------------------------------------------------------------------------------
+TFP_CON	addq.w	#1,(a3)		* Count characters.. including final zero
+	rts
+;--------------------------------------------------------------------------------------
+TFP_ROU	move.b	d0,(a3)+	* Stuff routine
+	rts
+;--------------------------------------------------------------------------------------
+_LVOTextFmtRastPortArgs
+	movem.l	d2-d7/a2-a6,-(sp)	* Save Regs
+	lea	-atx_SIZEOF(sp),sp	* Create the AsmText struct on the Stack...
+	move.l	sp,a4			* Stack pointed to by A4
+	move.l	a6,a5			* Save AsmBase
+	movem.w	d0-d2,atx_Left(a4)	* Save Left, Top and Flags...
+	move.l	a0,atx_TextFmt(a4)	* Save fmtstring... TextFmt
+	move.l	a1,atx_RastPort(a4)	* Save RastPort
+	move.l	a2,atx_DataStream(a4)	* Save DataStream...
+***************************************************************************************
+* ** TextFmt ** ROUTINE
+*
+* This part prints text, referencing the ASMTEXT structure
+* A4 = ASMTEXT
+* A5 = assemblybase
+***************************************************************************************
+TextFmt	move.l	ab_ExecBase(a5),a6	* Exec in A6/Allocate and format
+	move.l	atx_TextFmt(a4),a0	* Text...
+	move.l	atx_DataStream(a4),a1	* DataStream...
+	lea	TFP_CON(pc),a2		* Routine that counts the characters
+	pea	0			* clear
+	move.l	sp,a3			* on the stack
+	jsr	_LVORawDoFmt(a6)	* format
+	move.l	(sp)+,d0		* Number of bytes to allocate
+	swap	d0			* get them
+	addq.w	#5,d0			* Align + PackAlloc
+	bclr	#0,d0			* Even
+	move.l	d0,d2			* Save Len in D2
+	moveq	#MEMF_PUBLIC,d1		* Allocate memory space
+	jsr	_LVOAllocMem(a6)
+	tst.l	d0			* All OK??
+	beq	TFP_EXT			* Exit failure...
+	move.l	d0,a3			*
+	move.l	d2,(a3)+		* Pack AllocMem	A3 = Buffer
+	move.l	atx_TextFmt(a4),a0	* Text...
+	move.l	a3,atx_TextFmt(a4)	* Save the allocated one
+	move.l	atx_DataStream(a4),a1	* DataStream...
+	lea	TFP_ROU(pc),a2		* Create formatted text...
+	jsr	_LVORawDoFmt(a6)
+	move.l	d0,atx_DataStream(a4)	* For RESULT...
+	move.l	atx_TextFmt(a4),a0	* Text in A0
+;--------------------------------------------------------------------------------------
+; At this point, atx_TextFmt contains the formatted text ready to be BUFFERED
+; and PRINTED... atx_DataStream holds the pointer to the next data stream... //
+;--------------------------------------------------------------------------------------
+	moveq	#10,d6			* NewLine (\n) Character
+	move.l	a0,a1
+	move.l	sp,d3			* ##private - don't delete!!
+	pea	0			* Reference, for end of list
+TFP_ZER	tst.b	(a0)+			* Go to the end of the string...
+	bne.s	TFP_ZER
+	subq.l	#1,a0			* Position on the zero...
+	cmp.b	-1(a0),d6		* NewLine...
+	beq.s	TFP_CES			* Buffer the next one...
+	subq.l	#1,a0			* We skip this address...
+TFP_CES	cmp.l	a1,a0			* Have we returned to the beginning??
+	beq.s	TFP_EBU			* Ok, End Buffering...
+	cmp.b	-(a0),d6
+	bne.s	TFP_CES
+	pea	1(a0)
+	bra.s	TFP_CES
+TFP_EBU	move.l	a0,-(sp)		* The last (first) address...
+;--------------------------------------------------------------------------------------
+; Buffering complete, now on the stack we have as many addresses as there are
+; lines, or rather as many NewLine (\n) characters were present, this list ends with a
+; LONG = NULL. Now, let's check if any text justification was requested, either
+; right or centered. Otherwise there's no issue and we can print directly.
+;--------------------------------------------------------------------------------------
+	move.l	atx_RastPort(a4),a3	* RastPort
+	move.l	ab_GfxBase(a5),a6	* The rest is handled by Graphics...
+	move.w	atx_Flags(a4),d0	* Take Flags
+	andi.w	#TEXTF_PRIVATE|3,d0	* Bit 0 and Bit 1/J_RIGHT/J_CENTER
+	beq.s	NOJUST			* No justification type...
+	move.l	sp,a2			* Strings to print
+	moveq	#0,d5			* Width...
+	moveq	#0,d2			* Height...
+CAL_LOP	move.l	(a2)+,d4		* String addresses finished???
+	beq.s	CAL_EXT			* Done...
+	move.l	(a2),d7			* D7=Next address...
+	bne.s	CAL_THE
+	move.l	d4,a1
+CAL_LEN	tst.b	(a1)+
+	bne.s	CAL_LEN
+	move.l	a1,d7
+CAL_THE	sub.w	d4,d7			* length in characters
+	subq.w	#1,d7			* -1 for NewLine (\n)
+	move.l	a3,a1
+	move.l	d4,a0
+	move.w	d7,d0
+	jsr	_LVOTextLength(a6)
+	add.w	rp_TxHeight(a3),d2	* Count pixels in Height...
+	cmp.w	d0,d5			* Which one is larger???
+	bge.s	CAL_LOP			* D5
+	move.w	d0,d5			* D0...
+	bra.s	CAL_LOP
+;--------------------------------------------------------------------------------------
+; Great, at this point we haven't actually printed anything, but at least we know
+; how wide the longest string is... D5
+;--------------------------------------------------------------------------------------
+CAL_EXT	move.w	d5,atx_MaxWidth(a4)	* Num. of pixels Width Max
+	move.w	d2,atx_MaxHeight(a4)	* Num. of pixels Height Max
+	BTSTW	TEXTB_PRIVATE,atx_Flags(a4)
+	bne	TPRIV			* Exit - PRIVATE USE ONLY!!!
+;--------------------------------------------------------------------------------------
+; Now, since we still have our string addresses on the SP, let's go ahead and
+; actually print, justifying the text if requested...
+;--------------------------------------------------------------------------------------
+NOJUST	movem.w	atx_Left(a4),d2-d3	* D2 = Left | D3 = Top
+	moveq	#0,d5			* No Justification...
+TFP_LOP	move.l	(sp)+,d4		* String addresses finished???
+	beq.s	TFP_FRE
+	move.l	(sp),d7			* D7=Next address...
+	bne.s	TFP_THE
+	move.l	d4,a1
+TFP_LEN	tst.b	(a1)+
+	bne.s	TFP_LEN
+	move.l	a1,d7
+TFP_THE	sub.w	d4,d7			* length in characters
+	subq.w	#1,d7			* -1 for NewLine (\n)
+	move.b	atx_Flags+1(a4),d0
+	andi.b	#3,d0
+	beq.s	NoGiust
+	move.l	a3,a1
+	move.l	d4,a0
+	move.w	d7,d0
+	jsr	_LVOTextLength(a6)
+	move.w	atx_MaxWidth(a4),d5
+	sub.w	d0,d5
+	BTSTW	1,atx_Flags(a4)
+	beq.s	NoGiust
+	asr.w	#1,d5
+NoGiust	move.w	d2,d0			* LeftEdge
+	add.w	d5,d0			* Center...
+	movem.w	d0/d3,rp_cp_x(a3)	   ****************************
+	ori.w	#RPF_ONE_DOT,rp_Flags(a3)  **  SPECIAL MOVE Replace  **
+	move.b	#$F,rp_linpatcnt(a3)	   ****************************
+	move.l	a3,a1			* RastPort
+	move.l	d4,a0			* String
+	move.w	d7,d0			* length
+	jsr	_LVOText(a6)
+	add.w	rp_TxHeight(a3),d3	* Next line...
+	bra.s	TFP_LOP
+TFP_FRE	move.l	atx_TextFmt(a4),a1
+	move.l	-(a1),d0
+	move.l	ab_ExecBase(a5),a6
+	jsr	_LVOFreeMem(a6)
+	move.l	atx_DataStream(a4),d0
+	move.l	atx_MaxWidth(a4),d1	* Private RESULT...
+TFP_EXT	lea	atx_SIZEOF(sp),sp
+	movem.l	(sp)+,d2-d7/a2-a6
+	rts
+;--------------------------------------------------------------------------------------
+TPRIV	move.l	d3,sp			* This part is the exit in case
+	move.l	atx_TextFmt(a4),a1	* private data was requested: A1^TextFmt
+	move.l	atx_DataStream(a4),d0	* D0 = Next DataStream
+	move.l	atx_MaxWidth(a4),d1	* D1 = WidthHeight
+	lea	atx_SIZEOF(sp),sp
+	movem.l	(sp)+,d2-d7/a2-a6
+	rts
+```

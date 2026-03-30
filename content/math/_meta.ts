@@ -6,5 +6,4 @@ export default {
   'value-to-string-dec': 'ValueToStringDec',
   'value-to-string-hex': 'ValueToStringHex',
   'value-to-string-bin': 'ValueToStringBin',
-  'source-code': 'Source Code',
 };

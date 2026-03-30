@@ -41,3 +41,156 @@ See [OpenREIA](/rei/open-rei) for the tag list, and the file `assembly/asmintuit
 [OpenREIA](/rei/open-rei), [GetREIAttrsA](/rei/get-rei-attrs)
 
 `assembly/asmintuition.h`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (17-Mar-1995) =Jon= --- SetREIAttrsA(rei,name,TagList) (a0/a1/a2)
+***************************************************************************************
+SETREITable
+	dc.l SET_ESR	* Offset...
+	dc.l SETScreen,SETSKIP,SETSKIP,SETWindowTextAttr
+	dc.l SETSKIP,SETSKIP,SETSKIP,SETSKIP
+	dc.l SETUserData,SETSKIP,SETSKIP
+	dc.l SETRememberPos,SETRememberSize,SETCenterHScreen,SETCenterVScreen
+	dc.l SETCenterMouse,SETNoFontSensitive,SETWindowTitle,SETSKIP
+	dc.l SETSKIP,SETSKIP,SETSKIP,SETSKIP,SETSKIP,SETSKIP
+	dc.l SETSKIP,SETSKIP,SETSKIP,SETSKIP,SETSKIP,SETSKIP,SETSKIP,SETSKIP
+	dc.l SETDoubleClick
+_LVOSetREIAttrsA
+	movem.l	d2-d6/a2-a6,-(sp)
+	moveq	#0,d6			* Used as a boolean flag...
+	move.l	a6,a5			* Save AsmBase
+	move.l	a0,d0			* Was a REI provided??
+	bne.s	SET_FND			* Ok, then don't search for it by name...
+	move.l	a1,d0			* if a NULL name was provided
+	beq.s	SET_ESR			* exit...
+	move.l	ab_ExecBase(a5),a0
+	move.l	([ThisTask.w,a0],TC_Userdata.w),a0	* struct MinList *
+	move.l	a0,d0
+	beq.s	SET_ESR
+	FINDNAME
+	move.l	d0,a4			* (struct REI *) in A4
+	move.l	a4,d0			* Check...
+	bne.s	SET_FND			* Ok, name and node found... continue...
+SET_ESR	tst.l	d6			* Should I close and reopen the REI??
+	bne.s	RefreshingREI		* Yes, go...
+SET_EXT	movem.l	(sp)+,d2-d6/a2-a6	* Nothing, just exit
+	rts
+;--------------------------------------------------------------------------------------
+RefreshingREI
+	move.l	a4,a0			* REI to close
+	suba.l	a1,a1			* null name...
+	bsr	_LVOCloseREI		* close everything...
+RREFRSH	move.l	a4,a0			* REI to open...
+	suba.l	a1,a1
+	move.l	a1,a2
+	bsr	_LVOOpenREIA
+	tst.l	d0
+	bne.s	SET_EXT
+	lea	TopazAttr(pc),a0
+	move.l	a0,rei_GadgetTextAttr(a4)
+	bra	RREFRSH
+;--------------------------------------------------------------------------------------
+SET_FND	move.l	d0,a4			* THIS REI ALWAYS IN A4
+	move.l	a2,a0			* TagItem in A1...
+	move.l	a0,d0			* Is there a TagItem list??
+	beq.s	SET_ESR			* If no TagList, exit quickly, thanks.
+;--------------------------------------------------------------------------------------
+SETTAG	USETAGLIST.l	SETREITable(pc),SETATAG,SET_ESR
+;--------------------------------------------------------------------------------------
+SETScreen
+	move.l	(a0)+,d0		* NULL Screen??
+	beq.s	SETATAG			* Yes, exit... next Tag please...
+	move.l	a0,a2			* Save TagItem...
+	move.l	rei_Screen(a4),d1	* Old Screen Pointer...
+	sub.l	d0,d1			* is it the same screen?? then don't do
+	beq.s	SETATAG			* anything...
+	move.l	d0,rei_Screen(a4)	* New Screen Output...
+	moveq	#1,d6			* Set to close and reopen the REI on exit
+	bra.s	SETATAG
+;--------------------------------------------------------------------------------------
+SETSKIP	addq.w	#4,a0
+	bra	SETATAG
+;--------------------------------------------------------------------------------------
+SETWindowTextAttr
+	move.l	(a0)+,rei_GadgetTextAttr(a4)
+	moveq	#1,d6
+	bra	SETATAG
+;--------------------------------------------------------------------------------------
+SETUserData
+	move.l	(a0)+,rei_UserData(a4)
+	bra	SETATAG
+;--------------------------------------------------------------------------------------
+SETRememberPos
+	move.l	(a0)+,d0
+	beq.s	RPosOff
+	BSETL	REIB_REMEMBERPOS,rei_Flags(a4)
+	bra	SETATAG
+RPosOff	BCLRL	REIB_REMEMBERPOS,rei_Flags(a4)
+	bra	SETATAG
+;--------------------------------------------------------------------------------------
+SETRememberSize
+	move.l	(a0)+,d0
+	beq.s	RSizOff
+	BSETL	REIB_REMEMBERSIZE,rei_Flags(a4)
+	bra	SETATAG
+RSizOff	BCLRL	REIB_REMEMBERSIZE,rei_Flags(a4)
+	bra	SETATAG
+;--------------------------------------------------------------------------------------
+SETCenterHScreen
+	move.l	(a0)+,d0
+	beq.s	CHOff
+	BSETL	REIB_CENTERHSCREEN,rei_Flags(a4)
+	bra	SETATAG
+CHOff	BCLRL	REIB_CENTERHSCREEN,rei_Flags(a4)
+	bra	SETATAG
+;--------------------------------------------------------------------------------------
+SETCenterVScreen
+	move.l	(a0)+,d0
+	beq.s	CVOff
+	BSETL	REIB_CENTERVSCREEN,rei_Flags(a4)
+	bra	SETATAG
+CVOff	BCLRL	REIB_CENTERVSCREEN,rei_Flags(a4)
+	bra	SETATAG
+;--------------------------------------------------------------------------------------
+SETCenterMouse
+	move.l	(a0)+,d0
+	beq.s	CMOff
+	BSETL	REIB_CENTERMOUSE,rei_Flags(a4)
+	bra	SETATAG
+CMOff	BCLRL	REIB_CENTERMOUSE,rei_Flags(a4)
+	bra	SETATAG
+;--------------------------------------------------------------------------------------
+SETNoFontSensitive
+	move.l	(a0)+,d0
+	beq.s	NFOff
+	BSETL	REIB_NOFONTSENSITIVE,rei_Flags(a4)
+	bra	SETATAG
+NFOff	BCLRL	REIB_NOFONTSENSITIVE,rei_Flags(a4)
+	bra	SETATAG
+;--------------------------------------------------------------------------------------
+SETWindowTitle
+	move.l	(a0)+,a1		* window title
+	move.l	a0,d2			* save TagItem
+	moveq	#-1,d0
+	move.l	d0,a2			* screen title unchanged...
+	move.l	rei_Window(a4),a0	* window
+	move.l	a1,rei_NewWindow+nw_Title(a4)	* also put it in the REI...
+	move.l	ab_IntuiBase(a5),a6
+	jsr	_LVOSetWindowTitles(a6)
+	move.l	a5,a6			* Reset assemblybase
+	move.l	d2,a0			* Reset TagItem
+	bra	SETTAG
+;--------------------------------------------------------------------------------------
+SETDoubleClick
+	move.l	(a0)+,d0
+	beq.s	SETDC
+	BSETL	REIB_DOUBLECLICK,rei_Flags(a4)
+	bra	SETATAG
+SETDC	BCLRL	REIB_DOUBLECLICK,rei_Flags(a4)
+	bra	SETATAG
+```

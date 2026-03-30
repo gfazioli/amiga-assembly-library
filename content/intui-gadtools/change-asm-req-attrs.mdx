@@ -34,3 +34,19 @@ None.
 [AllocAsmRequestA](/intui-gadtools/alloc-asm-request)
 
 `assembly/asmintuition.h`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+** (18-Jan-1995) =Jon= --- ChangeAsmRequestAttrsA(areq,taglist) (a0/a1)
+***************************************************************************************
+_LVOChangeAsmReqAttrsA
+	movem.l	d2-d3/a2-a6,-(sp)
+	move.l	a6,a5				* Save AssemblyBase...
+	move.l	a0,a4				* A4 = (struct AsmRequest *)
+	move.l	a1,a0
+	bra	AR_PTAG
+```

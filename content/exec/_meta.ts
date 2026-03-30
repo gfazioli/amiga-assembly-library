@@ -8,5 +8,4 @@ export default {
   'free-list': 'FreeList',
   'free-node-name': 'FreeNodeName',
   'free-list-name': 'FreeListName',
-  'source-code': 'Source Code',
 };

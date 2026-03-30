@@ -40,3 +40,22 @@ struct REI *myrei = FindREI("Screen n.1");
 ## See Also
 
 [ActiveREI](/rei/active-rei), [OpenREIA](/rei/open-rei)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (20-Jan-1995) =Jon= ++++ rei = FindREI(name) (a1)
+***************************************************************************************
+_LVOFindREI
+	move.l	a1,d0
+	beq.s	FDRExit
+	move.l	ab_ExecBase(a6),a0
+	move.l	([ThisTask.w,a0],TC_Userdata.w),d0	* (Struct MinList *)
+	beq.s	FDRExit
+	move.l	d0,a0
+	FINDNAME
+FDRExit	rts
+```
