@@ -13,8 +13,8 @@ export const resources = [
   },
   {
     key: 'm68k-ref',
-    title: '68000 Programmer Reference',
-    href: 'http://www.68k.org/',
+    title: '68000 Editor',
+    href: 'https://asm-editor.specy.app/',
     newWindow: true,
   },
   {
