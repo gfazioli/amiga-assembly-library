@@ -12,6 +12,7 @@ import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from '@mantine/c
 // !! End of important imports !!
 
 import { MantineFooter, MantineNavBar } from '@/components';
+import { M68kHighlighter } from '@/components/M68kHighlighter/M68kHighlighter';
 import config from '@/config';
 import pack from '../package.json';
 import { theme } from '../theme';
@@ -39,6 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </Head>
       <body>
         <MantineProvider theme={theme} defaultColorScheme={head.mantine.defaultColorScheme}>
+          <M68kHighlighter />
           <Layout
             banner={
               <Banner storageKey={`amiga-asm-lib-${pack.version}`}>
