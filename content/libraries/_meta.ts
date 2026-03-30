@@ -9,6 +9,4 @@ export default {
   'next-iff-chunk': 'NextIFFChunk',
   'unpacker-ilbm-body': 'UnPackerILBMBODY',
   'unpacker-ilbm-cmap': 'UnPackerILBMCMAP',
-  'source-code': 'Source Code',
-  'section-source': 'Image Data',
 };

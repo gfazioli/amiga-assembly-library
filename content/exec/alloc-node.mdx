@@ -66,3 +66,39 @@ struct Node *node;
 [AllocNewList](/exec/alloc-new-list), [FreeNode](/exec/free-node), [FreeList](/exec/free-list)
 
 `exec/Enqueue()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (13-Jan-1995) --- AllocNode(List,name,type,pri) (a0/a1/d0/d1)
+***************************************************************************************
+_LVOAllocNode
+	movem.l	d2-d4/a2-a6,-(sp)
+	move.l	a0,a3				* Save struct List *
+	move.l	a1,a2				* Save STRPTR string
+	move.b	d0,d2				* type
+	move.b	d1,d3				* pri
+	moveq	#4+LN_SIZE,d0			* D0 = SIZEOF
+	move.l	d0,d4				* Save for PackAlloc()
+	moveq	#1,d1
+	swap	d1
+	move.l	ab_ExecBase(a6),a6	* Exec...
+	jsr	_LVOAllocMem(a6)
+	tst.l	d0
+	beq.s	ANFail			* Can't Alloc Memory...
+	move.l	d0,a5			* A5 = (struct Node *)
+	move.l	d4,(a5)+		* A5 = True address to return...
+	move.b	d2,LN_TYPE(a5)		* INITIALIZE THE NODE
+	move.b	d3,LN_PRI(a5)
+	move.l	a2,LN_NAME(a5)
+	move.l	a3,d0			* Does a List exist??
+	beq.s	ANExit			* No then exit
+	move.l	d0,a0			* List
+	ENQUEUE	a5
+ANExit	move.l	a5,d0			* Result...
+ANFail	movem.l	(sp)+,d2-d4/a2-a6
+	rts
+```

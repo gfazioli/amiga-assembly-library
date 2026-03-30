@@ -34,3 +34,39 @@ This function currently does not use `graphics.library/GetBitMapAttr()` -- it wi
 
 - [AddBitPlanes](/graphics/add-bit-planes)
 - `graphics.library/FreeBitMap()`, `FreeRaster()`, `GetBitMapAttr()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (06-10-1994) =JON= --- num = RemoveBitPlanes (bm, num) (a0,d0)
+***************************************************************************************
+_LVORemoveBitPlanes
+	movem.l	d2-d4/a2-a6,-(sp)
+	moveq	#0,d3
+	move.w	d0,d4			* num of raster...
+	subq.w	#1,d4
+	sub.b	bm_Depth(a0),d0
+	bpl.s	FalExit
+	movem.w	bm_BytesPerRow(a0),d2-d3
+	mulu.w	d3,d2			* D2 = amount of memory to free
+	lea	bm_Depth(a0),a3		* A3^Point to depth field
+	move.b	(a3),d3
+	ext.w	d3
+	lea	bm_Planes(a0,d3.w*4),a2	* Start to added bitplanes...
+	moveq	#0,d3			* bitplanes counter
+	suba.l	a4,a4			* Clear planeptr
+	move.l	ab_ExecBase(a6),a6
+RVB_LOP	move.l	-(a2),a1
+	subq.b	#1,(a3)
+	move.l	a4,(a2)			* Clear planeptr
+	move.l	d2,d0
+	jsr	_LVOFreeMem(a6)
+	addq.b	#1,d3
+	dbf	d4,RVB_LOP
+RVBExit	move.l	d3,d0
+	movem.l	(sp)+,d2-d4/a2-a6
+	rts
+```

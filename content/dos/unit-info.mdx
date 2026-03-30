@@ -28,3 +28,48 @@ This command returns an `InfoData` structure for the specified volume name. The 
 ## See Also
 
 `dos.library/Info()`, `exec.library/FreeVec()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (15-Feb-1995) Make up --- info = UnitInfo(volumename) (a0)
+***************************************************************************************
+_LVOUnitInfo
+	movem.l	d2-d4/a4-a6,-(sp)
+	move.l	a0,d4			* Save FileName
+	move.l	a6,a5			* Save AssemblyBase
+	move.l	ab_ExecBase(a5),a6
+	moveq	#id_SIZEOF+4,d0
+	moveq	#1,d1
+	swap	d1
+	jsr	_LVOAllocMem(a6)
+	tst.l	d0			* Rel.2.0
+	beq.s	UnitInfo_Exit
+	move.l	d0,a4
+	move.l	ab_DosBase(a5),a6
+	move.l	d4,d1
+	moveq	#ACCESS_READ,d2
+	jsr	_LVOLock(a6)
+	move.l	d0,d4
+	beq.s	UnitInfo_Error
+	move.l	d0,d1
+	move.l	a4,d2
+	jsr	_LVOInfo(a6)
+	move.l	d4,d1
+	jsr	_LVOUnLock(a6)
+	move.l	a4,d0
+UnitInfo_Exit
+	movem.l	(sp)+,d2-d4/a4-a6
+	rts
+UnitInfo_Error
+	move.l	ab_ExecBase(a5),a6
+	move.l	-(a4),d0
+	move.l	a4,a1
+	jsr	_LVOFreeMem(a6)
+	moveq	#0,d0
+	movem.l	(sp)+,d2-d4/a4-a6
+	rts
+```

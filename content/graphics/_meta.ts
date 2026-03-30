@@ -10,5 +10,4 @@ export default {
   'text-fmt-size': 'TextFmtSizeArgs',
   'erase-internal-rect': 'EraseInternalRect',
   'draw-frame-state': 'DrawFrameStateA',
-  'source-code': 'Source Code',
 };

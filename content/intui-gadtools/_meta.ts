@@ -9,5 +9,4 @@ export default {
   'find-asm-gadget': 'FindAsmGadget',
   'open-interface': 'OpenInterface',
   'close-interface': 'CloseInterface',
-  'source-code': 'Source Code',
 };

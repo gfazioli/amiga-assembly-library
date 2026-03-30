@@ -38,3 +38,314 @@ The `ArgList` parameter provides the values for any format specifiers in `TextFm
 ## See Also
 
 [AllocAsmRequestA](/intui-gadtools/alloc-asm-request), [ChangeAsmReqAttrsA](/intui-gadtools/change-asm-req-attrs), [FreeAsmRequest](/intui-gadtools/free-asm-request)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+** (18-Jan-1995) =Jon= --- AsmRequestArgs(areq,TextFmt,GadFmt,ArgList) (a0/a1/a2/a3)
+***************************************************************************************
+_LVOAsmRequestArgs
+	movem.l	d2-d7/a2-a6,-(sp)	* Save practically everything...
+	move.l	a6,a5			* Save AssemblyBase in A5
+	move.l	a0,a4			* AsmRequest fix in A4
+	movem.l	a1-a3,areq_TextFmt(a4)	* Save TextFmt, GadFmt, DataStream
+;--------------------------------------------------------------------------------------
+	move.l	areq_LockREI(a4),d0	* Is there a REI to lock??
+	beq.s	PCalc			* no, continue...
+	move.l	d0,a0
+	bsr	_LVOLockREI
+;--------------------------------------------------------------------------------------
+; Calculate minimum width & height of the Request, i.e. without Text or Image... plus
+; any Gadgets... D6 is a constant = 14
+;--------------------------------------------------------------------------------------
+PCalc	moveq	#12,d6					* MakeConstant
+	add.b	([rei_Screen.b,a4],sc_WBorBottom.w),d6
+	moveq	#0,d0
+	move.b	([rei_Screen.b,a4],sc_WBorLeft.w),d0
+	add.b	([rei_Screen.b,a4],sc_WBorRight.w),d0
+	add.w	#8+12,d0
+	move.w	d0,rei_NewWindow+nw_Width(a4)		* Min Width
+	move.w	d6,rei_NewWindow+nw_Height(a4)		* Min Height
+	move.l	areq_LeftEdge(a4),rei_NewWindow+nw_LeftEdge(a4)
+	tst.l	areq_GadFmt(a4)				* Are there Gadgets??
+	beq.s	CkText					* No, continue...
+	move.w	([areq_ScreenRP.b,a4],rp_TxHeight.w),d0
+	move.w	d0,d1
+	asr.w	#1,d0
+	add.w	d0,d1
+	addq.w	#8,d1
+	add.w	d1,rei_NewWindow+nw_Height(a4)		* New Min Height
+;--------------------------------------------------------------------------------------
+; Calculate how much space the Text occupies in the request...
+;--------------------------------------------------------------------------------------
+CkText	move.l	areq_TextFmt(a4),d0			* Does text exist?
+	beq.s	CKObject				* No, skip this part...
+	move.l	d0,a0
+	move.l	areq_SysRP(a4),a1
+	move.l	areq_DataStream(a4),a2
+	moveq	#0,d0				* Calculate the text size
+	moveq	#0,d1				* Using a direct call...
+	moveq	#0,d2
+	move.w	#TEXTF_PRIVATE,d2		* Set Private Flags Result
+	bsr	_LVOTextFmtRastPortArgs		*
+	move.l	d0,areq_GadArgList(a4)		* Next ArgList for the Gadgets...
+	move.l	d1,areq_IBox+ibox_Width(a4)	* dimensions...
+	move.l	ab_ExecBase(a5),a6		* formatted and Allocated.
+	move.l	-(a1),d0			* Free it because we need to
+	jsr	_LVOFreeMem(a6)			* reprint it anyway...
+	move.l	a5,a6				* AssemblyBase...
+	movem.w	areq_IBox+ibox_Width(a4),d0-d1
+	add.w	d0,rei_NewWindow+nw_Width(a4)		* Width
+	add.w	d1,rei_NewWindow+nw_Height(a4)		* Height
+	move.w	d6,areq_IBox+ibox_Left(a4)		* Text starts from here...
+	move.w	([areq_SysRP.w,a4],rp_TxBaseline.w),d0
+	addq.w	#6,d0
+	move.w	d0,areq_IBox+ibox_Top(a4)
+;--------------------------------------------------------------------------------------
+CKObject
+	move.l	areq_Object(a4),d0		* Does an Object exist??
+	bne.s	MakeObj				*
+	move.l	d0,areq_ObjectWidth(a4)
+	move.l	d0,areq_ObjectHeight(a4)
+	bra.s	CaGads
+
+MakeObj	BTSTW	ARQB_TEXTUNDEROBJECT,areq_Flags(a4)
+	bne.s	Under				* Go place everything underneath...
+;--------------------------------------------------------------------------------------
+	move.w	areq_IBox+ibox_Height(a4),d0	* height of the text... if present...
+	move.l	areq_ObjectHeight(a4),d1	* height Object... which exists for sure...
+	sub.w	d0,d1				* D1 - D0 = d1 (if D0 = NULL)!!
+	ble.s	SAddH
+	add.w	d1,rei_NewWindow+nw_Height(a4)
+SAddH	move.l	areq_ObjectWidth(a4),d1
+	addq.l	#8,d1				* /////
+	add.w	d1,rei_NewWindow+nw_Width(a4)
+	add.w	d1,areq_IBox+ibox_Left(a4)
+	bra.s	CaGads
+;--------------------------------------------------------------------------------------
+Under	move.w	areq_IBox+ibox_Width(a4),d0	* width of the text... if present...
+	move.l	areq_ObjectWidth(a4),d1		* width Object... which exists for sure...
+	sub.w	d0,d1				* D1 - D0 = d1 (if D0 = NULL)!!
+	ble.s	SAddW
+	add.w	d1,rei_NewWindow+nw_Width(a4)
+SAddW	move.l	areq_ObjectHeight(a4),d1
+	addq.l	#4,d1
+	add.w	d1,rei_NewWindow+nw_Height(a4)
+	add.w	d1,areq_IBox+ibox_Top(a4)
+;--------------------------------------------------------------------------------------
+; Let's check if Gadgets need to be added. If they exist, we format them
+; and check how much space they occupy (width, height), widening the Window if needed...
+;--------------------------------------------------------------------------------------
+CaGads	lea	rei_HEADAsmGadget(a4),a0	* Reset the list to accommodate the
+	NEWLIST	a0				* possible Gadgets...
+	move.l	areq_GadFmt(a4),d0		* Are there Gadgets...??
+	beq.s	Show				* No, continue
+	move.l	areq_ScreenRP(a4),a1		* Screen RastPort
+	move.l	areq_GadFmt(a4),a0		* Gadget Format Text
+	move.l	areq_GadArgList(a4),a2		* Next ArgList for Gadget
+	moveq	#0,d0
+	moveq	#0,d1
+	moveq	#0,d2
+	move.w	#TEXTF_PRIVATE,d2		* Set Private Flags Result
+	bsr	_LVOTextFmtRastPortArgs		* Calling in private mode operation...
+	move.l	a1,areq_GadFmt(a4)	* Formatted Gadgets... true allocated text...
+	swap	d1
+	move.w	d1,areq_GadFmtWidth(a4)		* Save Gadget String size
+	bsr	CreateGadFmt
+	tst.l	d0				* Check if everything went Ok...
+	beq	FreeGTX				* There was some error...
+;--------------------------------------------------------------------------------------
+Show	move.l	a4,a0				* Structure REI
+	suba.l	a2,a2				* NULL TagList...
+	bsr	_LVOOpenREIA			* Showing Requester...
+	tst.l	d0
+	bne.s	ARGLay
+	move.l	areq_LockREI(a4),d0		* Is there a REI to Unlock??
+	beq	CExit				* no, continue...
+	move.l	d0,a0
+	bsr	_LVOUnlockREI
+	moveq	#0,d0
+	movem.l	(sp)+,d2-d7/a2-a6		* ERROR the REI did not open...
+	rts
+;--------------------------------------------------------------------------------------
+ARGLay	tst.l	areq_TextFmt(a4)			* Does text exist?
+	beq	ARGWait					* No, wait for a message then...
+ARGText	movem.w	ab_FgPenRequest(a5),d0-d2
+	move.l	([rei_Window.w,a4],wd_RPort.w),a1	* RastPort...
+	move.l	ab_GfxBase(a5),a6
+	jsr	_LVOSetABPenDrMd(a6)
+	move.l	([rei_Window.w,a4],wd_RPort.w),a1	* RastPort...
+	move.l	a1,areq_ReqRP(a4)			* Save in AsmRequest...
+	move.l	areq_TextFmt(a4),a0
+	move.l	areq_DataStream(a4),a2
+	moveq	#0,d0
+	BTSTW	ARQB_TEXTUNDEROBJECT,areq_Flags(a4)
+	bne.s	NoUnder
+	add.w	areq_ObjectWidth+2(a4),d0
+NoUnder	add.w	([rei_Window.w,a4],wd_Width.w),d0
+	sub.w	areq_IBox+ibox_Width(a4),d0
+	asr.w	#1,d0
+
+	BTSTW	ARQB_TEXTUNDEROBJECT,areq_Flags(a4)
+	bne.s	NoYCent
+	move.w	areq_IBox+ibox_Height(a4),d2
+	move.w	areq_ObjectHeight+2(a4),d1
+	sub.w	d2,d1
+	ble.s	NoYCent
+	asr.w	#1,d1
+	add.w	areq_IBox+ibox_Top(a4),d1
+	bra.s	YeYCent
+
+NoYCent	move.w	areq_IBox+ibox_Top(a4),d1
+YeYCent	move.w	areq_TextFlags(a4),d2
+	moveq	#0,d3
+	move.b	([rei_Window.w,a4],wd_BorderTop.w),d3
+	add.w	d3,d1
+	move.l	a5,a6
+	bsr	_LVOTextFmtRastPortArgs
+;--------------------------------------------------------------------------------------
+	move.l	areq_Object(a4),d0		* Does an Object to attach exist?
+	beq	ARGSnd				* No, check if a sound exists...
+	move.l	sp,d7				* Save the StackPointer
+	pea	TAG_DONE
+	pea	([areq_ObjectHeight.w,a4])
+	pea	GA_Height			* GA_Height
+	pea	([areq_ObjectWidth.w,a4])
+	pea	GA_Width			* GA_Width
+	moveq	#0,d1
+	move.b	([rei_Window.w,a4],wd_BorderTop.w),d1
+	addq.w	#6,d1				* Default Top value
+	move.l	d1,-(sp)
+	pea	GA_Top				* GA_Top
+	moveq	#14,d1
+	BTSTW	ARQB_TEXTUNDEROBJECT,areq_Flags(a4)
+	beq.s	SkCent
+	move.w	([rei_Window.w,a4],wd_Width.w),d1
+	sub.w	areq_ObjectWidth+2(a4),d1
+	asr.w	#1,d1
+SkCent	move.l	d1,-(sp)
+	pea	GA_Left				* GA_Left
+	pea	1
+	pea	DTA_Immediate			* (ON) DTA_Immediate
+	pea	ICTARGET_IDCMP
+	pea	ICA_TARGET			* (SET) ICA_TARGET
+	move.l	ab_DataTypesBase(a5),a6
+	move.l	d0,a0				* Object *
+	move.l	rei_Window(a4),a1		* Window
+	suba.l	a2,a2				* Requester
+	move.l	sp,a3				* Attrs
+	jsr	_LVOSetDTAttrsA(a6)
+	move.l	d7,sp				* Restore the stack...
+	move.l	rei_Window(a4),a0		* Window
+	suba.l	a1,a1				* Request
+	move.l	areq_Object(a4),a2		* Object
+	moveq	#-1,d0				* Position
+	jsr	_LVOAddDTObject(a6)
+	move.l	areq_Object(a4),a0		* Object
+	move.l	rei_Window(a4),a1		* Window
+	suba.l	a2,a2				* Request
+	move.l	a2,a3				* Additional Attribute (none defined)...
+	jsr	_LVORefreshDTObjectA(a6)
+	move.l	a5,a6
+;--------------------------------------------------------------------------------------
+ARGSnd	move.l	areq_Sound(a4),d0		* Does a sound object to play exist??
+	beq.s	ARGWait				* No, then start waiting...
+	move.l	d0,a2				* Object in A2
+	move.l	sp,a3				* Save Stack...
+	pea	0
+	pea	STM_PLAY
+	pea	0
+	pea	DTM_TRIGGER
+	move.l	sp,a1
+	DOMETHODA
+	move.l	a3,sp
+;--------------------------------------------------------------------------------------
+ARGWait	move.l	a4,a0				* (struct REI *)
+	moveq	#"_",d0				* Underscore
+	bsr	_LVOWaitREIMsg			* Wait for a message...
+	move.l	d0,a0				* (struct REIMessage *)
+
+	move.l	rim_Class(a0),d0
+	and.l	areq_IDCMPFlags(a4),d0		* Additional IDCMPFlags??
+	bne.s	CkHook
+
+	move.l	rim_REICode(a0),d0		* Get REICode to check if a button
+	sub.l	#"QUIT",d0			* was pressed...
+	beq.s	ClosREI
+	moveq	#0,d0
+	move.l	d0,areq_Response(a4)
+	move.l	d0,rim_REICode(a0)		* Clear it to avoid confusion...
+
+	move.l	rim_Class(a0),d0
+	sub.l	#IDCMP_NEWSIZE,d0
+	beq	ARGText				* Future implementation of Resizing...
+	sub.l	#(IDCMP_CLOSEWINDOW-IDCMP_NEWSIZE),d0	* IDCMP_CLOSEWINDOW
+	beq.s	ClosREI
+	sub.l	#(IDCMP_VANILLAKEY-IDCMP_CLOSEWINDOW),d0
+	beq	ARGCKey
+	sub.l	#(IDCMP_IDCMPUPDATE-IDCMP_VANILLAKEY),d0
+	beq	ARGWTag
+	bra.s	ARGWait
+;--------------------------------------------------------------------------------------
+; Call a CustomHook to handle additional IDCMP messages...
+;--------------------------------------------------------------------------------------
+CkHook	move.l	d0,areq_Response(a4)		* Received IDCMPFlags...
+	move.l	areq_IDCMPHook(a4),d0
+	beq.s	ClosREI
+	move.l	d0,a0				* A0 = (struct Hook *)
+	lea	rei_REIMessage(a4),a1		* A1 = (struct REIMessage *)
+	move.l	a4,a2				* A2 = (struct REI *) Rev.(13.5.95)
+	move.l	h_Entry(a0),a3
+	move.l	#0,rim_REICode(a1)
+	jsr	(a3)
+	addq.l	#1,d0				* Check for ~0
+	beq.s	ClosREI				* Ok, returned -1, so exit...
+	bra.s	ARGWait				* nothing, continue as before...
+;--------------------------------------------------------------------------------------
+ClosREI	move.l	areq_Object(a4),d0		* Was an Object added??
+	beq.s	CCLREI				* No, continue...
+	move.l	d0,a1				* Object to remove
+	move.l	rei_Window(a4),a0		* on this Window...
+	move.l	ab_DataTypesBase(a5),a6		* Don't free memory, so that
+	jsr	_LVORemoveDTObject(a6)		* the Object can be reused...
+;--------------------------------------------------------------------------------------
+; Before closing everything, check if a ButtomHook was set
+;--------------------------------------------------------------------------------------
+CCLREI	move.l	a5,a6
+	move.l	areq_ButtomHook(a4),d0
+	beq.s	CREIHOK
+	move.l	d0,a0				* A0 = (struct Hook *)
+	lea	rei_REIMessage(a4),a1		* A1 = (struct REIMessage *)
+	move.l	a4,a2				* A2 = (struct REI *) Rev.(13.5.95)
+	move.l	h_Entry(a0),a3
+	move.l	areq_Response(a4),rim_REICode(a1) * Pressed gadget number...
+	jsr	(a3)
+	addq.l	#1,d0				* Check for ~0
+	bne	ARGWait				* nothing, continue as before...
+
+CREIHOK	move.l	a4,a0				* Close the Request...
+	bsr	_LVOCloseREI
+;--------------------------------------------------------------------------------------
+	move.l	a4,a0				* If they exist, free them, otherwise no..
+	bsr	_LVOFreeAsmGList		* exits safely always and in any case...
+;--------------------------------------------------------------------------------------
+FreeGTX	move.l	areq_GadFmt(a4),d0		* Were Gadgets created...???
+	beq.s	NoUnLk				* No, continue...
+	move.l	ab_ExecBase(a5),a6		* Free the text allocated for the
+	move.l	d0,a1				* Gadgets...
+	move.l	-(a1),d0			*
+	jsr	_LVOFreeMem(a6)			*
+	move.l	a5,a6
+;--------------------------------------------------------------------------------------
+NoUnLk	move.l	areq_LockREI(a4),d0		* Is there a REI to Unlock??
+	beq.s	CExit				* no, continue...
+	move.l	d0,a0
+	bsr	_LVOUnlockREI
+;--------------------------------------------------------------------------------------
+CExit	move.l	areq_Response(a4),d0		* RESULT...
+	movem.l	(sp)+,d2-d7/a2-a6
+	rts
+```

@@ -32,3 +32,31 @@ None.
 ## See Also
 
 - [ChangeChar](/libraries/change-char)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (25-feb-1995)
+***************************************************************************************
+_LVOFilterChars
+	movem.l d4/a0,-(sp)
+	subq.w	#1,d0
+	moveq	#0,d4
+FC_Start
+	move.b	(a0),d4
+	cmp.b	d1,d4
+	bmi.s	FC_Replace
+	cmp.b	d2,d4
+	bhi.s	FC_Replace
+	bra.s	FC_Repeat
+FC_Replace
+	move.b	d3,(a0)
+FC_Repeat
+	addq.w	#1,a0
+	dbf	d0,FC_Start
+	movem.l (sp)+,d4/a0
+	rts
+```

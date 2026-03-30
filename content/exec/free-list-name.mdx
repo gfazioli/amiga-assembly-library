@@ -28,3 +28,38 @@ None.
 ## See Also
 
 [FreeList](/exec/free-list), [FreeNode](/exec/free-node), [FreeNodeName](/exec/free-node-name)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (26-Feb-1995) --- FreeListName(list) (a0)
+***************************************************************************************
+_LVOFreeListName
+	movem.l	a4-a6,-(sp)
+	move.l	a0,a4				* A4 = struct List *
+	move.l	ab_ExecBase(a6),a6		* Get Exec right away...
+FLNCont	move.l	(a4),a1
+	move.l	(a1),d0
+	beq.s	FLNLst				* Go free the List structure
+	move.l	a1,a5				* Save for FreeMem()
+	move.l	a4,a0				* struct List *
+	REMOVE					* exec MACROS
+	move.l	LN_NAME(a5),d0
+	beq.s	ONode
+	move.l	d0,a1
+	move.l	-(a1),d0
+	jsr	_LVOFreeMem(a6)			* Free the string...
+ONode	lea	-4(a5),a1
+	moveq	#4+LN_SIZE,d0
+	jsr	_LVOFreeMem(a6)
+	bra.s	FLNCont
+FLNLst	lea	-4(a4),a1
+	moveq	#4+LH_SIZE,d0
+	jsr	_LVOFreeMem(a6)
+	movem.l	(sp)+,a4-a6
+	rts
+***************************************************************************************
+```

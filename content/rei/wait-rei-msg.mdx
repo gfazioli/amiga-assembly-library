@@ -86,3 +86,207 @@ In all cases, the REIMessage structure is always returned and properly initializ
 ## See Also
 
 [SetAsmGadgetAttrsA](/intui-gadtools/set-asm-gadget-attrs), [OpenREIA](/rei/open-rei)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+_LVOWaitREIMsg
+	movem.l	d2-d7/a2-a6,-(sp)
+	move.b	d0,d6			* D6 = Default Underscore
+	move.l	a6,a5			* Save AsmBase
+	move.l	a0,a4			* Save REI
+GetMesD	move.l	([rei_Window.w,a4],wd_UserPort.w),a0	* Port in A0
+	bsr	_LVOAS_GetIMsg
+	move.l	d0,d7
+	bne.s	WRElabo
+InWait	moveq	#0,d1			* otherwise put the Task in wait state::!!
+	moveq	#0,d0
+	move.l	([rei_Window.w,a4],wd_UserPort.w),a0
+	move.b	MP_SIGBIT(a0),d1
+	bset	d1,d0
+	move.l	ab_ExecBase(a5),a6
+	jsr	_LVOWait(a6)
+GetMes	move.l	a5,a6
+	move.l	([rei_Window.w,a4],wd_UserPort.w),a0	* Port in A0
+	bsr	_LVOAS_GetIMsg		* It must have arrived!
+	move.l	d0,d7			* Check for NULL and switch in D7
+	beq.s	WExit			* Go back to waiting...
+WRElabo	move.l	d7,a2			* IntuiMessage in A2
+;--------------------------------------------------------------------------------------
+	move.l	im_Class(a2),rei_REIMessage+rim_Class(a4)
+	move.l	im_Code(a2),rei_REIMessage+rim_Code(a4)
+	move.l	im_IAddress(a2),rei_REIMessage+rim_IAddress(a4)
+;--------------------------------------------------------------------------------------
+	move.l	im_Class(a2),d0
+	subq.l	#IDCMP_NEWSIZE,d0
+	beq.s	Drawing
+	subq.l	#(IDCMP_REFRESHWINDOW-IDCMP_NEWSIZE),d0
+	beq.s	Refresh
+	subq.l	#(IDCMP_MOUSEBUTTONS-IDCMP_REFRESHWINDOW),d0
+	beq	CheckDouble
+	sub.l	#(IDCMP_GADGETUP-IDCMP_MOUSEBUTTONS),d0
+	beq	AutoGadget
+	sub.l	#(IDCMP_MENUPICK-IDCMP_GADGETUP),d0
+	beq	AutoMenu
+	sub.l	#(IDCMP_VANILLAKEY-IDCMP_MENUPICK),d0
+	beq	AutoKey
+	move.l	a2,a1
+	bsr	_LVOAS_ReplyIMsg
+WExit	lea	rei_REIMessage(a4),a0
+	move.l	a0,d0
+	movem.l	(sp)+,d2-d7/a2-a6
+	rts
+;--------------------------------------------------------------------------------------
+Refresh	move.l	rei_Window(a4),a0		* Get the Window
+	move.l	ab_GadToolsBase(a5),a6
+	jsr	_LVOGT_BeginRefresh(a6)
+	move.l	rei_Window(a4),a0
+	moveq	#1,d0
+	jsr	_LVOGT_EndRefresh(a6)
+;--------------------------------------------------------------------------------------
+Reply	move.l	d7,a1
+	pea	GetMes(pc)
+	move.l	a5,a6
+	bra	_LVOAS_ReplyIMsg
+;--------------------------------------------------------------------------------------
+Drawing	move.l	rei_glist(a4),a0
+	move.l	gg_NextGadget(a0),d0	* Are there Gadgets??
+	beq.s	AskHook
+	moveq	#0,d1
+	move.l	d1,gg_NextGadget(a0)
+	move.l	d0,a0
+	move.l	ab_GadToolsBase(a5),a6
+	jsr	_LVOFreeGadgets(a6)	* Free Gadgets
+	move.l	rei_glist(a4),a2
+	move.l	rei_HEADAsmGadget(a4),a3	* surely they exist!!...
+	move.l	a5,a6
+	jsr	LayoutAsmGList		* A4=REI, A3=AsmGList, A2=PrevGadget
+	move.l	ab_LayersBase(a5),a6
+	move.l	([rei_Window.w,a4],wd_RPort.w),a1
+	move.l	([rp_Layer.w,a1],lr_BackFill.w),a0
+	suba.l	a2,a2
+	jsr	_LVODoHookClipRects(a6)
+;--------------------------------------------------------------------------------------
+AskHook	move.l	rei_CustomHook(a4),d0		* Check if a Custom Hook exists
+	beq.s	NoCHook				* Custom Hook...
+DoHook	move.l	a5,a6				* Since a CustomHook exists, we don't
+	move.l	d7,a1				* perform any window refresh
+	bsr	_LVOAS_ReplyIMsg		* but invoke the Hook
+	move.l	rei_CustomHook(a4),a0		* The message here is already replied...
+	suba.l	a1,a1
+	move.l	rei_Window(a4),a2
+	move.l	a5,a6
+	move.l	h_Entry(a0),a3
+	pea	GetMes(pc)			* More messages... returns here
+	jmp	(a3)
+;--------------------------------------------------------------------------------------
+NoCHook	move.l	rei_Window(a4),a0		* If no CustomHook exists, everything
+	move.l	ab_IntuiBase(a5),a6		* proceeds as usual... and the Window
+	jsr	_LVORefreshWindowFrame(a6)	* gets refreshed...
+	move.l	ab_GadToolsBase(a5),a6
+	move.l	rei_Window(a4),a0
+	suba.l	a1,a1
+	jsr	_LVOGT_RefreshWindow(a6)
+	move.l	d7,a1
+	pea	GetMes(pc)
+	move.l	a5,a6
+	bra	_LVOAS_ReplyIMsg
+;--------------------------------------------------------------------------------------
+; AUTOGADGET()
+;--------------------------------------------------------------------------------------
+AutoGadget
+	move.l	a2,-(sp)		* Reply to the message, since I know what it is
+	move.l	rei_REIMessage+rim_IAddress(a4),a2	* A2 (struct Gadget *)
+	move.l	gg_UserData(a2),a2			* A2 (struct AsmGadget *)
+	move.l	agg_Kind(a2),d0				* What type should I handle?
+	beq.s	JmpAddr					* security... generic kind
+	lea	AAG_Table2(pc),a0
+	move.l	ab_GadToolsBase(a5),a6
+	jmp	([a0,d0.w*4])
+;--------------------------------------------------------------------------------------
+JmpAddr	move.l	agg_NewGadget+gng_UserData(a2),d0	* D0 = (struct Hook *)
+	beq.s	AGSimGd			* If there was none, then exit
+	lea	rei_REIMessage(a4),a1	* A1 = message (struct REIMessage *)
+	move.l	d0,a0			* A0 = itself (struct Hook *)
+	move.l	a5,a6			* Force A6 = asmbase...
+	jsr	([h_Entry.w,a0])	* Call the Hook
+	move.l	(sp)+,a1
+	move.l	a5,a6
+	pea	GetMes(pc)
+	bra	_LVOAS_ReplyIMsg
+AGSimGd	move.l	(sp)+,a1
+	move.l	#GADGETUP,rei_REIMessage+rim_Class(a4)
+	move.l	agg_Gadget(a2),rei_REIMessage+rim_IAddress(a4)
+	move.l	a5,a6
+	pea	WExit(pc)
+	bra	_LVOAS_ReplyIMsg
+;--------------------------------------------------------------------------------------
+; AUTOKEY
+;--------------------------------------------------------------------------------------
+AutoKey	move.l	a2,-(sp)			* Reply to the msg, since I know what it is
+	move.w	rei_REIMessage+rim_Qualifier(a4),d1	* from REIMessage
+	andi.w	#~$8007,d1		* Check if it's a message I can handle
+	bne.s	AG_ER1			* Otherwise exit
+	move.w	rei_REIMessage+rim_Code(a4),d5	* D5 = Key (pressed) to search for
+	move.l	([rei_HEADAsmGadget.w,a4]),d0	* Are there Gadgets??
+	beq.s	AG_ER1				* No, then find exit...
+	move.l	rei_HEADAsmGadget(a4),a2	* A2 (struct AsmGadget *)
+CerRout	move.l	agg_NewGadget+gng_GadgetText(a2),d0	* Does it have associated text??
+	bne.s	FinRout				* Yes, then check
+ChekNex	move.l	([a2]),d0			* Get next, does it exist...
+	move.l	LN_SUCC(a2),a2
+	bne.s	CerRout				* yes, continue
+AAG_EXT	move.l	(sp)+,a1
+	move.l	a5,a6
+	bsr	_LVOAS_ReplyIMsg
+	lea	rei_REIMessage(a4),a0		* Exit from WaitREIMsg()
+	move.l	a0,d0				* (struct REIMessage *)
+	movem.l	(sp)+,d2-d7/a2-a6
+	rts
+;--------------------------------------------------------------------------------------
+FinRout	move.l	d0,a0			* A0 ^ GadgetText
+Undersc	move.b	(a0)+,d0		* character
+	beq.s	ChekNex
+	cmp.b	d6,d0			* Search for the Underscore
+	bne.s	Undersc			* nothing, continue
+	cmp.b	(a0),d5			* Found it, check the character now
+	beq.s	CharFin			* FOUND... it was this one
+	bchg	#5,d5			* Retry, for CASE
+	cmp.b	(a0),d5			* try now...
+	bne.s	ChekNex			* Nothing, it wasn't this one obviously...
+CharFin	move.w	([agg_Gadget.w,a2],gg_Flags.w),d0	* Flags
+	btst	#8,d0			* It's ghosted??
+	bne.s	AAG_EXT			* it's ghosted, so exit...
+	move.l	agg_Kind(a2),d0		* What type should I handle?
+	lea	AAG_Table(pc),a0	* Table
+	jmp	([d0.w*4,a0])		* Process
+;--------------------------------------------------------------------------------------
+; AUTOMENU
+;--------------------------------------------------------------------------------------
+AutoMenu
+	move.l	a2,a3			* Save IntuiMessage in A3
+	move.w	im_Code(a3),d0		* Check that a valid code arrived
+	cmpi.w	#MENUNULL,d0		* and not MENUNULL... in that case
+	beq.s	AMU_NOM			* Exit, clearing everything...
+	move.l	rei_Menu(a4),a0
+	move.l	ab_IntuiBase(a5),a6
+	jsr	_LVOItemAddress(a6)
+	move.l	d0,a2					* A2 (struct Sub/MenuItem *)
+	move.l	a2,rei_REIMessage+rim_IAddress(a4)	* Save Address in rim_IAddress
+	move.l	mi_SIZEOF(a2),d1			* ID in MenuItem structure...
+	move.w	d1,rei_REIMessage+rim_Code(a4)		* Menu ID in rim_Code
+	move.l	a3,a1					* reply to the message
+	move.l	a5,a6
+	pea	WExit(pc)				* and shamelessly exit
+	bra	_LVOAS_ReplyIMsg
+;--------------------------------------------------------------------------------------
+AMU_NOM move.w	d0,rei_REIMessage+rim_Code(a4)		* Put MENUNULL in rim_Code
+	addq.w	#1,d0					* D0 == NULL!
+	move.l	d0,rei_REIMessage+rim_IAddress(a4)	* Clear rim_IAddress
+	move.l	a3,a1					* Reply to the message
+	move.l	a5,a6
+	pea	GetMes(pc)
+	bra	_LVOAS_ReplyIMsg
+```

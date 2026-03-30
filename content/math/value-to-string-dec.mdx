@@ -54,3 +54,134 @@ The buffer is filled with the decimal string representation.
 ## See Also
 
 [StringDecToValue](/docs/math/string-dec-to-value), [ValueToStringBin](/docs/math/value-to-string-bin), [ValueToStringHex](/docs/math/value-to-string-hex)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (20-Feb-1995) --- ValueToStringDec(buffer, value, optlen) (A0/D0/D1)
+***************************************************************************************
+_LVOValueToStringDec
+	movem.l	d2-d7,-(sp)
+	tst.l	d1			* Should I decide the string length??
+	bne.s	ConLen			* Use the other conversion routine.
+	moveq	#10,d5			; 10
+	moveq	#"0",d2			; fast Code "0" $30
+	tst.l	d0			; Let's see if it's negative
+	bpl.s	CDD_PL
+	move.b	#"-",(a0)+		; If negative put a minus in the buffer
+	neg.l	d0			; And make it positive
+CDD_PL	cmp.l	d5,d0			; let's see if it's <10
+	bhi.s	CDD_BHI			; NO
+	bne.s	CDD_BNE			; <>10?
+	move.w	#"10",(a0)+		; Put 10 and exit
+	move.b	#0,(a0)
+	movem.l	(sp)+,d2-d7
+	rts
+CDD_BNE add.b	d2,d0			; Save the number
+	move.b	d0,(a0)+		; since it's <10
+	move.b	#0,(a0)			; clear and exit
+	movem.l	(sp)+,d2-d7		*
+	rts
+;--------------------------------------------------------------------------------------
+CDD_BHI	lea	Tables+4(pc),a1
+CDD_GT	cmp.l	(a1)+,d0
+	bge.s	CDD_GT
+	subq.l	#8,a1
+	move.l	d0,d3
+DCC_LX	move.l	(a1),d1
+	bne.s	DCC_CT
+	move.b	d1,(a0)+
+	movem.l	(sp)+,d2-d7
+	rts
+;--------------------------------------------------------------------------------------
+DCC_CT	moveq	#-1,d4
+DCC_LP	move.l	d3,d5
+	addq.w	#1,d4
+	sub.l	d1,d3
+	bcc.s	DCC_LP
+DC_LAS	add.b	d2,d4
+	move.b	d4,(a0)+
+	move.l	d5,d3
+	subq.w	#4,a1
+	bra.s	DCC_LX
+;--------------------------------------------------------------------------------------
+***************************************************************************************
+* (20-Feb-1995) --- ConLen (See above) Same INPUTS as ValueToStringDec()
+***************************************************************************************
+ConLen	move.l	a2,-(sp)
+	move.l	a0,a2			* Routine that converts with fixed length
+	moveq	#0,d5			* D5 for len Count
+	moveq	#10,d6
+	move.l	d1,d7			* number of final characters
+	sub.b	d7,d6
+	move.l	d6,d7
+	subq.b	#2,d1
+	move.l	d1,d6
+	asl.l	#2,d7
+ConvDec_NoZero
+	lea	ConvDec_Table(pc),a0	* Table of TEN (10)
+	lea	(a0,d7.w),a0
+	move.l	a2,a1
+	moveq	#0,d5
+	tst.l	d0
+	bpl.s	ConvDec_Plus
+	moveq	#1,d5			* Len+1 because there is "-"
+	move.b	#"-",(a1)+		* Set Sign Char
+	neg.l	d0			* Make it positive
+ConvDec_Plus
+	move.l	d6,d4			* Loop for ....
+	moveq	#"0",d7			* For Fasting CODE
+ConvDec_ReStart
+	moveq	#0,d3			* Ending Number
+	move.l	(a0)+,d2		* 10xxx.. in d2
+	move.l	d2,d1			* and save it in d1
+ConvDec_Ctrl
+	cmp.l	d2,d0
+	bmi.s	ConvDec_Save
+	add.l	d1,d2
+	addq.b	#1,d3
+	bra.s	ConvDec_Ctrl
+ConvDec_Save
+	add.b	d7,d3
+	move.b	d3,(a1)+
+	addq.b	#1,d5			* Count for Len
+	sub.l	d1,d2
+	sub.l	d2,d0
+	dbf	d4,ConvDec_ReStart
+	add.b	d7,d0
+	move.b	d0,(a1)+
+	addq.b	#1,d5
+	move.l	d5,4(sp)		* D1=Len
+	move.l	(sp)+,a2
+	movem.l	(sp)+,d2-d7
+	rts
+;--------------------------------------------------------------------------------------
+; Decimal conversion tables.
+;--------------------------------------------------------------------------------------
+	dc.l 0
+D2V_TableDec
+	dc.l 1
+Tables	dc.l 10
+	dc.l 100
+	dc.l 1000
+	dc.l 10000
+	dc.l 100000
+	dc.l 1000000
+	dc.l 10000000
+	dc.l 100000000
+	dc.l 1000000000
+ConvDec_Table
+	dc.l 1000000000
+	dc.l 100000000
+	dc.l 10000000
+	dc.l 1000000
+	dc.l 100000
+	dc.l 10000
+	dc.l 1000
+	dc.l 100
+	dc.l 10
+	dc.l 1
+```

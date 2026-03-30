@@ -34,3 +34,33 @@ The buffer is filled with the binary string representation.
 ## See Also
 
 [StringBinToValue](/docs/math/string-bin-to-value), [ValueToStringDec](/docs/math/value-to-string-dec), [ValueToStringHex](/docs/math/value-to-string-hex)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (20-Feb-1995) --- ValueToStringBin(buffer, value, optlen) (a0,d0,d1)
+***************************************************************************************
+_LVOValueToStringBin
+	movem.l	d0/a0,-(sp)
+	tst.l	d1
+	bne.s	ConvBin_NoDefault
+	moveq	#32,d1
+ConvBin_NoDefault
+	andi.w	#$FF,d1
+	subq.b	#1,d1
+	moveq	#"0",d2
+ConvBin_Loop
+	btst	d1,(sp)			* Fast Code
+	beq.s	ConvBin_Zero
+	moveq	#"1",d2
+ConvBin_Zero
+	move.b	d2,(a0)+
+	moveq	#"0",d2
+	dbf	d1,ConvBin_Loop
+ConvBin_Exit
+	movem.l	(sp)+,d0/a0
+	rts
+```

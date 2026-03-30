@@ -28,3 +28,16 @@ Advances the data pointer to the next chunk in an IFF data structure. The functi
 
 - [FindAIFFChunk](/libraries/find-aiff-chunk)
 - [TestAIFFChunk](/libraries/test-aiff-chunk)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+* Rel.1.0 * Last save: Jul 29 09:10 1991 =JON=
+_LVONextIFFChunk
+	move.l	4(a0),d0
+	lea	8(a0,d0.l),a0
+	move.l	4(a0),d0
+	rts
+```

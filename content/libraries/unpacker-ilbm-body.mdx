@@ -40,3 +40,127 @@ The unpacker supports up to 8 bitplanes (256 colors). The BitMap must be fully i
 
 - [FindAIFFChunk](/libraries/find-aiff-chunk)
 - [UnPackerILBMCMAP](/libraries/unpacker-ilbm-cmap)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+* Rel.2.0 * Last save: 17:30 21 Oct 1991 =JON=
+_LVOUnPackerILBMBODY
+	movem.l	d0-d7/a0-a6,-(sp)
+
+	movem.w	ClearRegs,d0-d7		* Clear all regs
+	movem.l	d0-d7,-(sp)		* 8 LONGS for planes Save
+
+	move.l	a7,a6			* My buffer for 8 max planes
+	lea	bm_Planes(a1),a5	* Original Planes
+
+	moveq	#0,d0
+	move.b	bm_Depth(a1),d0
+	subq.l	#1,d0			* Align for dbf
+	move.l	a5,a2
+UPIBody_Copy
+	move.l	(a2)+,(a6)+
+	dbf	d0,UPIBody_Copy
+
+	move.l	a7,a6			* ReSet
+	move.l	a6,a4			* A4 DO NOT SCRATCH!!!
+
+	move.w	bm_BytesPerRow(a1),d2	* copy pixels x
+UPIBody_Y
+	move.l	32(sp),d0
+	beq.s	UPIBody_Heigth
+	cmp.w	bm_Rows(a1),d0
+	bls.s	UPIBody_TakeYMinus
+UPIBody_Heigth
+	move.w	bm_Rows(a1),d3		* copy pixels y
+	bra.s	UPIBody_UnPacker
+UPIBody_TakeYMinus
+	move.l	d0,d3
+
+*********************************************
+* UnPacker (c)1991 TLED (c)1985-1991 EA, Inc.   *
+*					    *
+* Author: =JON=				    *
+* File date over: 17-Oct-1991		    *
+*					    *
+* Private Regs:				    *
+*					    *
+* D0 reserved for cmp value compression	    *
+* D1 unused -- scratch			    *
+* D2 reserved pixel x			    *
+* D3 reserved pixel y			    *
+* D4 new features cmp y value cmp (D3)	    *
+* D5 reserved for value to write -n+1 times *
+* D6 reserved for Algo unPacker	    	    *
+* D7 reserved count x pixel cmp (D2)	    *
+*********************************************
+UPIBody_UnPacker
+	movem.w	ClearRegs,d0/d4-d7
+	move.l	(a6),a1			* First Planes
+
+UPIBody_Check
+	move.b	(a0)+,d0
+	cmpi.b	#128,d0
+	beq.s	UPIBody_Check
+	cmpi.b	#127,d0
+	bls.s	UPIBody_Pn
+	beq.s	UPIBody_Pn
+
+UPIBody_Nn
+	neg.b	d0
+	move.l	d0,d6
+	move.b	(a0)+,d5
+	bsr.s	UPIBody_WriteNn
+	bra.s	UPIBody_Check
+
+UPIBody_Pn
+	move.l	d0,d6
+	bsr.s	UPIBody_WritePn
+	bra.s	UPIBody_Check
+
+UPIBody_WriteNn
+	move.b 	d5,(a1)+
+	addq.w	#1,d7			* Only WORD for now (CHIP MEM)
+	cmp.w	d7,d2
+	beq.s	UPIBody_NextBitPlanes
+	dbf	d6,UPIBody_WriteNn
+UPIBody_WriteNnEnd
+	rts
+
+UPIBody_WritePn
+	move.b (a0)+,(a1)+
+	addq.w	#1,d7			* Only WORD for now (CHIP MEM)
+	cmp.w	d7,d2
+	beq.s	UPIBody_NextBitPlanes
+	dbf	d6,UPIBody_WritePn
+UPIBody_WritePnEnd
+	rts
+
+UPIBody_NextBitPlanes
+	moveq	#0,d7
+	move.l	a1,(a6)+
+	move.l	(a6),d1
+	beq.s	UPIBody_ReStartBitPlanes
+	move.l	d1,a1
+	rts
+UPIBody_ReStartBitPlanes
+	addq.w	#1,d4			* New features
+	cmp.w	d4,d3
+	beq.s	UPIBody_PExit		* Vertical Position OFF!!
+	move.l	a4,a6
+	move.l	(a6),a1
+	rts
+UPIBody_PExit
+	addq.l	#4,sp
+UPIBody_Exit
+	movem.l	(sp)+,d0-d7		* 8 LONGS for planes Refree
+	movem.l	(sp)+,d0-d7/a0-a6
+	tst.l	d0
+	rts
+UPIBody_Error
+	suba.l	a0,a0
+	move.l	a0,(sp)
+	bra.s	UPIBody_Exit
+```

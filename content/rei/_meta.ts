@@ -11,5 +11,4 @@ export default {
   'interface-info': 'InterfaceInfo',
   'set-rei-attrs': 'SetREIAttrsA',
   'get-rei-attrs': 'GetREIAttrsA',
-  'source-code': 'Source Code',
 };

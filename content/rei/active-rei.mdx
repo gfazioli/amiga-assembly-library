@@ -30,3 +30,24 @@ None.
 ## See Also
 
 [FindREI](/rei/find-rei), [OpenREIA](/rei/open-rei)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+*(V41) - 20 Sept 1994 =JON= ** ActiveREI() ()
+***************************************************************************************
+_LVOActiveREI
+	movem.l	a5-a6,-(sp)
+	move.l	ab_IntuiBase(a6),a6
+	moveq	#0,d0
+	jsr	_LVOLockIBase(a6)
+	move.l	d0,a0
+	move.l	ib_ActiveWindow(a6),a5
+	jsr	_LVOUnlockIBase(a6)
+	move.l	wd_UserData(a5),d0
+	movem.l	(sp)+,a5-a6
+	rts
+```

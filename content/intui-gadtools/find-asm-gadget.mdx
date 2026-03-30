@@ -29,3 +29,17 @@ Finds a pointer to an AsmGadget structure by performing a name-based search thro
 ## See Also
 
 [SetAsmGadgetAttrsA](/intui-gadtools/set-asm-gadget-attrs), [GetAsmGadgetAttr](/intui-gadtools/get-asm-gadget-attr)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (25-Jan-1995) =Jon= ++++ asmgadget = FindAsmGadget(rei,name) (a0/a1)
+***************************************************************************************
+_LVOFindAsmGadget
+	lea	rei_HEADAsmGadget(a0),a0
+	FINDNAME
+	rts
+```

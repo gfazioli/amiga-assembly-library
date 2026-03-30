@@ -37,3 +37,45 @@ The buffer is filled with the hexadecimal string representation.
 ## See Also
 
 [StringHexToValue](/docs/math/string-hex-to-value), [ValueToStringDec](/docs/math/value-to-string-dec), [ValueToStringBin](/docs/math/value-to-string-bin)
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (20-Feb-1995) --- ValueToStringHex(buffer, value, optlen, prefix) (a0,d0,d1,d2)
+***************************************************************************************
+_LVOValueToStringHex
+	movem.l	d2-d7/a0,-(sp)
+	tst.l	d1
+	bne.s	ConvHex_Default
+	moveq	#8,d1
+ConvHex_Default
+	moveq	#$f,d5
+	moveq	#48,d6
+	moveq	#58,d7
+	cmpi.l	#8,d1
+	bhi.s	ConvHex_Exit
+	move.l	d1,d3
+	rol.w	#2,d3
+	ror.l	d3,d0
+	subq.l	#1,d1
+	tst.l	d2
+	beq.s	ConvHex_Next
+	move.b	#"$",(a0)+
+ConvHex_Next
+	rol.l	#4,d0
+	move.l	d0,d3
+	and.b	d5,d3
+	add.b	d6,d3
+	cmp.b	d7,d3
+	bcs.s	ConvHex_Out
+	addq.b	#7,d3
+ConvHex_Out
+	move.b	d3,(a0)+
+	dbf	d1,ConvHex_Next
+ConvHex_Exit
+	movem.l	(sp)+,d2-d7/a0
+	rts
+```

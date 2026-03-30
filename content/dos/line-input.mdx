@@ -30,3 +30,30 @@ This function obtains an input channel from the specified Handle. It can be used
 ## See Also
 
 `dos.library/Open()`, `dos.library/Input()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (15-Feb-1995) Make up --- len = LineInput (buffer, chars, Handle) (a0/d0,d1)
+***************************************************************************************
+_LVOLineInput
+	tst.l	d0
+	beq.s	LInput_Exit
+	movem.l	d2-d3/a6,-(sp)
+	move.l	ab_DosBase(a6),a6
+	move.l	d0,d3
+	move.l	a0,d2
+	tst.l	d1
+	bne.s	LI_Handle
+	jsr	_LVOInput(a6)
+	move.l	d0,d1
+LI_Handle
+	jsr	_LVORead(a6)
+	move.l	d2,a0
+	movem.l	(sp)+,d2-d3/a6
+LInput_Exit
+	rts
+```

@@ -61,3 +61,44 @@ As shown in the example, the `end` address is easily calculated starting from th
 ## See Also
 
 None.
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+***************************************************************************************
+* (V41.1) - 21-Oct-1994 =JON= *
+***************************************************************************************
+_LVORevertMem
+	move.l	a1,d1
+	sub.l	a0,d1			* D1 = number of bytes to reverse
+	bhi.s	RVM_CON
+	move.l	(sp)+,d2
+	rts
+RVM_CON	move.l	d2,-(sp)
+	asr.w	d0,d1
+	asr.w	#1,d1
+	subq.w	#1,d1
+	subq.w	#1,d0
+	bmi.s	RVM_BYT
+	beq.s	RVM_WOR
+RVM_LON	move.l	-(a1),d2
+	move.l	(a0)+,(a1)
+	move.l	d2,-4(a0)
+	dbf	d1,RVM_LON
+	move.l	(sp)+,d2
+	rts
+RVM_WOR	move.w	-(a1),d2
+	move.w	(a0)+,(a1)
+	move.w	d2,-2(a0)
+	dbf	d1,RVM_WOR
+	move.l	(sp)+,d2
+	rts
+RVM_BYT	move.b	-(a1),d2
+	move.b	(a0)+,(a1)
+	move.b	d2,-1(a0)
+	dbf	d1,RVM_BYT
+	move.l	(sp)+,d2
+	rts
+```
