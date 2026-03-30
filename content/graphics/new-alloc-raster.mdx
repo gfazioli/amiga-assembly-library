@@ -1,0 +1,38 @@
+# NewAllocRaster
+
+## Synopsis
+
+```asm
+planeptr = NewAllocRaster(width, height)
+D0                        D0     D1
+```
+
+## C Prototype
+
+```c
+PLANEPTR NewAllocRaster(ULONG width, ULONG height);
+```
+
+## Description
+
+A simpler way to allocate a pre-cleared bitplane. This function is faster than `graphics.library/AllocRaster()`, and additionally allocates a plane that is already cleared. It also simplifies deallocation, as the result can be sent directly to `exec.library/FreeVec()`.
+
+(V41.1) -- For future compatibility reasons, the use of this function is discouraged. Always use `AddBitPlanes()` and `RemoveBitPlanes()` when possible. The same recommendation applies to `graphics.library/AllocRaster()` and `FreeRaster()`.
+
+## Inputs
+
+- **width** -- Desired width of the plane in pixels.
+- **height** -- Desired height of the plane in pixels.
+
+## Result
+
+- **planeptr** -- If NULL, an error occurred. Otherwise, it is a pointer to the allocated bitplane, already cleared.
+
+## Notes
+
+Planes created with this function must be freed manually. You CANNOT use `RemoveBitPlanes()` to free them.
+
+## See Also
+
+- [AddBitPlanes](/graphics/add-bit-planes)
+- `exec.library/FreeVec()`

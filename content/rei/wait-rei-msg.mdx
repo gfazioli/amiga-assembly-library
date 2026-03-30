@@ -1,0 +1,88 @@
+# WaitREIMsg
+
+## Synopsis
+
+```asm
+rmsg = WaitREIMsg(rei, underscore)
+ D0                A0     D0:8
+```
+
+## C Prototype
+
+```c
+struct REIMessage *WaitREIMsg(struct REI *, LONG);
+```
+
+## Description
+
+Use `WaitREIMsg()` instead of the usual `exec.library/GetMsg()` and `gadtools.library/GT_GetIMsg()` to process REI events. `WaitREIMsg()` puts the task to sleep until a valid event arrives at the port of the Window belonging to the REI. At that point, `WaitREIMsg()` performs internal operations to manage the entire REI system (gadgets, window, menus, etc.). When control is returned to the task, it means an event has occurred, and `WaitREIMsg()` reports it through the REIMessage structure:
+
+```c
+struct REIMessage {
+    ULONG rim_Class;
+    UWORD rim_Code;
+    UWORD rim_Qualifier;
+    APTR  rim_IAddress;
+    ULONG rim_REICode;
+};
+```
+
+The REIMessage structure is essentially a copy of the relevant fields from the IntuiMessage structure. Since the Window's IntuiMessage is processed by `gadtools.library`, the REIMessage fields also contain all the additional information for GadTools gadget management.
+
+**NEW (V41.2)** — The `rim_REICode` field now contains additional event handling information. Double-click detection has been introduced for both left and right mouse buttons. This event must always be checked in conjunction with `IDCMP_MOUSEBUTTONS`. The `rim_Code` field via `SELECTDOWN` and `MENUDOWN` indicates which button was pressed (left or right respectively). `rim_REICode` with `RIM_LEFTDOUBLECLICK` and `RIM_RIGHTDOUBLECLICK` indicates if a double-click occurred.
+
+`WaitREIMsg()` introduces a new way of handling Window messages with significant advantages over the standard procedure. The first simplification is that you no longer need to reply to messages -- this is done automatically.
+
+### Automatic Gadget Handling
+
+`WaitREIMsg()` supports both standard event handling and fully automated event management. Automated management means the automatic execution of a routine linked to a gadget or menu via `SetAsmGadgetAttrsA()`.
+
+If an AsmGadget has been initialized via `SetAsmGadgetAttrsA()` and contains a pointer to an initialized Hook structure, `WaitREIMsg()` invokes this Hook. The Hook is invoked following standard Amiga Hook conventions:
+
+```c
+object  == (struct AsmGadget *)
+message == (struct REIMessage *)
+```
+
+For Assembly programmers:
+
+```asm
+; A0 = Address of the Hook structure
+; A1 = message -> (struct REIMessage *)
+; A2 = object  -> (struct AsmGadget *)
+; A6 = pointer to AssemblyBase
+```
+
+Registers A0, A1, A2, A6 must be saved, and the Hook must always return NULL as its return code.
+
+### Keyboard/Underscore Control
+
+Allows simulating gadget activation via keyboard. Automatically recognizes if a pressed key corresponds to a gadget. Since OS 2.04, it has been possible to underline a character in a gadget's text. `WaitREIMsg()` adds actual keyboard handling for this feature. Allowed key combinations for a gadget with label `"_Mode"`:
+
+- `m`
+- SHIFT + `m`
+- CAPS_LOCK + `m`
+
+Other modifier combinations (ALT, LEFT_AMIGA, etc.) are reserved for future extensions.
+
+### Gadget Type-Specific Behavior
+
+- **BUTTON_KIND** — Invokes the Hook (if present) both on key press and mouse click. Keyboard selection is visually highlighted.
+- **STRING_KIND / INTEGER_KIND** — If the gadget contains the underscore character, it is automatically activated and the cursor appears. On ENTER/release, the associated Hook is invoked if present.
+- **CYCLE_KIND** — If the gadget has an underscored label, it is cycled automatically by `WaitREIMsg()`, and the associated Hook is invoked if present.
+- **DISABLE CONTROL** — If a key is pressed matching a disabled gadget, `WaitREIMsg()` returns control without doing anything.
+
+In all cases, the REIMessage structure is always returned and properly initialized. If a gadget is selected via keyboard, the `rim_IAddress` field will contain the address of the activated gadget.
+
+## Inputs
+
+- **rei** — Pointer to a REI structure that displays at least one Window.
+- **underscore** — 8-bit value identifying the underscore character used for gadget label underlining. This parameter must NEVER be NULL, and defaults to 0x5F (the `_` character).
+
+## Result
+
+- **rmsg** — Address of a REIMessage structure.
+
+## See Also
+
+[SetAsmGadgetAttrsA](/intui-gadtools/set-asm-gadget-attrs), [OpenREIA](/rei/open-rei)

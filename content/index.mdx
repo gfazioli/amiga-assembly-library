@@ -1,72 +1,106 @@
-import { Button } from '@mantine/core';
-import { Callout, FileTree, Steps } from 'nextra/components'
-import { FileTreeLabel } from '@/components/FileTreeLabel'
+import { Callout } from 'nextra/components'
 
-# Introduction
+# Amiga Assembly Library
 
-Hello, world!
-Welcome to the Nextra + Mantine template.
+A shared library for Commodore Amiga written in Motorola 68020 assembly language.
+**Version 41.21** -- Public Domain Software. Compatible with KickStart 3.0 and above.
 
-This is a starter template for [Next.js](https://nextjs.org/) app router + [Mantine](https://mantine.dev/) + [Nextra](https://nextra.site/) documentation site.
+<Callout type="info">
+  This library can be used from both **Assembly** and **C** programs. It provides a wide range of utility functions organized into modules, from memory management to custom UI widgets.
+</Callout>
 
-## Features
+## Modules Overview
 
-This template comes with the following features:
+The Assembly Library is organized into **8 modules**, each providing specialized functionality:
 
-- [PostCSS](https://postcss.org/) with [mantine-postcss-preset](https://mantine.dev/styles/postcss-preset)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Storybook](https://storybook.js.org/)
-- [Jest](https://jestjs.io/) setup with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro)
-- ESLint setup with [eslint-config-mantine](https://github.com/mantinedev/eslint-config-mantine)
-- Provides API example in `/api/version`
+### [Exec](/docs/exec)
 
-## Nextra Features
+Memory and list management utilities.
 
-- [Nextra](https://nextra.site/) documentation site with Mantine theme
-- Sync Dark mode between documentation and application (Mantine/Nextra)
-- Customizable components in `components` folder
-- Provides new Navigation and Footer components for Nextra documentation site
+- `AllocNewList` -- Allocate and initialize a new Exec list
+- `AllocNode` -- Allocate and add a node to a list
+- `FreeList` / `FreeNode` -- Free lists and nodes
+- `FreeListName` / `FreeNodeName` -- Free named lists and nodes
+- `ReAllocVec` -- Reallocate a memory vector
+- `RevertMem` -- Reverse a memory region (byte, word, or longword)
 
-## Folder structure
+### [DOS](/docs/dos)
 
-You will find a lot of predefined folders and files in the project. Here is a short description of the most important ones:
+File and volume operations.
 
-<FileTree>
-  <FileTree.Folder name="app" defaultOpen>
-      <FileTree.Folder name={<FileTreeLabel type="folder" name="api">Useful API</FileTreeLabel>} defaultOpen />
-          <FileTree.File name={<FileTreeLabel type="file" name="layout.tsx">Main layout</FileTreeLabel>} />
-      <FileTree.File name={<FileTreeLabel type="file" name="page.tsx">Homepage</FileTreeLabel>} />
-  </FileTree.Folder>
-  <FileTree.Folder name={<FileTreeLabel type="folder" name="components">Useful components</FileTreeLabel>} defaultOpen />
-  <FileTree.Folder name="config" defaultOpen>
-    <FileTree.File name={<FileTreeLabel type="file" name="index.ts">Most of the config are here!</FileTreeLabel>} />
-  </FileTree.Folder>
-  <FileTree.Folder name={<FileTreeLabel type="folder" name="content">MDX docs</FileTreeLabel>} defaultOpen />
-</FileTree>
+- `Load` / `Save` -- Load and save files to/from memory buffers
+- `FileInfo` -- Retrieve a `FileInfoBlock` for a given file
+- `CheckFile` -- Validate a file and return error information
+- `CheckSum` -- Compute a checksum on a buffer
+- `LineInput` -- Read a single line from a file handle
+- `UnitInfo` -- Get `InfoData` for a volume (free space, disk type, etc.)
 
-You can start by changing the main configuration in `config/index.ts` file. This file contains the most important configuration for the project.
+### [Graphics](/docs/graphics)
 
+Graphics primitives and bitmap management.
 
+- `AllocRastPort` / `CloneRastPort` -- Allocate or duplicate a RastPort
+- `NewAllocRaster` -- Allocate raster memory
+- `AddBitPlanes` / `RemoveBitPlanes` -- Manage bitplanes in a BitMap
+- `DrawBox` -- Draw a filled or outlined box
+- `DrawFrameState` -- Draw a framed state element (raised, recessed, etc.)
+- `EraseInternalRect` -- Erase the interior of a window
+- `TextFmtRastPort` -- Formatted text rendering into a RastPort
 
-## npm scripts
+### [Libraries](/docs/libraries)
 
-### Build and dev scripts
+String processing, IFF support, and generic utilities.
 
-- `dev` – start dev server
-- `build` – bundle application for production
-- `analyze` – analyzes application bundle with [@next/bundle-analyzer](https://www.npmjs.com/package/@next/bundle-analyzer)
+- `ChangeChar` -- Replace occurrences of a character in a string
+- `FilterChars` -- Filter characters from a string by range
+- `StringToUpper` / `StringToLower` -- Case conversion (locale-aware)
+- `ReAllocVec` -- Reallocate memory vectors
+- `FindAIFFChunk` / `NextIFFChunk` / `TestAIFFChunk` -- AIFF/IFF chunk parsing
+- `UnPackerILBMBODY` / `UnPackerILBMCMAP` -- ILBM image unpacking
 
-### Testing scripts
+### [Math](/docs/math)
 
-- `typecheck` – checks TypeScript types
-- `lint` – runs ESLint
-- `prettier:check` – checks files with Prettier
-- `jest` – runs jest tests
-- `jest:watch` – starts jest watch
-- `test` – runs `jest`, `prettier:check`, `lint` and `typecheck` scripts
+Number format conversion routines.
 
-### Other scripts
+- `Dec2Val` / `Hex2Val` / `Bin2Val` -- Convert decimal, hexadecimal, or binary strings to numeric values
+- `ConvDec` / `ConvDecZ` -- Convert a value to a decimal string (with optional zero-padding)
+- `ConvHex` -- Convert a value to a hexadecimal string
+- `ConvBin` -- Convert a value to a binary string
 
-- `storybook` – starts storybook dev server
-- `storybook:build` – build production storybook bundle to `storybook-static`
-- `prettier:write` – formats all files with Prettier
+### [Intuition & GadTools](/docs/intui-gadtools)
+
+High-level UI gadgets and requesters built on top of Intuition and GadTools.
+
+- `AllocAsmRequest` / `FreeAsmRequest` -- Allocate and free custom requesters
+- `AsmRequest` -- Display a formatted requester dialog
+- `ChangeAsmReqAttrs` -- Modify requester attributes
+- `FindAsmGadget` -- Find a gadget by name
+- `SetAsmGadgetAttrs` / `GetAsmGadgetAttr` -- Set and get gadget attributes
+- `InterfaceInfo` -- Retrieve information about an interface
+
+### [REI Interface](/docs/rei)
+
+A custom windowing and interface management system. REI (Runtime Environment Interface) provides a structured way to manage windows, gadgets, and menus.
+
+- `OpenREI` / `CloseREI` -- Open and close REI windows
+- `OpenInterface` / `CloseInterface` -- Load and release interface definitions
+- `ActiveREI` / `FindREI` -- Find the active REI or locate one by name
+- `LockREI` / `UnlockREI` -- Lock and unlock REI structures
+- `WaitREIMsg` -- Wait for messages from a REI window
+- `RefreshREI` -- Refresh a REI window
+- `SetREIAttrs` / `GetREIAttrs` -- Set and get REI attributes
+- `AS_MenuAddress` -- Get the address of a menu item
+
+### [C Interface](/docs/c-interface)
+
+How to call the Assembly Library from C programs using SAS/C or compatible compilers. Includes the `HookEntry` glue function for callback support.
+
+## Key Features
+
+- **Pure 68020 assembly** -- Hand-optimized for the Motorola 68020 processor
+- **Shared library architecture** -- Standard Amiga shared library (placed in `LIBS:`)
+- **Auto-opens sub-libraries** -- When you open `assembly.library`, it automatically opens and caches pointers to `graphics.library`, `intuition.library`, `dos.library`, `asl.library`, `gadtools.library`, `icon.library`, `workbench.library`, `datatypes.library`, `locale.library`, `lowlevel.library`, and `realtime.library`
+- **Public Domain** -- No copyright restrictions; free to use, modify, and distribute
+- **Dual-language support** -- Callable from both 68k assembly and C
+- **KickStart 3.0+ compatible** -- Takes advantage of AmigaOS 3.0 features including locale support, datatypes, and GadTools
+- **REI windowing system** -- A high-level interface abstraction for building Amiga applications

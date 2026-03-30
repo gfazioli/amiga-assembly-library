@@ -1,0 +1,36 @@
+# ReAllocVec
+
+## Synopsis
+
+```asm
+newmemoryBlock = ReAllocVec(oldmemoryBlock, newsize, newattribute)
+      D0                          A0           D0         D1
+```
+
+## C Prototype
+
+```c
+ULONG *ReAllocVec(ULONG *oldmemoryBlock, ULONG newsize, ULONG newattribute);
+```
+
+## Description
+
+Allows dynamic resizing of a memory area previously allocated via `exec/AllocVec()`. The new memory block can be larger or smaller than the previous one and can have new memory attributes.
+
+If the `newattribute` parameter is left as NULL, the attributes of the old memory block will be used for the new allocation.
+
+If the new memory block is smaller than the previous one, some data may be lost. This function copies the contents of `oldmemoryBlock` into the new memory block, up to the smaller of the two sizes.
+
+## Inputs
+
+- **oldmemoryBlock** — The memory block to be resized.
+- **newsize** — The new number of bytes to allocate.
+- **newattribute** — Type of memory. If NULL, the memory type of `oldmemoryBlock` will be used.
+
+## Result
+
+- **newmemoryBlock** — New address to use in place of `oldmemoryBlock`. If NULL, it was not possible to allocate the new memory.
+
+## See Also
+
+`exec.library/AllocVec()`, `exec.library/FreeVec()`

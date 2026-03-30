@@ -1,0 +1,30 @@
+# FreeListName
+
+## Synopsis
+
+```asm
+FreeListName(list)
+              A0
+```
+
+## C Prototype
+
+```c
+void FreeListName(struct List *list);
+```
+
+## Description
+
+`FreeListName()` is entirely similar to `FreeList()`, with one difference: if the `LN_NAME` field in each `Node` structure is not NULL, that address is freed assuming it was previously allocated via `exec/AllocVec()`. If the `LN_NAME` field is NULL, `FreeListName()` behaves identically to `FreeList()` for that node.
+
+## Inputs
+
+- **list** — Address of an initialized `List` structure to free.
+
+## Result
+
+None.
+
+## See Also
+
+[FreeList](/exec/free-list), [FreeNode](/exec/free-node), [FreeNodeName](/exec/free-node-name)

@@ -1,28 +1,27 @@
 export const highlights = [
   {
-    key: 'undolog',
-    title: 'News',
-    href: 'https://undolog.com',
+    key: 'getting-started',
+    title: 'Getting Started',
+    href: '/docs/getting-started',
   },
   {
-    key: 'mantine-extensions',
-    title: 'Mantine Extensions HUB',
-    href: 'https://mantine-extensions.vercel.app',
+    key: 'exec',
+    title: 'Exec Module',
+    href: '/docs/exec',
   },
   {
-    key: 'mantine-nextra-template',
-    title: 'Mantine Nextra template',
-    href: 'https://github.com/gfazioli/next-app-nextra-template',
-    new: true,
+    key: 'dos',
+    title: 'DOS Module',
+    href: '/docs/dos',
   },
   {
-    key: 'mantine-extension-template',
-    title: 'Extension Template',
-    href: 'https://github.com/mantinedev/extension-template',
+    key: 'graphics',
+    title: 'Graphics Module',
+    href: '/docs/graphics',
   },
   {
-    key: 'youtube',
-    title: 'YouTube',
-    href: 'https://www.youtube.com/playlist?list=PL85tTROKkZrWyqCcmNCdWajpx05-cTal4',
+    key: 'c-interface',
+    title: 'C Interface',
+    href: '/docs/c-interface',
   },
 ];

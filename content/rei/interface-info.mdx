@@ -1,0 +1,30 @@
+# InterfaceInfo
+
+## Synopsis
+
+```asm
+succ = InterfaceInfo(rei)
+ D0                   A0
+```
+
+## C Prototype
+
+```c
+ULONG InterfaceInfo(struct REI *);
+```
+
+## Description
+
+Opens an AsmRequest containing information about the interface. The information is relative to the task's interface, i.e., the application's interface.
+
+## Inputs
+
+- **rei** — Usually NULL, but can point to a REI structure that will be locked while the information is displayed.
+
+## Result
+
+- **succ** — Returns TRUE if the AsmRequest was opened successfully. If NULL, it was not possible to obtain the information.
+
+## See Also
+
+[AllocAsmRequestA](/intui-gadtools/alloc-asm-request), [OpenREIA](/rei/open-rei)

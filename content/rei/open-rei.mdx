@@ -1,0 +1,75 @@
+# OpenREIA
+
+## Synopsis
+
+```asm
+rei = OpenREIA(rei, name, taglist)
+D0              A0   A1     A2
+```
+
+## C Prototype
+
+```c
+struct REI *OpenREIA(struct REI *, STRPTR, struct TagItem *);
+
+/* Varargs stub */
+struct REI *OpenREI(struct REI *, STRPTR, Tag, ...);
+```
+
+## Description
+
+Opens a specific REI, identified either by the address of the REI to open, or if the `rei` parameter is NULL, by its name -- a null-terminated string that identifies the REI. Both parameters cannot be NULL at the same time, otherwise the function fails and returns NULL.
+
+On success, the returned REI structure contains the following fields:
+
+```c
+struct REI {
+    /* struct Node */
+    struct Screen *rei_Screen;
+    struct Window *rei_Window;
+    struct Menu   *rei_Menu;
+    ULONG          rei_reserved1;
+    struct vi     *rei_VI;          /* VisualInfo */
+    ULONG          rei_reserved2[8];
+    UWORD          rei_ID;          /* User-defined REI ID */
+    APTR           rei_UserData;    /* User-defined data */
+};
+```
+
+## Inputs
+
+- **rei** — Pointer to a REI structure, previously loaded from disk by `OpenInterface()`. Can be NULL, in which case the `name` parameter will be used to search for the REI in the system list.
+- **name** — Pointer to a null-terminated string containing the name of the REI to display. This parameter is only considered when `rei` is NULL.
+- **taglist** — Pointer to a TagItem list.
+
+## Tags
+
+- **REIT_Screen** (struct Screen \*) — Address of the screen where the REI should open. If NULL, the REI is displayed on the default public screen. (Default: NULL)
+- **REIT_WindowTAG** (struct TagItem \*) — Address of a TagItem list for the Window, used instead of the one defined with REI-Editor. (Default: NULL)
+- **REIT_ScreenTAG** (struct TagItem \*) — Address of a TagItem list for the Screen, used instead of the one defined with REI-Editor. (Default: NULL)
+- **REIT_WindowTextAttr** (struct TextAttr \*) — Font type for this REI's Window. If NULL, the system font is used. (Default: NULL)
+- **REIT_WindowTextFont** (struct TextFont \*) — Font type for this REI's Window. If NULL, the system font is used. (Default: NULL)
+- **REIT_ScreenFont** (BOOL) — If TRUE, forces the Window to use the same fonts used by the screen it opens on. (Default: FALSE)
+- **REIT_NewMenu** (struct NewMenu \*) — Address of a NewMenu structure. These are the menus for this Window. (Default: NULL)
+- **REIT_NewMenuTAG** (struct TagItem \*) — Address of a TagItem list for menus attached via tags. (Default: NULL)
+- **REIT_UserData** (LONG) — 32 bits of user-defined data. (Default: NULL)
+- **REIT_LayoutCallBack** (struct Hook \*) — Address of a Hook structure for the backfill of this Window's layer. Called with `object == (struct RastPort *)` and `message == [Layer *, struct Rectangle bounds, LONG offsetx, LONG offsety]`. See `layers.library/InstallLayerHook()`. (Default: NULL)
+- **REIT_CustomHook** (struct Hook \*) — Address of a Hook for executing custom operations on the Window. Called after the REI Window is opened and prepared, with `object == (struct Window *)` and `message == NULL`. A6 contains AssemblyBase. (Default: NULL)
+- **REIT_RememberPos** (BOOL) — If TRUE, remembers the Window position (LeftEdge, TopEdge) after a `CloseREI()`. (Default: FALSE)
+- **REIT_RememberSize** (BOOL) — If TRUE, remembers the Window dimensions (Width, Height) after a `CloseREI()`. (Default: FALSE)
+- **REIT_CenterHScreen** (BOOL) — If TRUE, centers the Window horizontally on the output screen. (Default: FALSE)
+- **REIT_CenterVScreen** (BOOL) — If TRUE, centers the Window vertically on the output screen. (Default: FALSE)
+- **REIT_CenterMouse** (BOOL) — If TRUE, opens the Window so the mouse pointer is at its center. (Default: FALSE)
+- **REIT_NoFontSensitive** (BOOL) — If TRUE, the Window dimensions are no longer relative to fonts. USE WITH CAUTION. (Default: FALSE)
+- **REIT_WindowTitle** (STRPTR) — Pointer to a null-terminated string for the Window title. Introduced to simplify title setting for localization. (Default: NULL)
+- **REIT_Window** (struct Window \*) — Pointer to a Window structure that determines the output screen for this REI. (Default: NULL)
+
+## Result
+
+- **rei** — Address of the displayed REI structure. If NULL, an error occurred and the entire interface was not displayed. If a valid `rei` parameter was passed in the inputs, the same address is returned.
+
+## See Also
+
+[CloseREI](/rei/close-rei), [FindREI](/rei/find-rei), [GetREIAttrsA](/rei/get-rei-attrs), [SetREIAttrsA](/rei/set-rei-attrs)
+
+`assembly/asmintuition.h`

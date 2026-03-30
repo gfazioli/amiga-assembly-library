@@ -1,0 +1,33 @@
+# LockREI
+
+## Synopsis
+
+```asm
+rei = LockREI(rei, name)
+D0             A0   A1
+```
+
+## C Prototype
+
+```c
+struct REI *LockREI(struct REI *, STRPTR);
+```
+
+## Description
+
+Blocks a REI from any user input. This prevents access to both menus and gadgets attached to this REI, via both mouse and keyboard. The mouse pointer is set to the wait state, and its appearance is changed to the system BUSY pointer.
+
+This function ensures that the REI to be blocked is not already blocked. If both inputs are NULL, the currently active REI will be blocked, if one is found.
+
+## Inputs
+
+- **rei** — Address of the REI to block. If NULL, the `name` parameter will be used as a reference.
+- **name** — Pointer to a null-terminated string containing the name of the REI to block. This parameter is only considered when `rei` is NULL.
+
+## Result
+
+- **rei** — If NULL, it was not possible to block the REI. Otherwise, this is the address of the blocked REI structure.
+
+## See Also
+
+[UnlockREI](/rei/unlock-rei)

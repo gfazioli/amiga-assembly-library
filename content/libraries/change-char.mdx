@@ -1,0 +1,37 @@
+# ChangeChar
+
+## Synopsis
+
+```asm
+nreplace = ChangeChar(string, len, fchar, rchar)
+D0                    A0      D0   D1     D2
+```
+
+## C Prototype
+
+```c
+ULONG ChangeChar(STRPTR string, ULONG len, ULONG fchar, ULONG rchar);
+```
+
+## Description
+
+Searches for a character in a byte sequence, and when found, replaces it, continuing until it encounters the ASCII code 0 (null terminator). This is true if no length was passed in `len`; otherwise, the scan can be forced for a specific number of bytes.
+
+## Inputs
+
+- **string** -- Pointer to a string, not necessarily null-terminated.
+- **len** -- Number of characters to check. If NULL, the check ends when the ASCII code 0 is found.
+- **fchar** -- ASCII code to find. THIS MUST BE NON-ZERO IF `len` is NULL.
+- **rchar** -- ASCII code to substitute.
+
+## Result
+
+- **nreplace** -- Number of replacements made.
+
+## Notes
+
+If you set `fchar` to ASCII code 0 (zero) and at the same time set `len` to NULL, the command will not perform any replacements. In this case, you must either provide a length or use `FilterChars()` first.
+
+## See Also
+
+- [FilterChars](/libraries/filter-chars)

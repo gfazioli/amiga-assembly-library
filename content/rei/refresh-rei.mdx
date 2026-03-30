@@ -1,0 +1,34 @@
+# RefreshREI
+
+## Synopsis
+
+```asm
+RefreshREI(REI)
+            A0
+```
+
+## C Prototype
+
+```c
+void RefreshREI(struct REI *);
+```
+
+## Description
+
+Redraws all gadgets attached to a REI. Restores all information for GadTools. Redraws the entire Window, including system gadgets and borders.
+
+## Inputs
+
+- **rei** — Address of the REI structure to redraw.
+
+## Result
+
+The entire REI is redrawn and updated.
+
+## Notes
+
+This command may gain additional refresh capabilities in future versions.
+
+## See Also
+
+`gadtools.library/GT_RefreshWindow()`, `intuition.library/RefreshGList()`

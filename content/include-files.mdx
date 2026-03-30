@@ -1,0 +1,690 @@
+import { Callout } from 'nextra/components'
+
+# Include Files
+
+This page provides a reference for all C header files included with the Assembly Library. These files define the structures, constants, tags, and type flags used by the library's functions.
+
+## File Overview
+
+| File | Description |
+|------|-------------|
+| `assembly/assembly.h` (ASSEMBLY.H) | Main include -- `AssemblyBase` structure, version constants, library name |
+| `assembly/asmgraph.h` (ASMGRAPH.H) | Graphics definitions -- text justification constants |
+| `assembly/asmdos.h` (ASMDOS.H) | DOS definitions -- checksum type constants |
+| `assembly/asmexec.h` (ASMEXEC.H) | Exec definitions -- reserved for future use |
+| `assembly/asmlibra.h` (ASMLIBRA.H) | Library utility definitions -- `RevertMem` type flags |
+| `assembly/asmintui.h` (ASMINTUI.H) | Intuition definitions -- `Interface`, `REI`, `REIMessage`, `AsmGadget`, `AsmRequest` structures and all associated tags |
+
+---
+
+## ASSEMBLY.H -- Main Include File
+
+This is the primary header file. It defines the `AssemblyBase` structure that is returned when you open the library, along with version constants and the library name macro.
+
+```c
+#ifndef ASSEMBLY_ASSEMBLYBASE_H
+#define ASSEMBLY_ASSEMBLYBASE_H
+/*
+**    $VER: assemblybase.h 41.10 (19-Jan-1995)
+**    Includes Release 41.21
+**
+**    AssemblyBase structure and constants
+**
+**    (No) Copyrights, Public Domain Software
+**            Nothing Rights Reserved
+*/
+
+#ifndef EXEC_TYPES_H
+#include <exec/types.h>
+#endif
+
+#ifndef ASSEMBLY_ASSEMBLY_H
+#include <assembly/assembly.h>
+#endif
+
+/* ======================================================================= */
+/* === AssemblyBase ====================================================== */
+/* ======================================================================= */
+
+struct AssemblyBase {
+    struct Library LibNode;             /* Standard library node */
+    struct GfxBase *ab_GfxBase;         /* Pointer to GfxBase */
+    struct IntuitionBase *ab_IntuiBase; /* Pointer to IntuitionBase */
+    struct DosBase *ab_DosBase;         /* Pointer to DosBase */
+    WORD  ab_private1;                  /* Private use */
+    LONG  ab_private2;                  /* Private use */
+    struct Library *ab_ExecBase;        /* Pointer to ExecBase */
+
+/** KickStart 3.0 compatible version -- added new features **************/
+    struct Library *ab_AslBase;         /* Pointer to asl.library */
+    struct Library *ab_GadToolsBase;    /* Pointer to gadtools.library */
+    struct Library *ab_CxBase;          /* Pointer to commodities.library */
+    struct Library *ab_IconBase;        /* Pointer to icon.library */
+    struct Library *ab_WorkbenchBase;   /* Pointer to workbench.library */
+    struct Library *ab_DataTypesBase;   /* Pointer to datatypes.library */
+
+/** Special linking libraries ********************************************/
+    struct Library *ab_UtilityBase;     /* (Gfx) Pointer to utility.library */
+    struct Library *ab_LayersBase;      /* (Gfx) Pointer to layers.library */
+
+/** (3.1) Additional libraries *******************************************/
+    struct LocaleBase *ab_LocaleBase;   /* Pointer to locale.library */
+    struct Library *ab_LowLevelBase;    /* Pointer to lowlevel.library */
+    struct Library *ab_RealTimeBase;    /* Pointer to realtime.library */
+    ULONG ab_reserved1;                 /* Future extension */
+
+/** Preferences **********************************************************/
+    UWORD ab_TicksDelay;               /* Simulated mouse press delay */
+    UWORD ab_FgPenRequest;
+    UWORD ab_BgPenRequest;
+    UWORD ab_DrMdRequest;
+    struct Image *ab_QuestionImage;
+    struct Image *ab_WarningImage;
+    struct Image *ab_DangerImage;
+    struct Image *ab_IOImage;
+    struct Locale *ab_Locale;           /* Default Locale pointer */
+
+/** Task private user ****************************************************/
+    APTR ab_AssemblyTask;               /* Private */
+    APTR ab_LastTask;                   /* Private */
+    LONG ab_private3;                   /* Future use */
+    LONG ab_private4;                   /* Future use */
+};
+
+/****************************************************************************
+**
+** Public include constants for opening this library
+**
+****************************************************************************/
+#define ASSEMBLY_MINIMUM  41    /* Lowest version supported */
+#define ASSEMBLY_VERSION  41    /* This version */
+#define ASSEMBLY_REVISION 21    /* This revision */
+
+/****************************************************************************
+**
+** Library name -- used by application programs
+**
+****************************************************************************/
+
+#define ASSEMBLYNAME "assembly.library"
+
+#endif /* ASSEMBLY_ASSEMBLYBASE_H */
+```
+
+### Key Elements
+
+- **`AssemblyBase`** -- The main library base structure. When you call `OpenLibrary("assembly.library", 41)`, this structure is returned. It contains cached pointers to all major Amiga system libraries, eliminating the need to open them individually.
+- **`ASSEMBLYNAME`** -- String constant `"assembly.library"` used in `OpenLibrary()` calls.
+- **`ASSEMBLY_MINIMUM`** -- The minimum version number (41) required to open the library.
+- **Preferences fields** -- `ab_FgPenRequest`, `ab_BgPenRequest`, `ab_DrMdRequest` control the default pen colors and draw mode for requesters. The `ab_QuestionImage`, `ab_WarningImage`, `ab_DangerImage`, and `ab_IOImage` fields hold pre-built images for requester icons.
+
+<Callout type="info">
+  The `ab_UtilityBase` and `ab_LayersBase` pointers are obtained indirectly from the `graphics.library` base structure rather than being opened separately.
+</Callout>
+
+---
+
+## ASMGRAPH.H -- Graphics Definitions
+
+Defines text justification constants used by `TextFmtRastPort()` and related rendering functions.
+
+```c
+#ifndef ASSEMBLY_ASMGRAPHICS_H
+#define ASSEMBLY_ASMGRAPHICS_H
+/*
+**    $VER: asmgraphics.h 41.0 (01-Jan-1995)
+**    Includes Release 41.1
+**
+**    Basic graphics operations.
+**
+**    (No) Copyrights, Public Domain Software
+**            Nothing Rights Reserved
+*/
+
+#ifndef EXEC_TYPES_H
+#include <exec/types.h>
+#endif
+
+#ifndef GRAPHICS_RASTPORT_H
+#include <graphics/rastport.h>
+#endif
+
+#ifndef INTUITION_INTUITION_H
+#include <intuition/intuition.h>
+#endif
+
+/*
+** Text justification type support for TextFmtRastPortArgs()
+*/
+
+#define ASJ_LEFT     0
+#define ASJ_RIGHT    1
+#define ASJ_CENTER   2
+
+#endif /* ASSEMBLY_ASMGRAPHICS_H */
+```
+
+### Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `ASJ_LEFT` | 0 | Left-align text |
+| `ASJ_RIGHT` | 1 | Right-align text |
+| `ASJ_CENTER` | 2 | Center text |
+
+---
+
+## ASMDOS.H -- DOS Definitions
+
+Defines checksum type constants for the `CheckSum()` function.
+
+```c
+#ifndef ASSEMBLY_ASMDOS_H
+#define ASSEMBLY_ASMDOS_H
+/*
+**    $VER: asmdos.h 41 (10.Oct.94)
+**    Includes Release 41.1
+**
+**    DOS definitions (reserved for future expansion)
+**
+**    (No) Copyrights, Public Domain Software
+**            Nothing Rights Reserved
+*/
+
+#ifndef EXEC_TYPES_H
+#include <exec/types.h>
+#endif
+
+#ifndef LIBRARIES_DOS_H
+#include <dos/dos.h>
+#endif
+
+#ifndef LIBRARIES_DOSEXTENS_H
+#include <dos/dosextens.h>
+#endif
+
+#ifndef LIBRARIES_FILEHANDLER_H
+#include <dos/filehandler.h>
+#endif
+
+
+/* -- Checksum type constants for CheckSum() ------------------------------- */
+
+#define TCS_BOOTBLOCK 0
+#define TCS_DATABLOCK 1
+#define TCS_FILEBLOCK TCS_DATABLOCK
+
+#endif /* ASSEMBLY_ASMDOS_H */
+```
+
+### Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `TCS_BOOTBLOCK` | 0 | Compute a boot block checksum |
+| `TCS_DATABLOCK` | 1 | Compute a data block checksum |
+| `TCS_FILEBLOCK` | 1 | Alias for `TCS_DATABLOCK` |
+
+---
+
+## ASMEXEC.H -- Exec Definitions
+
+Reserved for future Exec-related definitions. Currently empty apart from the standard header guard.
+
+```c
+#ifndef ASSEMBLY_ASMEXEC_H
+#define ASSEMBLY_ASMEXEC_H
+/*
+**    $VER: asmexec.h 41.00 (07.10.94)
+**    Includes Release 41.1
+**
+**    Reserved for future implementations.
+**
+**    (No) Copyrights, Public Domain Software
+**            Nothing Rights Reserved
+*/
+
+#ifndef EXEC_TYPES_H
+#include <exec/types.h>
+#endif
+
+#endif /* ASSEMBLY_ASMEXEC_H */
+```
+
+---
+
+## ASMLIBRA.H -- Library Utility Definitions
+
+Defines type flags for the `RevertMem()` function, which reverses the byte order of a memory region.
+
+```c
+#ifndef ASSEMBLY_ASMLIBRARIES_H
+#define ASSEMBLY_ASMLIBRARIES_H
+/*
+**    $VER: asmlibraries.h 41.1 (20.10.94)
+**    Includes Release 41.1
+**
+**    Special library support -- basic structures and definitions
+**
+**    (No) Copyrights, Public Domain Software
+**            Nothing Rights Reserved
+*/
+
+#ifndef EXEC_TYPES_H
+#include <exec/types.h>
+#endif
+
+/* =========================================================================
+** === Miscellaneous =======================================================
+** =========================================================================
+*/
+
+/*
+** Type flags for RevertMem()
+*/
+
+#define TYPEF_WORD (1<<0)
+#define TYPEF_LONG (1<<1)
+
+#endif /* ASSEMBLY_ASMLIBRARIES_H */
+```
+
+### Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `TYPEF_WORD` | 1 | Reverse memory in 16-bit (word) units |
+| `TYPEF_LONG` | 2 | Reverse memory in 32-bit (longword) units |
+
+---
+
+## ASMINTUI.H -- Intuition Definitions
+
+This is the largest and most important header file. It defines all the structures and tag constants for the REI windowing system, gadgets, requesters, and interface management.
+
+```c
+#ifndef ASSEMBLY_ASMINTUITION_H
+#define ASSEMBLY_ASMINTUITION_H
+/*
+**    $VER: asmintuition.h 41.404 (07.8.95)
+**    Includes Release 41.11
+**
+**    All Intuition, GadTools and Requester definitions.
+**
+**    (No) Copyrights, Public Domain Software
+**            Nothing Rights Reserved
+*/
+
+#ifndef EXEC_TYPES_H
+#include <exec/types.h>
+#endif
+
+#ifndef GRAPHICS_RASTPORT_H
+#include <graphics/rastport.h>
+#endif
+
+#ifndef INTUITION_INTUITION_H
+#include <intuition/intuition.h>
+#endif
+
+/* ======================================================================= */
+/* === Interface ========================================================= */
+/* ======================================================================= */
+/* This structure is returned by OpenInterface() */
+
+struct Interface {
+    struct MinList int_MinList;
+    STRPTR  int_IName;          /* Interface name */
+    STRPTR  int_Version;        /* Version string */
+    STRPTR  int_Author;         /* Author name */
+    STRPTR  int_Address;        /* Address or E-Mail */
+    STRPTR  int_Date;           /* Creation date */
+    STRPTR  int_Comment;        /* Comment string */
+    ULONG   int_FORM;           /* Identifying FORM type */
+    ULONG   int_REI0;           /* 'R','E','I',0x00 -- version marker */
+    UBYTE   int_reserved1[40];  /* Future expansion */
+    STRPTR  int_CatalogName;    /* Optional catalog name */
+    struct  Catalog *int_Catalog; /* Catalog pointer if opened */
+};
+
+/* ======================================================================= */
+/* === REIMessage ======================================================== */
+/* ======================================================================= */
+/* This structure is returned by WaitREIMsg() */
+
+struct REIMessage {
+    ULONG   rim_Class;
+    UWORD   rim_Code;
+    UWORD   rim_Qualifier;
+    APTR    rim_IAddress;
+    ULONG   rim_REICode;        /* Special REI return code */
+};
+
+/*
+** NEW (V41.2) - Special return codes in rim_REICode
+*/
+
+#define RIM_SEEINTUITION        NULL    /* No special communication */
+
+#define RIM_LEFTDOUBLECLICK     1       /* Left mouse button double-click */
+#define RIM_RIGHTDOUBLECLICK    2       /* Right mouse button double-click */
+
+/* ======================================================================= */
+/* === REI =============================================================== */
+/* ======================================================================= */
+/* This structure is strictly READ ONLY */
+
+struct REI {
+    struct Node rei_Node;
+    struct Screen *rei_Screen;
+    struct Window *rei_Window;
+    struct Menu   *rei_Menu;
+    struct TagItem *rei_STDWindowTAG;    /* Standard Window TagItem list */
+    LONG   rei_VI;
+    UBYTE  rei_reserved2[32];
+    UWORD  rei_ID;
+    BYTE   *rei_UserData;                /* General-purpose user data */
+
+/**** The rest of this structure is private ********************************/
+
+    struct TagItem *rei_ScreenTAG;
+    STRPTR rei_PubScreenName;
+    UWORD  rei_RemLeft;                  /* Remembered LeftEdge */
+    UWORD  rei_RemTop;                   /* Remembered TopEdge */
+    LONG   rei_RemWidth;                 /* Remembered Width */
+    LONG   rei_RemHeight;                /* Remembered Height */
+    LONG   rei_PropWidth;                /* Gadget proportional layout width */
+    LONG   rei_PropHeight;               /* Gadget proportional layout height */
+    struct NewWindow rei_NewWindow;
+    struct TagItem   *rei_NewWindowTAG;
+    struct AsmGadget *rei_HEADAsmGadget;
+    struct AsmGadget *rei_TAIL;
+    struct AsmGadget *rei_TAILAsmGadget;
+    struct NewMenu   *rei_NewMenu;
+    struct TagItem   *rei_NewMenuTAG;
+    struct Hook      *rei_MenuHook;
+    struct TextAttr  *rei_GadgetTextAttr;
+    struct TextFont  *rei_GadgetFont;
+    struct Hook      *rei_LayoutCallBack;
+    struct Hook      *rei_CustomHook;
+    ULONG  rei_Flags;
+    struct RastPort  *rei_rpGadget;
+    struct Hook      *rei_OldHook;
+    struct Gadget    *rei_glist;
+    struct Requester rei_Request;
+    struct REIMessage rei_REIMessage;
+    ULONG  rei_LeftSeconds;              /* NEW (V41.2) for double-click timing */
+    ULONG  rei_LeftMicros;
+    ULONG  rei_RightSeconds;
+    ULONG  rei_RightMicros;
+};
+
+/*
+** TAGS for OpenREIA(), SetREIAttrsA() and GetREIAttrsA()
+**
+** (O|S|G) indicates which functions support each tag:
+** (O) - OpenREIA()
+** (S) - SetREIAttrsA()
+** (G) - GetREIAttrsA()
+*/
+
+#define REIT_Base               TAG_USER
+
+#define REIT_Screen             REIT_Base+1     /* (O|G) (struct Screen *) */
+#define REIT_WindowTAG          REIT_Base+2     /* (O|G) (struct TagItem *) */
+#define REIT_ScreenTAG          REIT_Base+3     /* (O|G) (struct TagItem *) */
+#define REIT_WindowTextAttr     REIT_Base+4     /* (O|G) (struct TextAttr *) */
+#define REIT_WindowTextFont     REIT_Base+5     /* (O|G) (struct TextFont *) */
+#define REIT_ScreenFont         REIT_Base+6     /* (O|G) (BOOL) */
+#define REIT_NewMenu            REIT_Base+7     /* (O|G) (struct NewMenu *) */
+#define REIT_NewMenuTAG         REIT_Base+8     /* (O|G) (struct TagItem *) */
+#define REIT_UserData           REIT_Base+9     /* (O|S|G) (ULONG) */
+#define REIT_LayoutCallBack     REIT_Base+10    /* (O|G) (struct Hook *) */
+#define REIT_CustomHook         REIT_Base+11    /* (O|G) (struct Hook *) */
+#define REIT_RememberPos        REIT_Base+12    /* (O|G) (BOOL) */
+#define REIT_RememberSize       REIT_Base+13    /* (O|G) (BOOL) */
+#define REIT_CenterHScreen      REIT_Base+14    /* (O|G) (BOOL) */
+#define REIT_CenterVScreen      REIT_Base+15    /* (O|G) (BOOL) */
+#define REIT_CenterMouse        REIT_Base+16    /* (O|G) (BOOL) */
+#define REIT_NoFontSensitive    REIT_Base+17    /* (O|G) (BOOL) */
+#define REIT_WindowTitle        REIT_Base+18    /* (O|S|G) (STRPTR) */
+#define REIT_Window             REIT_Base+19    /* (O|G) (struct Window *) */
+
+/* --- AsmGadget support tags --- */
+#define REIT_FirstAsmGadget     REIT_Base+20    /* (G) (struct AsmGadget *) */
+#define REIT_LastAsmGadget      REIT_Base+21    /* (G) (struct AsmGadget *) */
+#define REIT_AsmGadgetHook      REIT_Base+22    /* (S|G) (struct TagItem *) */
+#define REIT_AsmMenuHook        REIT_Base+23    /* (S|G) (struct TagItem *) */
+
+/* --- REI alignment, resize and move tags --- */
+#define REIT_AlignLeft          REIT_Base+30    /* (S) (struct REI *) */
+#define REIT_AlignTop           REIT_Base+31    /* (S) (struct REI *) */
+#define REIT_AlignRight         REIT_Base+32    /* (S) (struct REI *) */
+#define REIT_AlignBottom        REIT_Base+33    /* (S) (struct REI *) */
+
+/* --- NEW (V41.2) --- */
+#define REIT_DoubleClick        REIT_Base+34    /* (O|S|G) (BOOL) */
+
+/* ======================================================================= */
+/* === AsmGadget ========================================================= */
+/* ======================================================================= */
+/* This structure is strictly READ ONLY */
+
+struct AsmGadget {
+    struct  Node agg_Node;
+    ULONG   agg_Kind;
+    struct  TagItem *agg_TagList;
+    APTR    agg_UserData;           /* General-purpose user data */
+/*** Private fields below */
+    struct  NewGadget agg_NewGadget;    /* GadTools compatible */
+    ULONG   agg_Flags;
+    struct  Gadget *agg_Gadget;
+    struct  Gadget *agg_IGadget;
+    WORD    agg_LeftEdge;
+    WORD    agg_TopEdge;
+    WORD    agg_Width;
+    WORD    agg_Height;
+    UWORD   agg_LabelWidth;
+    UWORD   agg_LabelHeight;
+    struct  Gadget *agg_XChild;
+    struct  Gadget *agg_YChild;
+    struct  Gadget *agg_InnerWidth;
+    struct  Gadget *agg_InnerHeight;
+};
+
+/*
+** Extended gadget KIND values -- these extend the standard GadTools kinds.
+** See AllocAsmGadget() for details.
+*/
+
+#define UPPERCASE_KIND      15
+#define DECIMAL_KIND        16
+#define HEXDECIMAL_KIND     17
+#define BINARY_KIND         18
+
+/*
+** TAGS for SetAsmGadgetAttrsA() and GetAsmGadgetAttr()
+*/
+#define AGAT_Dummy          TAG_USER
+
+#define AGAT_AsmGadgetHook  AGAT_Dummy+1    /* (struct Hook *) */
+
+#define AGAT_RelBBottom     AGAT_Dummy+2    /* (BOOL) */
+#define AGAT_RelBRight      AGAT_Dummy+3    /* (BOOL) */
+#define AGAT_HCenter        AGAT_Dummy+4    /* (BOOL) */
+#define AGAT_VCenter        AGAT_Dummy+5    /* (BOOL) */
+#define AGAT_WindowWidth    AGAT_Dummy+6    /* (BOOL) */
+#define AGAT_WindowHeight   AGAT_Dummy+7    /* (BOOL) */
+
+#define AGAT_XChild         AGAT_Dummy+8    /* (struct AsmGadget *) */
+#define AGAT_YChild         AGAT_Dummy+9    /* (struct AsmGadget *) */
+#define AGAT_HorzInner      AGAT_Dummy+10   /* (BOOL) */
+#define AGAT_VertInner      AGAT_Dummy+11   /* (BOOL) */
+
+#define AGAT_NextAsmGadget  AGAT_Dummy+12   /* (struct AsmGadget *) via Node */
+#define AGAT_PrevAsmGadget  AGAT_Dummy+13   /* (struct AsmGadget *) via Node */
+
+#define AGAT_UserData       AGAT_Dummy+14   /* User-defined data */
+#define AGAT_AsmGadgetID    AGAT_Dummy+15   /* Gadget ID */
+#define AGAT_HighLight      AGAT_Dummy+16   /* (S) Highlight the gadget */
+
+#define AGATLV_SelectedNode AGAT_Dummy+20   /* (struct Node *) for ListView */
+
+/*
+** Built-in image types for ListView callback routines
+*/
+#define ASYSI_DEFAULT   0
+#define ASYSI_TEXT      1
+#define ASYSI_PICTURE   2
+#define ASYSI_SOUND     3
+#define ASYSI_SYSTEM    4
+#define ASYSI_DRAWER    5
+#define ASYSI_SELECTED  6
+#define ASYSI_NORMAL    7
+#define ASYSI_QUESTION  8
+#define ASYSI_WARNING   9
+#define ASYSI_ALT       10
+#define ASYSI_INPUT     11
+#define ASYSI_GHOSTB    7
+#define ASYSI_GHOST     (1<<ASYSI_GHOSTB)
+
+/* ======================================================================= */
+/* === AsmRequest ======================================================== */
+/* ======================================================================= */
+/* The structure returned by AllocAsmRequestA() is private. */
+
+struct AsmRequest {
+    /* all private */
+};
+
+/*
+** TAGS for AllocAsmRequestA() and ChangeAsmReqAttrsA()
+*/
+#define AREQ_Base               TAG_USER
+
+#define AREQ_Left               AREQ_Base+1
+#define AREQ_Top                AREQ_Base+2
+#define AREQ_REI                AREQ_Base+3
+#define AREQ_Window             AREQ_Base+4
+#define AREQ_Screen             AREQ_Base+5
+#define AREQ_Title              AREQ_Base+6
+#define AREQ_IDCMP              AREQ_Base+7
+#define AREQ_IDCMPHook          AREQ_Base+8
+#define AREQ_LockREI            AREQ_Base+9
+#define AREQ_Justification      AREQ_Base+10
+#define AREQ_Object             AREQ_Base+11
+#define AREQ_Sound              AREQ_Base+12
+#define AREQ_Reserved2          AREQ_Base+13
+#define AREQ_Reserved3          AREQ_Base+14
+#define AREQ_CenterHScreen      AREQ_Base+15
+#define AREQ_CenterVScreen      AREQ_Base+16
+#define AREQ_CenterMouse        AREQ_Base+17
+#define AREQ_TextUnderObject    AREQ_Base+18
+#define AREQ_APenPattern        AREQ_Base+19
+#define AREQ_BPenPattern        AREQ_Base+20
+#define AREQ_PubScreenName      AREQ_Base+21
+#define AREQ_NewLookBackFill    AREQ_Base+22
+#define AREQ_ReturnKey          AREQ_Base+23
+#define AREQ_FrameOnly          AREQ_Base+24
+#define AREQ_WindowFlags        AREQ_Base+25
+#define AREQ_ButtomHook         AREQ_Base+26
+
+#endif /* ASSEMBLY_ASMINTUITION_H */
+```
+
+### Key Structures
+
+#### Interface
+
+The `Interface` structure is returned by `OpenInterface()` when loading a `.rei` interface definition file. It provides metadata about the interface (name, version, author, date) and an optional localization catalog.
+
+#### REI
+
+The `REI` (Runtime Environment Interface) structure represents an open window with its associated screen, menu, and gadget list. The public fields include:
+
+| Field | Description |
+|-------|-------------|
+| `rei_Screen` | The screen this REI is displayed on |
+| `rei_Window` | The Intuition window for this REI |
+| `rei_Menu` | The menu strip attached to this window |
+| `rei_STDWindowTAG` | Standard window tag list |
+| `rei_VI` | VisualInfo for GadTools |
+| `rei_ID` | Unique REI identifier |
+| `rei_UserData` | General-purpose user data pointer |
+
+<Callout type="warning">
+  The REI structure is **read-only**. Do not modify its fields directly. Use `SetREIAttrs()` and `GetREIAttrs()` to change or query attributes.
+</Callout>
+
+#### REIMessage
+
+The `REIMessage` structure is returned by `WaitREIMsg()` and wraps the standard Intuition IDCMP message fields with an additional `rim_REICode` field for extended events like double-clicks.
+
+#### AsmGadget
+
+The `AsmGadget` structure wraps a standard GadTools gadget with additional metadata. Key public fields:
+
+| Field | Description |
+|-------|-------------|
+| `agg_Node` | Node for linking in the gadget list (named by `ln_Name`) |
+| `agg_Kind` | GadTools gadget kind (e.g., `BUTTON_KIND`, `STRING_KIND`, or extended kinds) |
+| `agg_TagList` | The gadget's tag list |
+| `agg_UserData` | General-purpose user data |
+
+#### AsmRequest
+
+The `AsmRequest` structure is fully private. It is allocated with `AllocAsmRequest()` and freed with `FreeAsmRequest()`. Its attributes are configured exclusively through tags.
+
+### REIT Tags Reference
+
+| Tag | Supported by | Type | Description |
+|-----|-------------|------|-------------|
+| `REIT_Screen` | O, G | `struct Screen *` | Custom screen for the REI |
+| `REIT_WindowTAG` | O, G | `struct TagItem *` | Additional window tags |
+| `REIT_ScreenTAG` | O, G | `struct TagItem *` | Additional screen tags |
+| `REIT_WindowTextAttr` | O, G | `struct TextAttr *` | Window text attribute |
+| `REIT_WindowTextFont` | O, G | `struct TextFont *` | Window text font |
+| `REIT_ScreenFont` | O, G | `BOOL` | Use the screen's default font |
+| `REIT_NewMenu` | O, G | `struct NewMenu *` | Menu definition |
+| `REIT_NewMenuTAG` | O, G | `struct TagItem *` | Menu tags |
+| `REIT_UserData` | O, S, G | `ULONG` | User-defined data |
+| `REIT_LayoutCallBack` | O, G | `struct Hook *` | Layout callback hook |
+| `REIT_CustomHook` | O, G | `struct Hook *` | Custom rendering hook |
+| `REIT_RememberPos` | O, G | `BOOL` | Remember window position |
+| `REIT_RememberSize` | O, G | `BOOL` | Remember window size |
+| `REIT_CenterHScreen` | O, G | `BOOL` | Center horizontally on screen |
+| `REIT_CenterVScreen` | O, G | `BOOL` | Center vertically on screen |
+| `REIT_CenterMouse` | O, G | `BOOL` | Center on mouse position |
+| `REIT_NoFontSensitive` | O, G | `BOOL` | Disable font-sensitive layout |
+| `REIT_WindowTitle` | O, S, G | `STRPTR` | Window title string |
+| `REIT_Window` | O, G | `struct Window *` | Existing window to use |
+| `REIT_DoubleClick` | O, S, G | `BOOL` | Enable double-click detection (V41.2) |
+
+### AREQ Tags Reference
+
+| Tag | Description |
+|-----|-------------|
+| `AREQ_Left` | Left edge position of the requester |
+| `AREQ_Top` | Top edge position of the requester |
+| `AREQ_REI` | Parent REI for the requester |
+| `AREQ_Window` | Parent window |
+| `AREQ_Screen` | Screen to open on |
+| `AREQ_Title` | Requester window title |
+| `AREQ_IDCMP` | Additional IDCMP flags |
+| `AREQ_IDCMPHook` | Hook for custom IDCMP handling |
+| `AREQ_LockREI` | Lock the parent REI while open |
+| `AREQ_Justification` | Text justification (`ASJ_LEFT`, `ASJ_RIGHT`, `ASJ_CENTER`) |
+| `AREQ_Object` | DataType object to display (image, animation) |
+| `AREQ_Sound` | Sound DataType object to play |
+| `AREQ_CenterHScreen` | Center horizontally on screen |
+| `AREQ_CenterVScreen` | Center vertically on screen |
+| `AREQ_CenterMouse` | Center on mouse position |
+| `AREQ_TextUnderObject` | Place text below the object |
+| `AREQ_APenPattern` | Foreground pen pattern index |
+| `AREQ_BPenPattern` | Background pen pattern index |
+| `AREQ_PubScreenName` | Public screen name |
+| `AREQ_NewLookBackFill` | Enable new-look backfill pattern |
+| `AREQ_ReturnKey` | Enable Return key as default button |
+| `AREQ_FrameOnly` | Draw frame only (no backfill) |
+| `AREQ_WindowFlags` | Additional window flags |
+| `AREQ_ButtomHook` | Hook for custom button rendering |

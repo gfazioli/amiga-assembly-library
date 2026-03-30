@@ -1,0 +1,30 @@
+# FileInfo
+
+## Synopsis
+
+```asm
+FileInfoBlock = FileInfo(filename)
+     D0                     A0
+```
+
+## C Prototype
+
+```c
+struct FileInfoBlock *FileInfo(STRPTR filename);
+```
+
+## Description
+
+This command allocates a `FileInfoBlock` structure in memory and fills it with information about the file specified in the inputs. The resulting structure is a standard DOS `FileInfoBlock`, which must be freed using `FreeVec()`.
+
+## Inputs
+
+- **filename** — Name of the file from which to retrieve the `FileInfoBlock`.
+
+## Result
+
+- **FileInfoBlock** — If NULL, an error occurred. Otherwise, it is the address of a `FileInfoBlock` structure.
+
+## See Also
+
+`dos.library/Examine()`, `exec.library/FreeVec()`

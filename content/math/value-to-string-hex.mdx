@@ -1,0 +1,39 @@
+# ValueToStringHex
+
+## Synopsis
+
+```asm
+ValueToStringHex(buffer, value, optlen, prefix)
+                   A0    D0:32    D1      D2
+
+void ValueToStringHex(APTR, LONG, ULONG, BOOL);
+```
+
+## C Prototype
+
+```c
+void ConvHex(APTR, LONG, LONG, BOOL);
+```
+
+## Description
+
+Converts a signed 32-bit LONG value into a hexadecimal ASCII string.
+
+If the input value is negative, a `-` character is prepended to the output string. By default (when `optlen` is NULL), 8 characters are placed in the buffer. The `optlen` parameter can be used to specify a different output length.
+
+The `prefix` parameter controls whether a `$` character is prepended to the output.
+
+## Inputs
+
+- **buffer** — Pointer to a buffer that will contain the output string.
+- **value** — The LONG value to convert.
+- **optlen** — Number of characters to place in the output buffer. If NULL, defaults to 8 characters.
+- **prefix** — If TRUE, the `$` character is prepended to the buffer.
+
+## Result
+
+The buffer is filled with the hexadecimal string representation.
+
+## See Also
+
+[StringHexToValue](/docs/math/string-hex-to-value), [ValueToStringDec](/docs/math/value-to-string-dec), [ValueToStringBin](/docs/math/value-to-string-bin)

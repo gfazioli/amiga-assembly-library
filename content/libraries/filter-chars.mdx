@@ -1,0 +1,34 @@
+# FilterChars
+
+## Synopsis
+
+```asm
+FilterChars(address, len, lo_range, hi_range, Rchar)
+            A0       D0   D1        D2        D3
+```
+
+## C Prototype
+
+```c
+void FilterChars(STRPTR address, ULONG len, ULONG lo_range, ULONG hi_range, ULONG Rchar);
+```
+
+## Description
+
+Performs the basic function of `ChangeChar()`, but instead of replacing a single character, it operates on a range of codes. All characters outside the range defined by `lo_range` and `hi_range` are replaced with the character `Rchar`.
+
+## Inputs
+
+- **address** -- Pointer to the memory area to filter.
+- **len** -- Number of bytes to filter.
+- **lo_range** -- Minimum value below which codes will be replaced.
+- **hi_range** -- Maximum value above which codes will be replaced.
+- **Rchar** -- ASCII code that will be placed in position of those outside the range.
+
+## Result
+
+None.
+
+## See Also
+
+- [ChangeChar](/libraries/change-char)

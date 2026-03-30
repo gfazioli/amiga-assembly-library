@@ -1,0 +1,432 @@
+import { Callout } from 'nextra/components'
+
+# Examples
+
+This section provides complete C example programs that demonstrate how to use the Assembly Library. All examples are compiled with SAS/C and require `assembly.library` V41 or higher to be installed in `LIBS:`.
+
+## Available Examples
+
+| File | Description |
+|------|-------------|
+| **STDC.C** | Standard C template -- minimal skeleton for any Assembly Library program |
+| **DEMO.C** | Interactive demo showcasing `AsmRequest` dialogs with images, text justification, and DataType objects |
+| **WINDOWIN.C** | Window inspector -- lists all open windows on a screen using REI interface and GadTools gadgets |
+| **GRABSCRE.C** | Screen grabber -- saves the frontmost screen as an IFF ILBM file to `RAM:` |
+| **CALLBACK.C** | Hook callback example |
+| **DATATYPE.C** | DataType object loading and display |
+| **SHOWREI.C** | REI interface viewer |
+| **TEST.C** | General library function tests |
+| **VERSION.C** | Library version information display |
+| **SETCOLOR.C** | Color manipulation utility |
+| **SETPATCH.C** | Patch management utility |
+| **GRABKICK.C** | KickStart ROM grabber |
+| **CUT.C** | Clipboard cut utility |
+| **ARGC_WBS.C** | Workbench argument parsing |
+
+---
+
+## STDC.C -- Standard Template
+
+This is the recommended starting point for any C program using the Assembly Library. It demonstrates the standard pattern: open the library, retrieve all sub-library base pointers from `AssemblyBase`, and provide a Workbench entry point.
+
+```c
+#include <exec/exec.h>
+#include <graphics/gfx.h>
+#include <graphics/view.h>
+#include <dos/dosextens.h>
+#include <dos/doshunks.h>
+#include <intuition/classusr.h>
+#include <intuition/screens.h>
+#include <intuition/icclass.h>
+#include <libraries/locale.h>
+#include <workbench/workbench.h>
+#include <workbench/startup.h>
+
+#include <clib/datatypes_protos.h>
+#include <clib/alib_protos.h>
+#include <clib/exec_protos.h>
+#include <clib/asl_protos.h>
+#include <clib/dos_protos.h>
+#include <clib/icon_protos.h>
+#include <clib/locale_protos.h>
+#include <clib/graphics_protos.h>
+#include <clib/intuition_protos.h>
+#include <clib/utility_protos.h>
+#include <clib/wb_protos.h>
+
+
+/********** Global variables ***********************************************/
+struct AssemblyBase *AssemblyBase;
+struct Library *DosBase, *IntuitionBase, *GfxBase, *AslBase, *IconBase;
+struct Library *GadToolsBase, *LocaleBase, *DataTypesBase, *WorkbenchBase;
+struct Library *DiskfontBase;
+struct Catalog *catalog;
+
+/********** Prototypes *****************************************************/
+struct AssemblyBase *OpenLibs(void);
+
+/**************************************************************************
+** Main
+**************************************************************************/
+VOID main(int argc, char **argv)
+{
+    struct WBStartup *wbs;
+    struct WBArg *wbarg;
+
+    if (AssemblyBase = OpenLibs())
+    {
+        /* --- Your application code here --- */
+
+        CloseLibrary(AssemblyBase);
+    }
+}
+
+/**************************************************************************
+** OpenLibs() -- Open the Assembly Library and retrieve sub-library pointers.
+**
+** When assembly.library is opened, it automatically opens and caches
+** pointers to all major Amiga system libraries. We read them directly
+** from the AssemblyBase structure instead of opening each one individually.
+**************************************************************************/
+struct AssemblyBase *OpenLibs()
+{
+    AssemblyBase = OpenLibrary(ASSEMBLYNAME, ASSEMBLY_MINIMUM);
+
+    DosBase       = AssemblyBase->ab_DosBase;
+    IconBase      = AssemblyBase->ab_IconBase;
+    IntuitionBase = AssemblyBase->ab_IntuiBase;
+    GfxBase       = AssemblyBase->ab_GfxBase;
+    AslBase       = AssemblyBase->ab_AslBase;
+    GadToolsBase  = AssemblyBase->ab_GadToolsBase;
+    LocaleBase    = AssemblyBase->ab_LocaleBase;
+    DataTypesBase = AssemblyBase->ab_DataTypesBase;
+    WorkbenchBase = AssemblyBase->ab_WorkbenchBase;
+
+    /* Open additional libraries not cached by AssemblyBase */
+    DiskfontBase  = OpenLibrary("diskfont.library", NULL);
+
+    /* Open an optional localization catalog */
+    catalog = OpenCatalogA(NULL, "MyApp.catalog", NULL);
+
+    return(AssemblyBase);
+}
+
+/**************************************************************************/
+
+VOID wbmain(wbmsg)
+{
+    main(NULL, (struct WBStartup *)wbmsg);
+    exit(0);
+}
+```
+
+<Callout type="info">
+  The `wbmain()` function is the entry point when the program is launched from Workbench (by double-clicking its icon). It simply delegates to `main()` with the Workbench startup message.
+</Callout>
+
+---
+
+## WINDOWIN.C -- Window Inspector
+
+A more complete example that demonstrates the REI interface system. This program opens a REI-based window that lists all currently open windows on the screen. It uses `OpenInterface()` to load a `.rei` definition file, `FindAsmGadget()` to access gadgets by name, and `WaitREIMsg()` for the event loop.
+
+Key features demonstrated:
+- Opening and closing an `Interface` and a `REI` window
+- Using `AllocAsmRequest()` to create an "About" dialog with a DataType animation
+- Building a dynamic ListView using `AllocNewList()` and `AllocNode()`
+- Querying gadget attributes with GadTools functions
+- Formatted text rendering with `TextFmtRastPort()`
+- The standard event loop pattern with `WaitREIMsg()`
+
+```c
+/**************************************************************************
+** WindowInfo Ver.1.0a
+**
+** Author: =JON=
+** Date: 13-Feb-1995
+**************************************************************************/
+
+#include <exec/exec.h>
+#include <assembly/assemblybase.h>
+#include <libraries/gadtools.h>
+#include <graphics/gfx.h>
+#include <datatypes/datatypes.h>
+#include <datatypes/datatypesclass.h>
+#include <datatypes/animationclass.h>
+#include <intuition/classusr.h>
+#include <intuition/icclass.h>
+#include <intuition/imageclass.h>
+#include <intuition/intuitionbase.h>
+#include <workbench/workbench.h>
+#include <workbench/startup.h>
+
+#include <clib/assembly_protos.h>
+#include <clib/datatypes_protos.h>
+#include <clib/alib_protos.h>
+#include <clib/exec_protos.h>
+#include <clib/asl_protos.h>
+#include <clib/graphics_protos.h>
+#include <clib/gadtools_protos.h>
+#include <clib/utility_protos.h>
+
+
+/********** Global variables ***********************************************/
+struct AssemblyBase *AssemblyBase;
+struct IntuitionBase *IntuitionBase;
+struct Library *DosBase, *GfxBase, *AslBase, *DataTypesBase;
+struct Library *GadToolsBase, *LocaleBase;
+
+/********** Prototypes *****************************************************/
+
+struct AssemblyBase *OpenLibs(void);
+struct List *Update(struct REI *mainrei);
+struct Window *GetWindow(struct REI *mainrei, struct REIMessage *rmsg);
+void PrintInfo(struct REI *mainrei, struct Window *ewin);
+Object *LoadDTObject(STRPTR objname);
+
+/**************************************************************************
+** Main
+**************************************************************************/
+
+VOID main()
+{
+    struct Interface *i;
+    struct REI *mainrei;
+    struct Window *winrei;
+    struct REIMessage *rmsg;
+    struct AsmRequest *areq;
+    Object *dto;
+    BOOL fine = TRUE;
+
+    if (AssemblyBase = OpenLibs())
+    {
+        /* Load the interface definition from a .rei file */
+        i = OpenInterface("WindowInfo.rei");
+
+        /* Load a DataType animation object */
+        dto = LoadDTObject("Author.animbsh");
+
+        /* Allocate a custom requester for the "About" dialog */
+        areq = AllocAsmRequest(
+            AREQ_Title,           "About...",
+            AREQ_Object,          dto,
+            AREQ_CenterHScreen,   TRUE,
+            AREQ_CenterVScreen,   TRUE,
+            AREQ_Justification,   ASJ_CENTER,
+            AREQ_NewLookBackFill, TRUE,
+            AREQ_APenPattern,     5,
+            AREQ_BPenPattern,     5,
+            TAG_DONE);
+
+        /* Show the About dialog */
+        AsmRequestArgs(areq,
+            "WindowInfo Ver.1.0a (13-Feb-1995)\n"
+            "(C)1995 Giovambattista Fazioli\n\n"
+            "The first small test for the Assembly Library.\n\n"
+            "Thanks to: Marco Talamelli, Giacomo Magnini ;)",
+            "_Continue", NULL);
+
+        /* Open the main REI window using the screen font */
+        mainrei = OpenREI(NULL, "main", REIT_ScreenFont, TRUE, TAG_END);
+
+        /* Populate the window list */
+        struct List *list = Update(mainrei);
+
+        /* Main event loop */
+        while (fine)
+        {
+            if (rmsg = WaitREIMsg(mainrei, 0x5F))
+            {
+                switch(rmsg->rim_Class)
+                {
+                    case IDCMP_CLOSEWINDOW:
+                        fine = FALSE;
+                        break;
+
+                    case IDCMP_GADGETUP:
+                        struct Gadget *gad = rmsg->rim_IAddress;
+                        if (gad->GadgetID == 0x1000)
+                            list = Update(mainrei);
+                        if (gad->GadgetID == 0x2000)
+                        {
+                            struct Window *ewin = GetWindow(mainrei, rmsg);
+                            PrintInfo(mainrei, ewin);
+                        }
+                        if (gad->GadgetID == 0x1002)
+                            fine = FALSE;
+                        break;
+                }
+            }
+        }
+
+        /* Clean up */
+        FreeList(list);
+        CloseREI(mainrei, NULL);
+        CloseInterface(i);
+        DisposeDTObject(dto);
+        FreeAsmRequest(areq);
+        CloseLibrary(AssemblyBase);
+    }
+}
+
+/**************************************************************************
+** GetWindow() -- Return the Window pointer corresponding to the selected
+** ListView entry by walking the screen's window list.
+**************************************************************************/
+struct Window *GetWindow(struct REI *mainrei, struct REIMessage *rmsg)
+{
+    struct Screen *screen = mainrei->rei_Screen;
+    struct Window *win = screen->FirstWindow;
+    UWORD code = rmsg->rim_Code;
+
+    while (code--)
+        win = win->NextWindow;
+    return(win);
+}
+
+/**************************************************************************
+** Update() -- Rebuild the ListView with all windows on the REI's screen.
+** Uses AllocNewList() and AllocNode() to build a named node list, with
+** system image types for the ListView callback.
+**************************************************************************/
+struct List *Update(struct REI *mainrei)
+{
+    long asmtype;
+
+    struct Window *win = mainrei->rei_Window;
+    struct AsmGadget *agad = FindAsmGadget(mainrei, "lv1");
+    struct Gadget *gad = agad->agg_Gadget;
+    struct List *list = NULL;
+
+    /* Detach the current list from the gadget */
+    GT_GetGadgetAttrs(gad, win, NULL, GTLV_Labels, &list, TAG_DONE);
+    if (list)
+    {
+        GT_SetGadgetAttrs(gad, win, NULL, GTLV_Labels, ~0);
+        FreeList(list);
+    }
+
+    /* Build a new list with all windows on this screen */
+    list = AllocNewList();
+    struct Screen *screen = mainrei->rei_Screen;
+    struct Window *lwin = screen->FirstWindow;
+
+    while (lwin)
+    {
+        asmtype = ASYSI_QUESTION;
+        STRPTR title = lwin->Title;
+        if (title == NULL)
+        {
+            asmtype = ASYSI_SYSTEM;
+            title = "Untitled";
+        }
+        AllocNode(list, title, asmtype, NULL);
+        lwin = lwin->NextWindow;
+    }
+
+    /* Attach the new list to the gadget */
+    GT_SetGadgetAttrs(gad, win, NULL, GTLV_Labels, list);
+    return(list);
+}
+
+/**************************************************************************
+** PrintInfo() -- Display position and size info for the selected window
+** using TextFmtRastPort() for formatted output.
+**************************************************************************/
+void PrintInfo(struct REI *mainrei, struct Window *ewin)
+{
+    struct Window *win = mainrei->rei_Window;
+    struct RastPort *rp = win->RPort;
+
+    struct AsmGadget *agad = FindAsmGadget(mainrei, "text01");
+    struct Gadget *gad = agad->agg_Gadget;
+    WORD x = gad->LeftEdge + 6;
+    WORD y = gad->TopEdge + rp->TxBaseline + 6;
+
+    SetABPenDrMd(rp, 1, 0, JAM2);
+    TextFmtRastPort(rp,
+        "Left:%-3ld \nTop:%-3ld \nWidth:%-3ld \nHeight:%-3ld \n",
+        x, y, NULL,
+        ewin->LeftEdge, ewin->TopEdge,
+        ewin->Width, ewin->Height);
+}
+
+/**************************************************************************
+** LoadDTObject() -- Load a DataType object, searching the current
+** directory first, then falling back to sys:Classes/Images/.
+**************************************************************************/
+Object *LoadDTObject(STRPTR objname)
+{
+    Object *obj;
+    BPTR lock = NULL;
+    BPTR oldlock, homedir;
+
+    struct ExecBase *eb = AssemblyBase->ab_ExecBase;
+    struct Process *mytask = eb->ThisTask;
+    homedir = (struct Process *)mytask->pr_HomeDir;
+    oldlock = CurrentDir(homedir);
+
+    if (CheckFile(objname, NULL))
+    {
+        BPTR lock = Lock("sys:Classes/Images/", ACCESS_READ);
+        CurrentDir(lock);
+    }
+
+    if (obj = NewDTObject(objname, DTA_ControlPanel, FALSE, TAG_DONE))
+    {
+        if (lock)
+            UnLock(lock);
+        CurrentDir(oldlock);
+        return(obj);
+    }
+    return(NULL);
+}
+
+/**************************************************************************
+** OpenLibs() -- Open assembly.library and retrieve cached sub-library
+** base pointers.
+**************************************************************************/
+
+struct AssemblyBase *OpenLibs()
+{
+    AssemblyBase = OpenLibrary(ASSEMBLYNAME, ASSEMBLY_MINIMUM);
+
+    DosBase       = AssemblyBase->ab_DosBase;
+    IntuitionBase = AssemblyBase->ab_IntuiBase;
+    GfxBase       = AssemblyBase->ab_GfxBase;
+    AslBase       = AssemblyBase->ab_AslBase;
+    GadToolsBase  = AssemblyBase->ab_GadToolsBase;
+    LocaleBase    = AssemblyBase->ab_LocaleBase;
+    DataTypesBase = AssemblyBase->ab_DataTypesBase;
+    return(AssemblyBase);
+}
+
+/* Workbench entry point */
+VOID wbmain(wbmsg)
+{
+    main();
+    exit(0);
+}
+```
+
+### How It Works
+
+1. **Library initialization** -- `OpenLibs()` opens `assembly.library` and retrieves all sub-library pointers from `AssemblyBase`. This single call replaces a dozen individual `OpenLibrary()` calls.
+
+2. **Interface loading** -- `OpenInterface("WindowInfo.rei")` loads a binary interface definition file that describes the window layout, gadgets, and menus. This separates the UI definition from the program logic.
+
+3. **REI window** -- `OpenREI(NULL, "main", ...)` opens the window named "main" from the loaded interface. The `REIT_ScreenFont` tag tells the REI system to use the screen's default font for gadget layout.
+
+4. **Gadget access by name** -- `FindAsmGadget(mainrei, "lv1")` retrieves the ListView gadget by its name (defined in the `.rei` file). This avoids hardcoded gadget IDs and makes the code more readable.
+
+5. **Dynamic list management** -- `AllocNewList()` creates a new Exec list, and `AllocNode()` adds named nodes with icon types. The list is then attached to the ListView gadget using standard GadTools calls.
+
+6. **Event loop** -- `WaitREIMsg(mainrei, 0x5F)` waits for IDCMP messages and returns them as `REIMessage` structures. The bitmask `0x5F` selects which message types to wait for.
+
+7. **Formatted text** -- `TextFmtRastPort()` renders printf-style formatted text directly into a RastPort, combining the convenience of `printf()` with direct graphics output.
+
+<Callout type="info">
+  The `.rei` interface definition files are created with the **Re-Edit** visual editor tool. They contain complete window layouts including gadget positions, types, labels, and properties -- similar to how modern GUI builders work.
+</Callout>
+
+See [Getting Started](/docs/getting-started) for a complete guide on setting up and using the library, and [C Interface](/docs/c-interface) for the full header and pragma reference.

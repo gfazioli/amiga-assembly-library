@@ -1,0 +1,52 @@
+# StringDecToValue
+
+## Synopsis
+
+```asm
+value = StringDecToValue(string)
+ D0                       A0
+
+LONG StringDecToValue(STRPTR);
+```
+
+## C Prototype
+
+```c
+LONG Dec2Val(STRPTR);
+```
+
+## Description
+
+Converts a decimal ASCII string into a numeric value. The returned value occupies at most a LONG (32 bits). The maximum convertible number is therefore `$FFFFFFFF` = `4294967295`.
+
+The following special characters are permitted in the input string:
+
+- `#` — Optional prefix indicator for decimal values. Has no effect on conversion.
+- `+` — Indicates positive conversion (already the default). Has no effect on conversion.
+- `-` — Makes the result negative.
+
+## Inputs
+
+- **string** — Pointer to a null-terminated string containing the ASCII decimal value to convert.
+
+## Result
+
+- **value** — The converted LONG value.
+
+## Example
+
+```asm
+; Conversion examples:
+; string = "49152"   --> value = 0000C000
+; string = "#64"     --> value = 00000040
+; string = "#-64"    --> value = FFFFFFC0
+; string = "-#+64"   --> value = FFFFFFC0
+```
+
+## Notes
+
+If the `-` character is present, it always overrides the `+` character regardless of position.
+
+## See Also
+
+[StringBinToValue](/docs/math/string-bin-to-value), [StringHexToValue](/docs/math/string-hex-to-value), [ValueToStringDec](/docs/math/value-to-string-dec)

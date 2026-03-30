@@ -5,30 +5,33 @@ export default {
    */
   metadata: {
     title: {
-      default: 'Mantine Next.js and Nextra template',
-      template: '%s | Mantine Next.js and Nextra template',
+      default: 'Amiga Assembly Library',
+      template: '%s | Amiga Assembly Library',
     },
-    description: 'I am using Mantine with Next.js and Nextra!',
-    metadataBase: new URL('https://next-app-nextra-template.vercel.app/'),
+    description:
+      'Documentation for the Amiga Assembly Library v41.21 — A Motorola 68020 shared library for Commodore Amiga (KickStart 3.0+). Public Domain Software.',
+    metadataBase: new URL('https://gfazioli.github.io/amiga-68020-library/'),
     keywords: [
-      'Mantine',
-      'Nextra',
-      'Next.js',
-      'React',
-      'JavaScript',
-      'MDX',
-      'Markdown',
-      'Static Site Generator',
+      'Amiga',
+      'Assembly',
+      'Motorola 68020',
+      '68k',
+      'Commodore',
+      'KickStart 3.0',
+      'assembly.library',
+      'AmigaOS',
+      'retro computing',
+      '680x0',
     ],
     generator: 'Next.js',
-    applicationName: 'Mantine',
+    applicationName: 'Amiga Assembly Library',
     appleWebApp: {
-      title: 'Mantine',
+      title: 'Amiga Assembly Library',
     },
     openGraph: {
       // https://github.com/vercel/next.js/discussions/50189#discussioncomment-10826632
       url: './',
-      siteName: 'Mantine',
+      siteName: 'Amiga Assembly Library',
       locale: 'en_US',
       type: 'website',
     },
@@ -36,7 +39,7 @@ export default {
       'msapplication-TileColor': '#fff',
     },
     twitter: {
-      site: 'https://next-app-nextra-template.vercel.app/',
+      site: 'https://gfazioli.github.io/amiga-68020-library/',
     },
     alternates: {
       // https://github.com/vercel/next.js/discussions/50189#discussioncomment-10826632
@@ -47,7 +50,8 @@ export default {
    * Nextra Layout component configuration
    */
   nextraLayout: {
-    docsRepositoryBase: 'https://github.com/gfazioli/next-app-nextra-template/tree/main/app/docs/',
+    docsRepositoryBase:
+      'https://github.com/gfazioli/amiga-68020-library/tree/main/amiga-assembly-library/content/',
     sidebar: {
       defaultMenuCollapseLevel: 1,
     },
@@ -64,30 +68,23 @@ export default {
   /**
    * GitHub API configuration
    * @see https://docs.github.com/en/rest/reference/repos#releases
-   *
-   * The GitHub API token is optional for rate limiting.
-   * If you want to use it, create a personal access token with the `repo` scope.
-   *
-   * This information is used to fetch the releases from the GitHub API.
    */
   gitHub: {
-    repo: 'gfazioli/next-app-nextra-template',
+    repo: 'gfazioli/amiga-68020-library',
     apiUrl: 'https://api.github.com',
-    releasesUrl: 'https://api.github.com/repos/gfazioli/next-app-nextra-template/releases',
+    releasesUrl: 'https://api.github.com/repos/gfazioli/amiga-68020-library/releases',
   },
 
   /**
    * Release notes configuration
-   * This is used to link the release notes in the app.
    */
   releaseNotes: {
-    url: 'https://github.com/gfazioli/next-app-nextra-template/releases',
+    url: 'https://github.com/gfazioli/amiga-68020-library/releases',
     maxReleases: 10,
   },
 
   /**
    * Search configuration (for pagefind)
-   * This is used to configure the search engine API.
    * @see /app/api/search/route.ts
    */
   search: {

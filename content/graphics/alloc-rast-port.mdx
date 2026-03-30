@@ -1,0 +1,31 @@
+# AllocRastPort
+
+## Synopsis
+
+```asm
+rp = AllocRastPort()
+D0
+```
+
+## C Prototype
+
+```c
+struct RastPort *AllocRastPort(void);
+```
+
+## Description
+
+Allocates a RastPort structure and initializes it using `graphics.library/InitRastPort()`. The allocation is performed in public memory, and no BitMap structure is attached to the RastPort. Use `exec.library/FreeVec()` to free the memory when it is no longer needed.
+
+## Inputs
+
+None.
+
+## Result
+
+- **rp** -- If NULL, an error occurred. Otherwise, it is the address of the allocated RastPort structure.
+
+## See Also
+
+- [CloneRastPort](/graphics/clone-rast-port)
+- `exec.library/FreeVec()`

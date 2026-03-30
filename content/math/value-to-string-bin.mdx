@@ -1,0 +1,36 @@
+# ValueToStringBin
+
+## Synopsis
+
+```asm
+ValueToStringBin(buffer, value, optlen)
+                   A0    D0:32    D1
+
+void ValueToStringBin(APTR, LONG, ULONG);
+```
+
+## C Prototype
+
+```c
+void ConvBin(APTR, LONG, ULONG);
+```
+
+## Description
+
+Converts a signed 32-bit LONG value into a binary ASCII string.
+
+By default (when `optlen` is NULL), 32 characters are placed in the buffer. The `optlen` parameter can be used to specify a different number of output characters.
+
+## Inputs
+
+- **buffer** — Pointer to a buffer that will contain the output string.
+- **value** — The LONG value to convert.
+- **optlen** — Number of characters to place in the output buffer. If NULL, defaults to 32 characters.
+
+## Result
+
+The buffer is filled with the binary string representation.
+
+## See Also
+
+[StringBinToValue](/docs/math/string-bin-to-value), [ValueToStringDec](/docs/math/value-to-string-dec), [ValueToStringHex](/docs/math/value-to-string-hex)

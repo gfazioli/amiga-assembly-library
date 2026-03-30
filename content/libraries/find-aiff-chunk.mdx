@@ -1,0 +1,37 @@
+# FindAIFFChunk
+
+## Synopsis
+
+```asm
+chunkID, chunkSize = FindAIFFChunk(data, chunkID)
+D0       D1                        A0    D0
+```
+
+## C Prototype
+
+There is no direct C prototype exported for this function. It is called internally from assembly.
+
+## Description
+
+Searches for a specific chunk within an IFF/AIFF data structure. If the data starts with a "FORM" header, the function automatically skips past the 12-byte FORM header (4-byte type ID + 4-byte size + 4-byte form type) before beginning the search.
+
+The function iterates through the chunk list using `TestAIFFChunk()` to validate each chunk and `NextIFFChunk()` to advance to the next one, until the requested chunk ID is found.
+
+## Inputs
+
+- **data** (A0) -- Pointer to the beginning of the IFF/AIFF data in memory.
+- **chunkID** (D0) -- The 4-byte chunk identifier to search for (e.g., `"BODY"`, `"CMAP"`).
+
+## Result
+
+- **chunkID** (D0) -- The chunk ID of the found chunk.
+- **chunkSize** (D1) -- The size of the found chunk data.
+- **A0** -- Points to the found chunk header.
+- If the chunk is not found, the condition codes indicate failure (zero flag set).
+
+## See Also
+
+- [TestAIFFChunk](/libraries/test-aiff-chunk)
+- [NextIFFChunk](/libraries/next-iff-chunk)
+- [UnPackerILBMBODY](/libraries/unpacker-ilbm-body)
+- [UnPackerILBMCMAP](/libraries/unpacker-ilbm-cmap)

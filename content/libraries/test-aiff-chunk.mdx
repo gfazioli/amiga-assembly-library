@@ -1,0 +1,29 @@
+# TestAIFFChunk
+
+## Synopsis
+
+```asm
+result = TestAIFFChunk(data)
+D0                     A0
+```
+
+## C Prototype
+
+There is no direct C prototype exported for this function. It is called internally from assembly.
+
+## Description
+
+Validates whether the data at the current position represents a valid IFF chunk. The function checks that the 4-byte chunk identifier at the given address falls within the valid ASCII range (between "AAAA" and "ZZZZ"). This is a quick sanity check to ensure that the pointer is positioned at a legitimate chunk boundary.
+
+## Inputs
+
+- **data** (A0) -- Pointer to the current position in the IFF data, expected to point to a chunk header.
+
+## Result
+
+- **result** (D0) -- If non-zero, the data at the position is a valid IFF chunk. If zero, the data is not a valid chunk (the zero flag in the condition codes is set).
+
+## See Also
+
+- [FindAIFFChunk](/libraries/find-aiff-chunk)
+- [NextIFFChunk](/libraries/next-iff-chunk)

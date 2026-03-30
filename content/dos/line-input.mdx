@@ -1,0 +1,32 @@
+# LineInput
+
+## Synopsis
+
+```asm
+len = LineInput(buffer, chars, Handle)
+ D0               A0     D0      D1
+```
+
+## C Prototype
+
+```c
+ULONG LineInput(APTR buffer, ULONG chars, BPTR Handle);
+```
+
+## Description
+
+This function obtains an input channel from the specified Handle. It can be used, by passing a CON window handle, to receive keyboard input.
+
+## Inputs
+
+- **buffer** — Address of a buffer that will contain the data read.
+- **chars** — Maximum number of characters to read.
+- **Handle** — Address of a Handle opened by `dos.library/Open()`.
+
+## Result
+
+- **len** — Number of characters read.
+
+## See Also
+
+`dos.library/Open()`, `dos.library/Input()`

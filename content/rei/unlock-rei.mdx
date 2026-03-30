@@ -1,0 +1,33 @@
+# UnlockREI
+
+## Synopsis
+
+```asm
+rei = UnlockREI(lockrei, name)
+D0                A0      A1
+```
+
+## C Prototype
+
+```c
+BOOL UnlockREI(struct REI *, STRPTR);
+```
+
+## Description
+
+Unlocks a REI previously blocked by `LockREI()`. In addition to reactivating the window functions associated with the REI, this command restores the mouse pointer that was previously set to the wait/busy state.
+
+If both inputs are NULL, this function fails. Unlike `LockREI()`, which automatically takes the currently active REI, `UnlockREI()` requires an explicit target for safety reasons.
+
+## Inputs
+
+- **lockrei** — Pointer to a REI structure previously blocked via `LockREI()`. If NULL, the `name` parameter will be used to locate the REI.
+- **name** — Pointer to a null-terminated string containing the name of the REI to unlock. This parameter is only considered when `lockrei` is NULL.
+
+## Result
+
+- **rei** — If NULL, it was not possible to unlock the REI, or the REI was not previously blocked. Otherwise, returns the address of the successfully unlocked REI.
+
+## See Also
+
+[LockREI](/rei/lock-rei)

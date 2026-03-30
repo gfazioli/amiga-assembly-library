@@ -1,0 +1,18 @@
+# Libraries Module
+
+The Libraries module provides generic utility functions for string manipulation and IFF/AIFF file format parsing. These functions cover character replacement and filtering, locale-aware case conversion, and support for reading and unpacking IFF-format data commonly used in Amiga multimedia files.
+
+## String Functions
+
+- **[ChangeChar](/libraries/change-char)** — Finds and replaces a specific character within a byte sequence.
+- **[FilterChars](/libraries/filter-chars)** — Replaces all characters outside a specified ASCII range with a given character.
+- **[StringToUpper](/libraries/string-to-upper)** — Converts a string to uppercase using the locale system.
+- **[StringToLower](/libraries/string-to-lower)** — Converts a string to lowercase using the locale system.
+
+## IFF/AIFF Functions
+
+- **[FindAIFFChunk](/libraries/find-aiff-chunk)** — Searches for a specific chunk within an IFF/AIFF data structure.
+- **[TestAIFFChunk](/libraries/test-aiff-chunk)** — Validates whether the data at the current position is a valid IFF chunk.
+- **[NextIFFChunk](/libraries/next-iff-chunk)** — Advances to the next chunk in an IFF data structure.
+- **[UnPackerILBMBODY](/libraries/unpacker-ilbm-body)** — Unpacks an ILBM BODY chunk into bitplane data, supporting up to 8 bitplanes.
+- **[UnPackerILBMCMAP](/libraries/unpacker-ilbm-cmap)** — Unpacks an ILBM CMAP chunk into a color table.

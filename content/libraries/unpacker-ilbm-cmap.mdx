@@ -1,0 +1,41 @@
+# UnPackerILBMCMAP
+
+## Synopsis
+
+```asm
+colorTable, nColors = UnPackerILBMCMAP(data, dest)
+A0          D0                         A0    A1
+```
+
+## C Prototype
+
+There is no direct C prototype exported for this function. It is called internally from assembly.
+
+## Description
+
+Unpacks an ILBM CMAP (color map) chunk from IFF data into an Amiga-format color table. The function uses `FindAIFFChunk()` to locate the "CMAP" chunk within the IFF data, then converts the 24-bit RGB triplets (8 bits per component) into the Amiga 12-bit color format (4 bits per component) used by the OCS/ECS chipset.
+
+If a destination buffer is provided in A1, the color data is written there. If A1 is NULL, the function allocates memory for the color table automatically using `exec.library/AllocMem()`.
+
+The conversion is performed within a `Forbid()`/`Permit()` pair to ensure atomicity.
+
+## Inputs
+
+- **data** (A0) -- Pointer to the beginning of the IFF data in memory (can include the FORM header).
+- **dest** (A1) -- Pointer to a destination buffer for the color table, or NULL to have the function allocate one.
+
+## Result
+
+- **colorTable** (A0) -- Pointer to the color table (either the provided buffer or the newly allocated one).
+- **nColors** (D0) -- Number of colors in the color table.
+- If the CMAP chunk is not found, the function returns with the zero flag set.
+
+## Notes
+
+When the function allocates memory for the color table (when `dest` is NULL), the caller is responsible for freeing it. Each color entry occupies one WORD (2 bytes) in the resulting table, in the 12-bit Amiga RGB4 format ($0RGB).
+
+## See Also
+
+- [FindAIFFChunk](/libraries/find-aiff-chunk)
+- [UnPackerILBMBODY](/libraries/unpacker-ilbm-body)
+- `graphics.library/LoadRGB4()`

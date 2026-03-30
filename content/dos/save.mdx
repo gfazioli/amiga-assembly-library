@@ -1,0 +1,48 @@
+# Save
+
+## Synopsis
+
+```asm
+len = Save(filename, buffer, len)
+ D0          A0       A1     D0
+```
+
+## C Prototype
+
+```c
+ULONG Save(STRPTR filename, APTR buffer, ULONG len);
+```
+
+## Description
+
+Opens an output channel to a device. It operates in the inverse manner of `Load()`.
+
+This command was designed for writing a file to disk, but its output can be redirected to any available peripheral (device).
+
+The file is opened in `MODE_READWRITE`, so if the filename already exists on the device, it will be overwritten without any warning. The responsibility of checking for the pre-existence of the file is left to the task; `CheckFile()` can be used for this purpose.
+
+## Inputs
+
+- **filename** — Address of a string containing the name of the file to write. This can be preceded by `RAM:`, `PRT:`, `CON:`, etc.
+- **buffer** — Pointer to the data buffer. This is the data that will be written to the device.
+- **len** — Number of bytes to transfer to the device. This parameter can be NULL when the buffer was acquired via `Load()` and `Load()` was responsible for allocating the buffer. Only in this case can `len` be NULL; otherwise it must be specified.
+
+## Result
+
+- **len** — Number of bytes written. If NULL, an error occurred.
+
+## Example
+
+```c
+/* Load and Save example.c */
+
+APTR mybuffer = Load("Work:page.txt", NULL, MEMF_PUBLIC);
+
+    /* Your READ or WRITE operation */
+
+ULONG len = Save("Work:page.txt", mybuffer, NULL);
+```
+
+## See Also
+
+[CheckFile](/dos/check-file), [Load](/dos/load)

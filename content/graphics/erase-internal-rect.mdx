@@ -1,0 +1,30 @@
+# EraseInternalRect
+
+## Synopsis
+
+```asm
+EraseInternalRect(window)
+                  A0
+```
+
+## C Prototype
+
+```c
+void EraseInternalRect(struct Window *win);
+```
+
+## Description
+
+Clears the interior rectangle of a Window without erasing its borders, using the current BackFill Hook installed on the Window itself.
+
+## Inputs
+
+- **window** -- Pointer to a Window structure.
+
+## Result
+
+None.
+
+## See Also
+
+- `graphics.library/EraseRect()`

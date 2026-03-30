@@ -1,0 +1,81 @@
+# AllocAsmRequestA
+
+## Synopsis
+
+```asm
+areq = AllocAsmRequestA(TagList)
+ D0                       A0
+```
+
+## C Prototype
+
+```c
+struct AsmRequest *AllocAsmRequestA(struct TagItem *);
+
+/* Varargs stub */
+struct AsmRequest *AllocAsmRequest(Tag, ...);
+```
+
+## Description
+
+Allocates an AsmRequest structure and initializes it according to the TagItem array passed in the inputs. The returned AsmRequest structure is READ-ONLY and must be freed from memory when no longer needed using `FreeAsmRequest()`.
+
+Once initialized, an AsmRequest can be modified, allowing the use of different types of AsmRequests combined together. In practice, there are two approaches to using multiple AsmRequests: initialize as many as needed, or create a single one and modify it via `ChangeAsmReqAttrsA()` when necessary.
+
+An AsmRequest has all the features of `intuition.library/EasyRequest()`, with the addition of special functions. The default layout of an AsmRequest is as follows:
+
+```
++-----------------------------------------+
+| . |  TITLE (screen font)             |LL|
++-----------------------------------------+
+||                                       ||
+|| BODYTEXT (system font)                ||
+||                                       ||
++-----------------------------------------+
+|                                         |
+|          Gadget (screen font)           |
++-----------------------------------------+
+```
+
+An optional Object (image or animation loaded via `datatypes.library`) can be placed either beside or above the body text. When the `AREQ_TextUnderObject` tag is set to TRUE, the object is centered above the text.
+
+Buttons are ordered the same way as `intuition.library/EasyRequest()`: the leftmost button returns the highest value and the rightmost button returns 0.
+
+**Keyboard Control** — The ESC key exits the requester with a return code of NULL by default. Buttons can be selected via keyboard if the underscore character `_` (0x5f) was included in their label string. The RETURN key selects the leftmost button (equivalent to AmigaLeft+V). The RETURN key behavior can be disabled via the `AREQ_ReturnKey` tag.
+
+## Tags
+
+- **AREQ_Left** (UWORD) — LeftEdge of the request relative to the output screen.
+- **AREQ_Top** (UWORD) — TopEdge of the request relative to the output screen.
+- **AREQ_REI** (struct REI \*) — Determines the output screen via a REI structure.
+- **AREQ_Window** (struct Window \*) — Reference window that determines the output screen.
+- **AREQ_Screen** (struct Screen \*) — Address of the output screen. Can be NULL to use the default public screen.
+- **AREQ_Title** (STRPTR) — Title of the AsmRequest. If NULL, the reference window title is used, or `"System Request"` as fallback.
+- **AREQ_IDCMP** (ULONG) — IDCMP flags to handle directly. For each set bit, if that message is received, the AsmRequest lets you exit or handle it yourself. Works with `AREQ_IDCMPHook`. (Default: NULL)
+- **AREQ_IDCMPHook** (struct Hook \*) — Hook invoked when an IDCMP flag set in `AREQ_IDCMP` is received. Called with `object == (struct REI *)` and `message == (struct REIMessage *)`. If the Hook returns `~0`, it causes immediate exit. (Default: NULL)
+- **AREQ_LockREI** (struct REI \*) — Address of the REI to put in wait state while the request is displayed. Usually the parent REI.
+- **AREQ_Justification** (UWORD) — Text justification: `ASJ_LEFT`, `ASJ_RIGHT`, `ASJ_CENTER`.
+- **AREQ_Object** (Object \*) — Pointer to a boopsi object obtained via `datatypes.library`. Can be any image or animation.
+- **AREQ_Sound** (Object \*) — Pointer to a sound opened via DataTypes. Played when the request opens.
+- **AREQ_CenterHScreen** (BOOL) — If TRUE, centers the window horizontally on the output screen. (Default: FALSE)
+- **AREQ_CenterVScreen** (BOOL) — If TRUE, centers the window vertically on the output screen. (Default: FALSE)
+- **AREQ_CenterMouse** (BOOL) — If TRUE, opens the window so the mouse pointer is at its center. (Default: FALSE)
+- **AREQ_TextUnderObject** (BOOL) — If TRUE, the text is displayed below the Object (if present). Otherwise the text is placed beside the Object. (Default: FALSE)
+- **AREQ_APenPattern** (UWORD) — Foreground pen for the default pattern, or for a simple backfill in NewLook mode. (Default: 2)
+- **AREQ_BPenPattern** (UWORD) — Background pen for the default pattern, or for a simple backfill in NewLook mode. (Default: 0)
+- **AREQ_PubScreenName** (STRPTR) — Name of the output public screen.
+- **AREQ_NewLookBackFill** (BOOL) — Removes the standard system requester crosshatch pattern, giving the request a new graphic look. (Default: FALSE)
+- **AREQ_ReturnKey** (BOOL) — If FALSE, disables RETURN key recognition. (Default: TRUE)
+- **AREQ_FrameOnly** (BOOL) — If TRUE, removes the title bar, drag bar, and gadgets from the request window. (Default: FALSE)
+- **AREQ_WindowFlags** (ULONG) — Additional window flags for personal use. USE WITH CAUTION. (Default: NULL)
+- **AREQ_ButtomHook** (struct Hook \*) — Hook invoked when a request button is released. Called with `object == (struct REI *)` and `message == (struct REIMessage *)`. The `rim_REICode` field contains the button number. If the Hook returns `~0`, it causes immediate exit. (Default: NULL)
+
+## Result
+
+- **areq** — If NULL, an error occurred. Otherwise returns the address of the allocated AsmRequest structure.
+
+## See Also
+
+[AsmRequestArgs](/intui-gadtools/asm-request-args), [ChangeAsmReqAttrsA](/intui-gadtools/change-asm-req-attrs), [FreeAsmRequest](/intui-gadtools/free-asm-request)
+
+`assembly/asmintuition.h`

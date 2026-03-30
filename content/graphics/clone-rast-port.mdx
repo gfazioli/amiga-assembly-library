@@ -1,0 +1,31 @@
+# CloneRastPort
+
+## Synopsis
+
+```asm
+clonerp = CloneRastPort(rp)
+D0                      A0
+```
+
+## C Prototype
+
+```c
+struct RastPort *CloneRastPort(struct RastPort *rp);
+```
+
+## Description
+
+Creates a copy of a RastPort structure. It allocates a new RastPort and copies the data from the source RastPort into the newly allocated one. Use `exec.library/FreeVec()` to free the memory when it is no longer needed.
+
+## Inputs
+
+- **rp** -- Address of the RastPort structure to be cloned.
+
+## Result
+
+- **clonerp** -- Address of the new RastPort structure, identical in data to the one passed in the inputs. If NULL, an error occurred.
+
+## See Also
+
+- [AllocRastPort](/graphics/alloc-rast-port)
+- `exec.library/FreeVec()`

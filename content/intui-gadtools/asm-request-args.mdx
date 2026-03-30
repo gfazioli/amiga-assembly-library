@@ -1,0 +1,40 @@
+# AsmRequestArgs
+
+## Synopsis
+
+```asm
+num = AsmRequestArgs(areq, TextFmt, GadgetFmt, ArgList)
+D0                    A0     A1       A2         A3
+```
+
+## C Prototype
+
+```c
+LONG AsmRequestArgs(struct AsmRequest *, STRPTR, STRPTR, APTR);
+
+/* Varargs stub */
+LONG AsmRequest(struct AsmRequest *, STRPTR, STRPTR, ...);
+```
+
+## Description
+
+Displays a requester previously initialized via `AllocAsmRequestA()`. The requester is shown on screen with the specified body text, gadget labels, and optional format arguments.
+
+The `TextFmt` parameter is a C-style format string for the body text, and `GadgetFmt` is a string containing the button labels separated by `|` characters (following the same convention as `intuition.library/EasyRequest()`).
+
+The `ArgList` parameter provides the values for any format specifiers in `TextFmt`.
+
+## Inputs
+
+- **areq** — Pointer to an AsmRequest structure, previously allocated by `AllocAsmRequestA()`.
+- **TextFmt** — Pointer to a C-style format string for the body text.
+- **GadgetFmt** — Pointer to a string containing the button labels, separated by `|`.
+- **ArgList** — Array of arguments for the format string.
+
+## Result
+
+- **num** — The number of the button pressed. The leftmost button returns the highest value, the rightmost button returns 0.
+
+## See Also
+
+[AllocAsmRequestA](/intui-gadtools/alloc-asm-request), [ChangeAsmReqAttrsA](/intui-gadtools/change-asm-req-attrs), [FreeAsmRequest](/intui-gadtools/free-asm-request)

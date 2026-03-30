@@ -1,0 +1,19 @@
+# DOS Module
+
+The DOS module provides file I/O and disk utility functions that simplify common operations built on top of the Amiga's `dos.library`. These functions handle file loading, saving, information retrieval, error checking, checksum calculation, and console input.
+
+## File I/O Functions
+
+- **[Load](/dos/load)** — Loads a file from disk into memory, with optional automatic buffer allocation.
+- **[Save](/dos/save)** — Writes a buffer to a file or device.
+- **[LineInput](/dos/line-input)** — Reads keyboard input through a file handle.
+
+## File Information Functions
+
+- **[FileInfo](/dos/file-info)** — Retrieves a `FileInfoBlock` structure with information about a file.
+- **[CheckFile](/dos/check-file)** — Checks the status of a file and optionally returns a localized error string.
+- **[UnitInfo](/dos/unit-info)** — Retrieves an `InfoData` structure with information about a volume or device.
+
+## Data Integrity Functions
+
+- **[CheckSum](/dos/check-sum)** — Calculates various types of checksums (BootBlock, DataBlock, FileBlock).

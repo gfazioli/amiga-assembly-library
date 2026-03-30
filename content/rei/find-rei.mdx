@@ -1,0 +1,42 @@
+# FindREI
+
+## Synopsis
+
+```asm
+rei = FindREI(name)
+D0              A1
+```
+
+## C Prototype
+
+```c
+struct REI *FindREI(STRPTR);
+```
+
+## Description
+
+Searches the internal lists for the REI structure that matches the name provided in the inputs. If no list exists, it means no interface has been opened, and the function fails. If the name is found, the address of the matching REI is returned.
+
+## Inputs
+
+- **name** — Address of the name of the REI to search for. This must be a null-terminated string.
+
+## Result
+
+- **rei** — If NULL, the REI could not be found because no matching name was found. Otherwise, returns the address of the matching REI.
+
+## Example
+
+```c
+/* C Only Example */
+
+struct Interface *i = OpenInterface("I:test.rei");
+
+struct REI *myrei = FindREI("Screen n.1");
+
+/* etc... */
+```
+
+## See Also
+
+[ActiveREI](/rei/active-rei), [OpenREIA](/rei/open-rei)

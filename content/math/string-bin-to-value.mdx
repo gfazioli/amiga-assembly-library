@@ -1,0 +1,61 @@
+# StringBinToValue
+
+## Synopsis
+
+```asm
+value = StringBinToValue(string, optlen)
+ D0                       A0      D0
+
+LONG StringBinToValue(STRPTR, WORD);
+```
+
+## C Prototype
+
+```c
+LONG Bin2Val(STRPTR, LONG);
+```
+
+## Description
+
+Converts a binary ASCII string (a sequence of `1` and `0` characters) into a decimal LONG value. This is the inverse operation of [ValueToStringBin](/docs/math/value-to-string-bin).
+
+The function converts strings of variable length from 1 to 32 characters, thus covering the full 32-bit range.
+
+The following special characters are permitted in the input string:
+
+- `%` — Optional prefix indicator for binary values. Has no effect on conversion.
+- `+` — Indicates positive conversion (already the default). Has no effect on conversion.
+- `-` — Performs a logical NOT on the final result, indicating that the NOT of the input string is desired.
+
+## Inputs
+
+- **string** — Pointer to a null-terminated string containing the ASCII binary sequence to convert.
+- **optlen** — By default NULL, which operates on all 32 bits. When specified, it limits the number of bits used for conversion.
+
+## Result
+
+- **value** — The converted LONG value.
+
+## Example
+
+```asm
+; With optlen = NULL:
+; string = "000100"    --> 4
+; string = "%0100"     --> 4
+; string = "-%100"     --> -5
+; string = "%-100"     --> -5
+; string = "-100"      --> -5
+
+; With optlen = 4:
+; string = "1110010"   --> 2
+; string = "0010"      --> 2
+; string = "111111"    --> 15
+```
+
+## Notes
+
+If the `-` character is present, it always overrides the `+` character regardless of position.
+
+## See Also
+
+[StringDecToValue](/docs/math/string-dec-to-value), [StringHexToValue](/docs/math/string-hex-to-value), [ValueToStringBin](/docs/math/value-to-string-bin)

@@ -1,0 +1,54 @@
+# DrawFrameStateA
+
+## Synopsis
+
+```asm
+DrawFrameStateA(rei, left, top, width, height, state, taglist)
+                A0   D0    D1   D2     D3      D4     A1
+```
+
+## C Prototype
+
+```c
+void DrawFrameStateA(struct REI *rei, ULONG left, ULONG top, ULONG width, ULONG height, ULONG state, struct TagItem *taglist);
+```
+
+Varargs stub:
+
+```c
+void DrawFrameState(struct REI *rei, ULONG left, ULONG top, ULONG width, ULONG height, ULONG state, Tag firsttag, ...);
+```
+
+## Description
+
+Draws a BOOPSI "frameiclass" object on a REI following a series of attributes passed in a TagItem list. `DrawFrameStateA()` performs essentially the same function as `DrawBevelBoxA()` from `gadtools.library`, but in a more complete form.
+
+The `state` parameter allows you to change the drawing state of the object at equal image settings, controlling the way the object will be rendered:
+
+- `IDS_NORMAL` -- Like `DrawImage()`
+- `IDS_SELECTED` -- Represents the "selected state" of a Gadget
+- `IDS_DISABLED` -- The "ghosted state" of a gadget
+- `IDS_BUSY` -- For future functionality
+- `IDS_INDETERMINATE` -- For future functionality
+- `IDS_INACTIVENORMAL` -- For gadgets in window border
+- `IDS_INACTIVESELECTED` -- For gadgets in window border
+- `IDS_INACTIVEDISABLED` -- For gadgets in window border
+
+## Inputs
+
+- **rei** -- Pointer to a REI structure.
+- **left** -- X coordinate of the upper-left corner of the object.
+- **top** -- Y coordinate of the upper-left corner of the object.
+- **width** -- Width of the object.
+- **height** -- Height of the object.
+- **state** -- Drawing state of the object (see values above).
+- **taglist** -- All tags for the "frameiclass" class are accepted. See `intuition/imageclass.h` for names and details.
+
+## Result
+
+None.
+
+## See Also
+
+- `intuition/imageclass.h`
+- `gadtools.library/DrawBevelBoxA()`

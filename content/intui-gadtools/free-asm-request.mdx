@@ -1,0 +1,30 @@
+# FreeAsmRequest
+
+## Synopsis
+
+```asm
+FreeAsmRequest(areq)
+                A0
+```
+
+## C Prototype
+
+```c
+void FreeAsmRequest(struct AsmRequest *);
+```
+
+## Description
+
+Frees all resources allocated by `AllocAsmRequestA()`.
+
+## Inputs
+
+- **areq** — Address of an AsmRequest structure.
+
+## Result
+
+None.
+
+## See Also
+
+[AllocAsmRequestA](/intui-gadtools/alloc-asm-request)

@@ -1,0 +1,30 @@
+# FreeList
+
+## Synopsis
+
+```asm
+FreeList(list)
+          A0
+```
+
+## C Prototype
+
+```c
+void FreeList(struct List *list);
+```
+
+## Description
+
+Removes all nodes from a list, frees the memory occupied by each node (which MUST have been added using `AllocNode()`), and then frees the memory occupied by the `List` structure itself.
+
+## Inputs
+
+- **list** — Address of an initialized `List` structure to free.
+
+## Result
+
+None.
+
+## See Also
+
+[FreeNode](/exec/free-node), [FreeListName](/exec/free-list-name)

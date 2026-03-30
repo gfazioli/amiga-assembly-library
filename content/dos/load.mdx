@@ -1,0 +1,48 @@
+# Load
+
+## Synopsis
+
+```asm
+buffer = Load(filename, buffer, typeofmem)
+  D0            A0       A1       D0
+```
+
+## C Prototype
+
+```c
+APTR Load(STRPTR filename, APTR buffer, ULONG typeofmem);
+```
+
+## Description
+
+Loads any file into memory using `dos.library/Open()`. This command does NOT perform any relocation of the file. The filename pointer is a string, complete with path, indicating the file to be loaded into memory.
+
+A notable feature is the ability to pre-allocate your own buffer instead of having `Load()` allocate one. If a buffer is passed in the inputs, the file will be loaded into it. As a general rule, it is strongly recommended to always pass a NULL buffer, leaving the allocation task to `Load()`. This will allow the use of `exec.library/FreeVec()` when it is time to free the memory.
+
+`Load()` allocates an entire block of memory corresponding to the byte size of the file to be loaded. Therefore, its use is recommended in all cases where available memory and its fragmentation are not a concern.
+
+Its use is suitable for files that do not exceed 500K in size, although on systems equipped with large amounts of RAM (Fast or Chip), it can be used with any file size.
+
+## Inputs
+
+- **filename** — Pointer to the name of the file to load.
+- **buffer** — Pointer to a buffer where the data will be loaded. If NULL, the routine will automatically allocate a buffer for the data. In this case, the type of memory to allocate must ALWAYS be specified.
+- **typeofmem** — Type of memory to allocate (e.g., `MEMF_PUBLIC`). This parameter is only considered when `buffer` is NULL.
+
+## Result
+
+- **buffer** — If NULL, an error occurred. Otherwise, it is the address of the buffer containing the file data. If a pre-allocated buffer was passed, this address is the same as the one passed in the inputs. Otherwise, it is the buffer allocated by the command.
+
+## Notes
+
+None.
+
+## Bugs
+
+With heavily fragmented memory, `Load()` may fail for very large files.
+
+## See Also
+
+[CheckFile](/dos/check-file), [Save](/dos/save)
+
+`dos.library/Open()`, `dos.library/Read()`, `exec.library/FreeVec()`

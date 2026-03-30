@@ -1,0 +1,33 @@
+# StringToLower
+
+## Synopsis
+
+```asm
+StringToLower(locale, string, len)
+              A0      A1      D0
+```
+
+## C Prototype
+
+```c
+void StringToLower(struct Locale *locale, STRPTR string, LONG len);
+```
+
+## Description
+
+Converts an entire ASCII string to lowercase, in accordance with the localization system.
+
+## Inputs
+
+- **locale** -- Pointer to a Locale structure, or NULL for the default Locale.
+- **string** -- Address of the string to convert. It must be null-terminated if you want to pass `len` as NULL.
+- **len** -- Number of characters to convert. If NULL, the entire string will be converted.
+
+## Result
+
+None. The string is converted in place.
+
+## See Also
+
+- [StringToUpper](/libraries/string-to-upper)
+- `locale.library/ConvToUpper()`, `ConvToLower()`

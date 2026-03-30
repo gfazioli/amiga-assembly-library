@@ -1,0 +1,64 @@
+# OpenInterface
+
+## Synopsis
+
+```asm
+i = OpenInterface(filename)
+D0                   A0
+```
+
+## C Prototype
+
+```c
+struct Interface *OpenInterface(STRPTR);
+```
+
+## Description
+
+Opens an interface file created with the REI-Editor from a device. `OpenInterface()` provides simplified management for loading an interface. The filename passed in the inputs can include a full path, for example: `work:utils/myinter/cogito.rei`.
+
+The full path is taken into consideration, and if for any reason `OpenInterface()` cannot load the interface, it extracts just the filename (e.g., `cogito.rei`) and searches first in the application's own directory. If that also fails, as a last resort, it tries the `SYS:I` drawer, which is defined by default as the system interface drawer.
+
+For compatibility and readability, the recommended filename syntax is: `APPLICATIONNAME.rei`.
+
+As a general guideline, knowing `OpenInterface()`'s file reading priority, it is recommended to place the original interface files of all applications in `SYS:I`, and any customized/modified versions in the same path as the application. This helps maintain future compatibility.
+
+## Inputs
+
+- **filename** — Pointer to a null-terminated string indicating the `.rei` file to open.
+
+## Result
+
+- **i** — Pointer to an Interface structure. If NULL, the `.rei` file was not found, or it was impossible to load it.
+
+## Example
+
+```c
+/* Open and Display a REI */
+/* C language version     */
+
+main() {
+
+struct Interface *i;
+struct REI *myrei;
+
+    if(i = OpenInterface("MyApplication.rei"))
+    {
+        if(myrei = OpenREIA(NULL, "main", NULL))
+        {
+            /* Use the interface */
+
+            CloseREI(myrei, NULL);
+        }
+        CloseInterface(i);
+    }
+} /* end main */
+```
+
+## Notes
+
+A recommended method for supporting multiple interfaces is to have the application determine the `.rei` filename directly. This can be done via TOOLTYPES if the application is launched from the Workbench, or via command-line parsing if launched from the CLI. For example, `INTERFACE=cogito2.rei` in the TOOLTYPES or command-line parse allows easy switching between interfaces.
+
+## See Also
+
+[CloseInterface](/intui-gadtools/close-interface), [OpenREIA](/rei/open-rei)

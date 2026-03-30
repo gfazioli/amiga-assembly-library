@@ -1,0 +1,68 @@
+# AllocNode
+
+## Synopsis
+
+```asm
+node = AllocNode(list, string, type, pri)
+ D0               A0     A1     D0   D1
+```
+
+## C Prototype
+
+```c
+struct Node *AllocNode(struct List *list, STRPTR string, ULONG type, LONG pri);
+```
+
+## Description
+
+Allocates and initializes a `Node` structure. If `list` is not NULL, the node is inserted into the list taking the `pri` (priority) parameter into account. The insertion is performed using the `ENQUEUE` macro defined in `assembly/asmmacros.i`, which performs the same function as `exec/Enqueue()`.
+
+If `list` is NULL, the node is only allocated and no insertion into a list is performed. In this case, the task is responsible for inserting the node into a list as it sees fit.
+
+## Inputs
+
+- **list** — Address of a `List` structure. If NULL, the node will only be allocated and NOT inserted into a list.
+- **string** — Address to place in `LN_NAME`. Can be NULL.
+- **type** — Value to place in `LN_TYPE`. Can be NULL.
+- **pri** — Priority to place in `LN_PRI`. Can be NULL. This parameter is only considered when `list` is not NULL, and allows priority-based insertion of nodes. See also `exec/Enqueue()`.
+
+## Result
+
+- **node** — Address of the allocated `Node` structure. If NULL, an error occurred.
+
+## Example
+
+```c
+/* Simple usage of AllocNewList() and AllocNode()       */
+/* to create a label list for a LISTVIEW, using and     */
+/* not using the priority (pri) parameter               */
+
+struct List *list;
+struct Node *node;
+
+    list = AllocNewList();       /* Create the list */
+
+    node = AllocNode(list, "Last Element", NULL, -5);
+    node = AllocNode(list, "I Element", NULL, 1);
+    node = AllocNode(list, "II Element", NULL, 2);
+    node = AllocNode(list, "IV Element", NULL, 4);
+
+    /*** this one I manage myself ***/
+    node = AllocNode(NULL, "???? Element", NULL, 0);
+    /** here you can call whichever function you prefer **/
+    /** the node has been allocated, but not inserted   **/
+    /** into the list... for example you could use      **/
+    /** AddTail() or AddHead(), etc...                  **/
+
+    node = AllocNode(list, "III Element", NULL, 3);
+
+/* etc... as you can see, the priority determines the   */
+/* position of the node in the list, as long as         */
+/* list != NULL                                         */
+```
+
+## See Also
+
+[AllocNewList](/exec/alloc-new-list), [FreeNode](/exec/free-node), [FreeList](/exec/free-list)
+
+`exec/Enqueue()`
