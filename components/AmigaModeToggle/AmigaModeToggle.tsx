@@ -69,8 +69,8 @@ export function AmigaModeToggle() {
             height: 34,
             borderRadius: 6,
             background: amigaMode
-              ? 'linear-gradient(160deg, #e8e4dc 0%, #c8c4b8 40%, #a8a498 100%)'
-              : 'linear-gradient(160deg, #606060 0%, #484848 40%, #303030 100%)',
+              ? 'linear-gradient(160deg, #303030 0%, #c8c4b8 40%, #ffffff 100%)'
+              : 'linear-gradient(160deg, #ffffff 0%, #e4e2e2 40%, #303030 100%)',
             boxShadow: amigaMode
               ? '0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.6)'
               : '0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)',
@@ -88,8 +88,8 @@ export function AmigaModeToggle() {
               height: 26,
               borderRadius: 4,
               background: amigaMode
-                ? 'linear-gradient(180deg, #f0ece4 0%, #ddd8d0 100%)'
-                : 'linear-gradient(180deg, #555 0%, #444 100%)',
+                ? 'linear-gradient(160deg, #e2e2e2 0%, #959393 100%)'
+                : 'linear-gradient(160deg, #959393 0%, #e2e2e2 100%)',
               boxShadow: amigaMode
                 ? 'inset 0 -1px 1px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.4)'
                 : 'inset 0 -1px 1px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.08)',
