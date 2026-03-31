@@ -80,24 +80,26 @@ export function Welcome() {
         </Group>
       </Center>
 
-      <Title maw="90vw" mx="auto" className={classes.title} ta="center">
+      <Title maw="90vw" mx="auto" className={classes.title} ta="center" data-amiga-logo="">
         <Box
           component="span"
           style={{
             display: 'inline-block',
             verticalAlign: 'middle',
-            marginRight: '-0.1em',
-            marginBottom: '-0.05em',
+            marginRight: '-0.5em',
+            marginBottom: '0.4em',
           }}
         >
-          <AmigaCheckmark size={180} />
+          <AmigaCheckmark size={140} />
         </Box>
         <span
+          data-amiga-logo=""
           style={{
             fontStyle: 'italic',
             fontFamily: 'Garamond, "EB Garamond", "Times New Roman", serif',
             textTransform: 'uppercase',
             letterSpacing: '0.02em',
+            fontSize: '1.15em',
           }}
         >
           Amiga
