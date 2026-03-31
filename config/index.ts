@@ -29,17 +29,26 @@ export default {
       title: 'Amiga Assembly Library',
     },
     openGraph: {
-      // https://github.com/vercel/next.js/discussions/50189#discussioncomment-10826632
       url: './',
       siteName: 'Amiga Assembly Library',
       locale: 'en_US',
       type: 'website',
+      images: [
+        {
+          url: '/social.jpeg',
+          width: 1200,
+          height: 630,
+          alt: 'Amiga Assembly Library — Commodore Amiga with Workbench',
+        },
+      ],
     },
     other: {
       'msapplication-TileColor': '#fff',
     },
     twitter: {
-      site: 'https://gfazioli.github.io/amiga-68020-library/',
+      card: 'summary_large_image',
+      site: 'https://gfazioli.github.io/amiga-assembly-library/',
+      images: ['/social.jpeg'],
     },
     alternates: {
       // https://github.com/vercel/next.js/discussions/50189#discussioncomment-10826632
