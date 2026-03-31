@@ -2,7 +2,7 @@
 
 import { TextAnimate } from '@gfazioli/mantine-text-animate';
 import { IconBrandGithub, IconDownload, IconExternalLink } from '@tabler/icons-react';
-import { Badge, Button, Center, Group, Paper, Text, Title } from '@mantine/core';
+import { Badge, Box, Button, Center, Group, Paper, Text, Title } from '@mantine/core';
 import classes from './Welcome.module.css';
 
 const LIBRARY_FUNCTIONS = [
@@ -32,6 +32,37 @@ const LIBRARY_FUNCTIONS = [
   'Ready.',
 ];
 
+/**
+ * Official Amiga checkmark logo — rainbow stripe V/checkmark.
+ */
+function AmigaCheckmark({ size = 200 }: { size?: number }) {
+  return (
+    <svg
+      clipRule="evenodd"
+      fillRule="evenodd"
+      height={size}
+      viewBox="0 0 48 48"
+      width={size}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clipRule="evenodd">
+        <g fillRule="evenodd">
+          <path d="m33.568 16h-5l4.216-6h5zm6 0h-5l4.216-6h5z" fill="#f36c00" />
+          <path d="m29.351 22h-5l4.217-6h5zm6 0h-5l4.217-6h5z" fill="#ff9000" />
+          <path d="m25.135 28h-5l4.216-6h5zm6 0h-5l4.216-6h5z" fill="#ffa100" />
+          <path d="m12.143 36 2.857 4-4 1-3.667-5zm6 0 2.857 4-4 1-3.667-5z" fill="#237f2d" />
+          <path d="m18.143 36h-4.81l-3.666-5h4.904z" fill="#008390" />
+          <path d="m20.919 34h-5l4.216-6h5zm6 0h-5l4.216-6h5z" fill="#fdc200" />
+          <path d="m16 41h-5l4.919-7h5zm6 0h-5l4.919-7h5z" fill="#feda0f" />
+          <path d="m37.784 10h-5l4.216-6h5zm6 0h-5l4.216-6h5z" fill="#dc4100" />
+          <path d="m12.143 36h-4.81l-3.666-5h4.904z" fill="#008390" />
+          <path d="m8.571 31h-4.904l-3.667-5h5zm6 0h-4.904l-3.667-5h5z" fill="#0075c0" />
+        </g>
+      </g>
+    </svg>
+  );
+}
+
 export function Welcome() {
   return (
     <>
@@ -48,25 +79,45 @@ export function Welcome() {
           </Badge>
         </Group>
       </Center>
-      <Title maw="90vw" mx="auto" className={classes.title} ta="center">
-        Amiga{' '}
-        <TextAnimate
-          animate="in"
-          by="character"
-          inherit
-          variant="gradient"
-          component="span"
-          segmentDelay={0.2}
-          duration={2}
-          animation="scale"
-          animateProps={{
-            scaleAmount: 3,
-          }}
-          gradient={{ from: 'orange', to: 'yellow' }}
+
+      <Box pos="relative" maw="90vw" mx="auto">
+        {/* Amiga checkmark behind the title */}
+        <Box
+          pos="absolute"
+          top={-60}
+          left="50%"
+          style={{ transform: 'translateX(-85%)', zIndex: 0, opacity: 0.9 }}
         >
-          Assembly Library
-        </TextAnimate>
-      </Title>
+          <AmigaCheckmark size={160} />
+        </Box>
+
+        <Title
+          maw="90vw"
+          mx="auto"
+          className={classes.title}
+          ta="center"
+          pos="relative"
+          style={{ zIndex: 1 }}
+        >
+          Amiga{' '}
+          <TextAnimate
+            animate="in"
+            by="character"
+            inherit
+            variant="gradient"
+            component="span"
+            segmentDelay={0.2}
+            duration={2}
+            animation="scale"
+            animateProps={{
+              scaleAmount: 3,
+            }}
+            gradient={{ from: 'orange', to: 'yellow' }}
+          >
+            Assembly Library
+          </TextAnimate>
+        </Title>
+      </Box>
 
       <Text c="dimmed" ta="center" size="xl" maw={620} mx="auto" mt="sm">
         A shared library for Commodore Amiga written in Motorola 68020 assembly language. Provides

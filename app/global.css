@@ -25,29 +25,12 @@
     --x-color-neutral-800: var(--mantine-color-dark-6);
   }
 
-  /* Apply Topaz a1200 font everywhere */
-  html,
-  body {
-    font-family: 'Topaz a1200', monospace !important;
-  }
-
-  /* Nextra content area */
-  .nextra-content,
-  article,
-  nav,
-  aside,
-  .nextra-sidebar-container,
-  .nextra-toc {
-    font-family: 'Topaz a1200', monospace !important;
-  }
-
-  /* Code blocks - Shiki/Nextra */
-  pre,
-  code,
-  pre code,
-  [data-rehype-pretty-code-figure] pre,
-  [data-rehype-pretty-code-figure] code {
-    font-family: 'Topaz a1200', monospace !important;
+  /* Amiga Mode: when [data-amiga-mode] is set, apply Topaz everywhere */
+  [data-amiga-mode] {
+    &,
+    & *:not(pre):not(code) {
+      font-family: 'Topaz a1200', monospace !important;
+    }
   }
 
   .x\:text-sm {

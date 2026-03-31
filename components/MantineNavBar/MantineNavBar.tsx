@@ -2,6 +2,7 @@
 
 import { Navbar } from 'nextra-theme-docs';
 import { Group, Text } from '@mantine/core';
+import { AmigaModeToggle } from '../AmigaModeToggle/AmigaModeToggle';
 import { ColorSchemeControl } from '../ColorSchemeControl/ColorSchemeControl';
 import { Logo } from '../Logo/Logo';
 import { MantineNextraThemeObserver } from '../MantineNextraThemeObserver/MantineNextraThemeObserver';
@@ -22,6 +23,7 @@ export const MantineNavBar = () => {
         chatLink="https://eab.abime.net/"
         projectLink="https://github.com/gfazioli/amiga-assembly-library"
       >
+        <AmigaModeToggle />
         <ColorSchemeControl />
       </Navbar>
     </>
