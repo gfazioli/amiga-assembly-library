@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ActionIcon, Tooltip } from '@mantine/core';
+import { Box, Tooltip, UnstyledButton } from '@mantine/core';
 
 const STORAGE_KEY = 'amiga-mode';
 
@@ -58,15 +58,47 @@ export function AmigaModeToggle() {
 
   return (
     <Tooltip label={amigaMode ? 'Switch to modern fonts' : 'Switch to Amiga mode'} withArrow>
-      <ActionIcon
-        variant={amigaMode ? 'filled' : 'subtle'}
-        color={amigaMode ? 'orange' : 'gray'}
-        onClick={toggle}
-        size="lg"
-        aria-label="Toggle Amiga mode"
-      >
-        <AmigaCheckIcon />
-      </ActionIcon>
+      <UnstyledButton onClick={toggle} aria-label="Toggle Amiga mode">
+        {/* Outer keycap base — beveled edges */}
+        <Box
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 34,
+            height: 34,
+            borderRadius: 6,
+            background: amigaMode
+              ? 'linear-gradient(160deg, #e8e4dc 0%, #c8c4b8 40%, #a8a498 100%)'
+              : 'linear-gradient(160deg, #606060 0%, #484848 40%, #303030 100%)',
+            boxShadow: amigaMode
+              ? '0 2px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.6)'
+              : '0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          {/* Inner keycap surface — raised center */}
+          <Box
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 26,
+              height: 26,
+              borderRadius: 4,
+              background: amigaMode
+                ? 'linear-gradient(180deg, #f0ece4 0%, #ddd8d0 100%)'
+                : 'linear-gradient(180deg, #555 0%, #444 100%)',
+              boxShadow: amigaMode
+                ? 'inset 0 -1px 1px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.4)'
+                : 'inset 0 -1px 1px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.08)',
+            }}
+          >
+            <AmigaCheckIcon size={16} />
+          </Box>
+        </Box>
+      </UnstyledButton>
     </Tooltip>
   );
 }

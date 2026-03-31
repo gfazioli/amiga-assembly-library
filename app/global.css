@@ -28,7 +28,7 @@
   /* Amiga Mode: when [data-amiga-mode] is set, apply Topaz everywhere */
   [data-amiga-mode] {
     &,
-    & *:not(pre):not(code) {
+    & *:not(pre):not(code):not([data-amiga-logo]):not([data-amiga-logo] *) {
       font-family: 'Topaz a1200', monospace !important;
     }
   }
