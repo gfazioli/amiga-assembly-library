@@ -211,12 +211,40 @@ function esc(t: string) {
 }
 
 function isM68kBlock(text: string): boolean {
-  // Detect 68k asm by checking for common patterns across more lines
-  const lines = text.split('\n').slice(0, 80);
+  const lines = text.split('\n');
+  const sample = lines.slice(0, 120);
+
+  // Quick reject: if first non-empty, non-comment line is a C #include, it's C
+  for (const line of sample) {
+    const trimmed = line.trim();
+    if (!trimmed || /^[;*/]/.test(trimmed)) {
+      continue;
+    }
+    if (/^#\s*include\s*</.test(trimmed)) {
+      return false;
+    }
+    break;
+  }
+
+  // Count strong C signals (function definitions with braces)
+  let cFuncs = 0;
+  for (const line of sample) {
+    if (/^\s*(void|int|char|struct\s+\w+\s*\*?)\s+\w+\s*\([^)]*\)\s*$/.test(line)) {
+      cFuncs++;
+    }
+  }
+  if (cFuncs >= 2) {
+    return false;
+  }
+
+  // Score for 68k assembly patterns
   let score = 0;
-  for (const line of lines) {
+  for (const line of sample) {
     if (/\b(move[aqm]?|lea|jsr|rts|bsr|dbf|tst)\.[bwls]?\b/i.test(line)) {
       score++;
+    }
+    if (/^\s+XDEF\b/i.test(line)) {
+      score += 2;
     }
     if (/\b[da][0-7]\b/i.test(line)) {
       score++;
@@ -227,7 +255,13 @@ function isM68kBlock(text: string): boolean {
     if (/_LVO\w+/.test(line)) {
       score++;
     }
-    if (/\b(SECTION|CALLEXEC|CALLLIB|dc\.[bwl]|ds\.[bwl]|include\s)/i.test(line)) {
+    if (/^\s+(SECTION|CALLEXEC|CALLLIB)\b/i.test(line)) {
+      score++;
+    }
+    if (/^\s+(dc|ds)\.[bwl]\b/i.test(line)) {
+      score++;
+    }
+    if (/^\s+(include|incdir)\s/i.test(line)) {
       score++;
     }
   }
