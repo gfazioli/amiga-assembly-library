@@ -211,8 +211,8 @@ function esc(t: string) {
 }
 
 function isM68kBlock(text: string): boolean {
-  // Detect 68k asm by checking for common patterns
-  const lines = text.split('\n').slice(0, 30);
+  // Detect 68k asm by checking for common patterns across more lines
+  const lines = text.split('\n').slice(0, 80);
   let score = 0;
   for (const line of lines) {
     if (/\b(move[aqm]?|lea|jsr|rts|bsr|dbf|tst)\.[bwls]?\b/i.test(line)) {
@@ -221,10 +221,13 @@ function isM68kBlock(text: string): boolean {
     if (/\b[da][0-7]\b/i.test(line)) {
       score++;
     }
-    if (/^\*{3,}/.test(line)) {
+    if (/^[*;]\*{3,}/.test(line)) {
       score++;
     }
     if (/_LVO\w+/.test(line)) {
+      score++;
+    }
+    if (/\b(SECTION|CALLEXEC|CALLLIB|dc\.[bwl]|ds\.[bwl]|include\s)/i.test(line)) {
       score++;
     }
   }
@@ -232,8 +235,8 @@ function isM68kBlock(text: string): boolean {
 }
 
 function colorLine(text: string): string {
-  // Full-line comment with *
-  if (/^\*/.test(text)) {
+  // Full-line comment with * or ;
+  if (/^[*;]/.test(text)) {
     return `<span style="color:${C.comment}">${esc(text)}</span>`;
   }
 
