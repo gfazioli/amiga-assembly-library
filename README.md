@@ -9,7 +9,8 @@
 
 ---
 
-[<kbd> <br/> If this project has been useful to you, please consider becoming a sponsor <br/> </kbd>](https://github.com/sponsors/gfazioli?o=esc)
+[<kbd> <br/> ❤️ If this project has been useful to you, please consider becoming a sponsor <br/> </kbd>](https://github.com/sponsors/gfazioli?o=esc)  
+
 
 </div>
 
@@ -106,7 +107,7 @@ yarn dev
 
 <div align="center">
 
-[<kbd> <br/> If this project has been useful to you, please consider becoming a sponsor <br/> </kbd>](https://github.com/sponsors/gfazioli?o=esc)
+[<kbd> <br/> ❤️ If this project has been useful to you, please consider becoming a sponsor <br/> </kbd>](https://github.com/sponsors/gfazioli?o=esc)  
 
 </div>
 
@@ -119,7 +120,7 @@ Your support helps me:
 
 Open source thrives when those who benefit can give back — even a small monthly contribution makes a real difference.
 
-[Become a sponsor](https://github.com/sponsors/gfazioli?o=esc) today and help me keep this project reliable, up-to-date, and growing for everyone.
+💚 [Become a sponsor](https://github.com/sponsors/gfazioli?o=esc) today and help me keep this project reliable, up-to-date, and growing for everyone.
 
 ---
 
