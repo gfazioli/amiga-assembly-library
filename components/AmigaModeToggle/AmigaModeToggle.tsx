@@ -67,7 +67,7 @@ export function AmigaModeToggle() {
             justifyContent: 'center',
             width: 34,
             height: 34,
-            borderRadius: 6,
+            borderRadius: 10,
             background: amigaMode
               ? 'linear-gradient(160deg, #303030 0%, #c8c4b8 40%, #ffffff 100%)'
               : 'linear-gradient(160deg, #ffffff 0%, #e4e2e2 40%, #303030 100%)',
@@ -86,13 +86,13 @@ export function AmigaModeToggle() {
               justifyContent: 'center',
               width: 26,
               height: 26,
-              borderRadius: 4,
+              borderRadius: 6,
               background: amigaMode
                 ? 'linear-gradient(160deg, #e2e2e2 0%, #959393 100%)'
                 : 'linear-gradient(160deg, #959393 0%, #e2e2e2 100%)',
               boxShadow: amigaMode
-                ? 'inset 0 -1px 1px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.4)'
-                : 'inset 0 -1px 1px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.08)',
+                ? 'inset 0 -1px 1px rgba(255, 255, 255, 1), 0 1px 0 rgba(255,255,255,0.4)'
+                : 'inset 0 -1px 1px rgba(245, 243, 243, 0.2), 0 1px 0 rgba(255,255,255,0.08)',
             }}
           >
             <AmigaCheckIcon size={16} />
