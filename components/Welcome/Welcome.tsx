@@ -80,44 +80,45 @@ export function Welcome() {
         </Group>
       </Center>
 
-      <Box pos="relative" maw="90vw" mx="auto">
-        {/* Amiga checkmark behind the title */}
+      <Title maw="90vw" mx="auto" className={classes.title} ta="center">
         <Box
-          pos="absolute"
-          top={-60}
-          left="50%"
-          style={{ transform: 'translateX(-85%)', zIndex: 0, opacity: 0.9 }}
+          component="span"
+          style={{
+            display: 'inline-block',
+            verticalAlign: 'middle',
+            marginRight: '-0.1em',
+            marginBottom: '-0.05em',
+          }}
         >
-          <AmigaCheckmark size={160} />
+          <AmigaCheckmark size={180} />
         </Box>
-
-        <Title
-          maw="90vw"
-          mx="auto"
-          className={classes.title}
-          ta="center"
-          pos="relative"
-          style={{ zIndex: 1 }}
+        <span
+          style={{
+            fontStyle: 'italic',
+            fontFamily: 'Garamond, "EB Garamond", "Times New Roman", serif',
+            textTransform: 'uppercase',
+            letterSpacing: '0.02em',
+          }}
         >
-          Amiga{' '}
-          <TextAnimate
-            animate="in"
-            by="character"
-            inherit
-            variant="gradient"
-            component="span"
-            segmentDelay={0.2}
-            duration={2}
-            animation="scale"
-            animateProps={{
-              scaleAmount: 3,
-            }}
-            gradient={{ from: 'orange', to: 'yellow' }}
-          >
-            Assembly Library
-          </TextAnimate>
-        </Title>
-      </Box>
+          Amiga
+        </span>{' '}
+        <TextAnimate
+          animate="in"
+          by="character"
+          inherit
+          variant="gradient"
+          component="span"
+          segmentDelay={0.2}
+          duration={2}
+          animation="scale"
+          animateProps={{
+            scaleAmount: 3,
+          }}
+          gradient={{ from: 'orange', to: 'yellow' }}
+        >
+          Assembly Library
+        </TextAnimate>
+      </Title>
 
       <Text c="dimmed" ta="center" size="xl" maw={620} mx="auto" mt="sm">
         A shared library for Commodore Amiga written in Motorola 68020 assembly language. Provides
