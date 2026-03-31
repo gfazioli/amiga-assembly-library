@@ -1,6 +1,11 @@
 'use client';
 
-import { IconBrandGithubFilled, IconBrandX, IconMailHeart } from '@tabler/icons-react';
+import {
+  IconBrandGithubFilled,
+  IconBrandMantine,
+  IconBrandX,
+  IconMailHeart,
+} from '@tabler/icons-react';
 import {
   ActionIcon,
   Anchor,
@@ -110,6 +115,30 @@ export const MantineFooter = () => {
               <Anchor fz={13} href="https://undolog.com/">
                 Undolog
               </Anchor>
+            </Text>
+            <Divider orientation="vertical" />
+            <Text fz={12} inline>
+              <Group gap={4} component="span">
+                Hosted on{' '}
+                <Anchor fz={13} href="https://vercel.com/">
+                  Vercel
+                </Anchor>
+              </Group>
+            </Text>
+            <Divider orientation="vertical" />
+            <Text fz={12} inline>
+              <Group gap={4} component="span">
+                Built with{' '}
+                <Anchor fz={13} href="https://mantine.dev/">
+                  <Group gap={4} component="span">
+                    <IconBrandMantine size={16} /> Mantine
+                  </Group>
+                </Anchor>
+                {' + '}
+                <Anchor fz={13} href="https://nextra.site/">
+                  Nextra
+                </Anchor>
+              </Group>
             </Text>
             <Divider orientation="vertical" />
             <Text fz={12} inline>
