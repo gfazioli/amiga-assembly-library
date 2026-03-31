@@ -20,7 +20,7 @@ A shared library for **Commodore Amiga** written in **Motorola 68020 assembly la
 
 > [!note]
 >
-> [Documentation](https://gfazioli.github.io/amiga-assembly-library/) | [Download (ZIP)](/download.zip)
+> [Documentation](https://amiga-assembly-library.vercel.app/) | [Download (ZIP)](/download.zip)
 
 ## Features
 
@@ -54,7 +54,7 @@ A shared library for **Commodore Amiga** written in **Motorola 68020 assembly la
 
 1. Copy `assembly.library` to `LIBS:`
 2. Copy include files to your include path
-3. See the [Getting Started](https://gfazioli.github.io/amiga-assembly-library/docs/getting-started) guide for details
+3. See the [Getting Started](https://amiga-assembly-library.vercel.app/docs/getting-started) guide for details
 
 ## Quick Example (C)
 

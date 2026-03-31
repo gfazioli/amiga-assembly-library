@@ -10,7 +10,7 @@ export default {
     },
     description:
       'Documentation for the Amiga Assembly Library v41.21 — A Motorola 68020 shared library for Commodore Amiga (KickStart 3.0+). Public Domain Software.',
-    metadataBase: new URL('https://gfazioli.github.io/amiga-assembly-library/'),
+    metadataBase: new URL('https://amiga-assembly-library.vercel.app/'),
     keywords: [
       'Amiga',
       'Assembly',
@@ -47,7 +47,7 @@ export default {
     },
     twitter: {
       card: 'summary_large_image',
-      site: 'https://gfazioli.github.io/amiga-assembly-library/',
+      site: 'https://amiga-assembly-library.vercel.app/',
       images: ['/social.jpeg'],
     },
     alternates: {
