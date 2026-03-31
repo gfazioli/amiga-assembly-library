@@ -20,6 +20,7 @@ export const MantineNavBar = () => {
           </Group>
         }
         chatLink="https://eab.abime.net/"
+        projectLink="https://github.com/gfazioli/amiga-assembly-library"
       >
         <ColorSchemeControl />
       </Navbar>

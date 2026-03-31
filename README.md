@@ -1,61 +1,126 @@
-# Mantine Next.js + Nextra template
+# Amiga Assembly Library
 
+<div align="center">
 
-<img width="1536" alt="image" src="https://github.com/user-attachments/assets/eac2e76d-0c63-4429-bb93-b75476e55216" />
+  ![Version](https://img.shields.io/badge/version-41.21-fd7e14?style=for-the-badge)
+  ![Platform](https://img.shields.io/badge/platform-Amiga-blue?style=for-the-badge)
+  ![CPU](https://img.shields.io/badge/CPU-Motorola%2068020-green?style=for-the-badge)
+  ![License](https://img.shields.io/badge/license-Public%20Domain-gray?style=for-the-badge)
 
+---
 
-This is a template for [Next.js](https://nextjs.org/) app router + [Mantine](https://mantine.dev/) + [Nextra](https://nextra.site/) documentation site.
+[<kbd> <br/> If this project has been useful to you, please consider becoming a sponsor <br/> </kbd>](https://github.com/sponsors/gfazioli?o=esc)
+
+</div>
+
+## Overview
+
+A shared library for **Commodore Amiga** written in **Motorola 68020 assembly language**. It provides 50+ high-level functions organized into specialized modules, callable from both Assembly and C programs. Compatible with **KickStart 3.0+** (AmigaOS V39 and above).
+
+> [!note]
+>
+> [Documentation](https://gfazioli.github.io/amiga-assembly-library/) | [Download (ZIP)](/download.zip)
 
 ## Features
 
-This template comes with the following features:
+- Written in optimized 680x0 assembly (68020+)
+- Public Domain Software — free to use and distribute
+- Dual API: call from Assembly or C with full type safety
+- Auto-opens 12+ system libraries via `AssemblyBase`
+- Comprehensive documentation with original source code
 
-- [PostCSS](https://postcss.org/) with [mantine-postcss-preset](https://mantine.dev/styles/postcss-preset)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Storybook](https://storybook.js.org/)
-- [Jest](https://jestjs.io/) setup with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro)
-- ESLint setup with [eslint-config-mantine](https://github.com/mantinedev/eslint-config-mantine)
-- Provides API example in `/api/version`
+## Modules
 
-## Nextra Features
+| Module | Description |
+|--------|-------------|
+| **Exec** | Memory management, linked lists, node operations (`AllocNewList`, `ReAllocVec`, `FreeList`...) |
+| **DOS** | File I/O, disk info, checksums (`Load`, `Save`, `FileInfo`, `CheckFile`...) |
+| **Graphics** | BitPlanes, RastPort, drawing, formatted text (`AddBitPlanes`, `AllocRastPort`, `DrawBox`...) |
+| **Libraries** | String processing, IFF/AIFF support (`ChangeChar`, `FilterChars`, `UnPackerILBM`...) |
+| **Math** | Decimal, hexadecimal, binary conversions (`StringDecToValue`, `ValueToStringHex`...) |
+| **Intuition & GadTools** | UI gadgets, custom requesters (`AllocAsmRequest`, `FindAsmGadget`...) |
+| **REI Interface** | Custom windowing system with event-driven messaging (`OpenREI`, `WaitREIMsg`...) |
+| **C Interface** | Full C prototypes and SAS/C pragma declarations |
 
-- [Nextra](https://nextra.site/) documentation site with Mantine theme
-- Sync Dark mode between documentation and application (Mantine/Nextra)
-- Customizable components in `components` folder
-- Provides new Navigation and Footer components for Nextra documentation site
+## System Requirements
 
-## Folder structure
+- **CPU**: Motorola 68020 or higher (68030, 68040, 68060)
+- **OS**: AmigaOS with KickStart 3.0 (V39) or later
+- **Assembler**: HiSoft DevPac or compatible 68k assembler
+- **C Compiler** (optional): SAS/C, DICE, or compatible Amiga C compiler
 
-- `components` – shared components 
-    - you can use them in both documentation and application
-    - you may customize them to fit your needs
-- `content` – Nextra documentation site (.mdx and _meta.json files)
+## Installation
 
-## npm scripts
+1. Copy `assembly.library` to `LIBS:`
+2. Copy include files to your include path
+3. See the [Getting Started](https://gfazioli.github.io/amiga-assembly-library/docs/getting-started) guide for details
 
-### Build and dev scripts
+## Quick Example (C)
 
-- `dev` – start dev server
-- `build` – bundle application for production
-- `analyze` – analyzes application bundle with [@next/bundle-analyzer](https://www.npmjs.com/package/@next/bundle-analyzer)
+```c
+#include <assembly/assemblybase.h>
+#include <clib/assembly_protos.h>
 
-### Testing scripts
+struct AssemblyBase *AssemblyBase;
 
-- `typecheck` – checks TypeScript types
-- `lint` – runs ESLint
-- `prettier:check` – checks files with Prettier
-- `jest` – runs jest tests
-- `jest:watch` – starts jest watch
-- `test` – runs `jest`, `prettier:check`, `lint` and `typecheck` scripts
+void main(int argc, char **argv)
+{
+    if (AssemblyBase = (struct AssemblyBase *)OpenLibrary(ASSEMBLYNAME, ASSEMBLY_MINIMUM))
+    {
+        /* All sub-libraries are now available:
+         * AssemblyBase->ab_DosBase
+         * AssemblyBase->ab_IntuiBase
+         * AssemblyBase->ab_GfxBase
+         * etc.
+         */
 
-### Other scripts
+        CloseLibrary((struct Library *)AssemblyBase);
+    }
+}
+```
 
-- `storybook` – starts storybook dev server
-- `storybook:build` – build production storybook bundle to `storybook-static`
-- `prettier:write` – formats all files with Prettier
+## Documentation Site
+
+The documentation site is built with [Next.js](https://nextjs.org/) + [Mantine](https://mantine.dev/) + [Nextra](https://nextra.site/) and features:
+
+- Complete API reference for all 50+ functions
+- Original 68020 assembly source code with syntax highlighting
+- C prototypes and include file reference
+- Example programs with full source code
+
+### Development
+
+```sh
+cd amiga-assembly-library
+yarn install
+yarn dev
+```
+
+| Command | Purpose |
+|---------|---------|
+| `yarn dev` | Start Next.js dev server |
+| `yarn build` | Production build |
+| `yarn test` | Full suite: typegen, prettier, lint, typecheck, jest |
+
+## Sponsor
 
 <div align="center">
-  
-[![Star History Chart](https://api.star-history.com/svg?repos=gfazioli/next-app-nextra-template&type=Timeline)](https://www.star-history.com/#gfazioli/next-app-nextra-template&Timeline)
+
+[<kbd> <br/> If this project has been useful to you, please consider becoming a sponsor <br/> </kbd>](https://github.com/sponsors/gfazioli?o=esc)
 
 </div>
+
+Your support helps me:
+
+- Keep the project actively maintained with timely bug fixes and updates
+- Improve the documentation and add new content
+- Expand test coverage and ensure long-term sustainability
+- Prioritize community requests and feature additions
+
+Open source thrives when those who benefit can give back — even a small monthly contribution makes a real difference.
+
+[Become a sponsor](https://github.com/sponsors/gfazioli?o=esc) today and help me keep this project reliable, up-to-date, and growing for everyone.
+
+---
+
+[![Star History Chart](https://api.star-history.com/svg?repos=gfazioli/amiga-assembly-library&type=Timeline)](https://www.star-history.com/#gfazioli/amiga-assembly-library&Timeline)

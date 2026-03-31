@@ -1,6 +1,7 @@
 'use client';
 
 import { TextAnimate } from '@gfazioli/mantine-text-animate';
+import { IconBrandGithub, IconDownload, IconExternalLink } from '@tabler/icons-react';
 import { Badge, Button, Center, Group, Paper, Text, Title } from '@mantine/core';
 import classes from './Welcome.module.css';
 
@@ -74,19 +75,47 @@ export function Welcome() {
       </Text>
 
       <Center>
-        <Button
-          href="/docs/getting-started"
-          component="a"
-          variant="outline"
-          color="orange"
-          px={32}
-          radius={256}
-          size="lg"
-          mx="auto"
-          mt="xl"
-        >
-          Get Started
-        </Button>
+        <Group gap="md">
+          <Button
+            href="https://github.com/gfazioli/amiga-assembly-library"
+            component="a"
+            rightSection={<IconExternalLink />}
+            leftSection={<IconBrandGithub />}
+            variant="outline"
+            color="orange"
+            px={32}
+            radius={256}
+            size="lg"
+            mt="xl"
+          >
+            View on GitHub
+          </Button>
+          <Button
+            href="/docs/getting-started"
+            component="a"
+            variant="filled"
+            color="orange"
+            px={32}
+            radius={256}
+            size="lg"
+            mt="xl"
+          >
+            Get Started
+          </Button>
+          <Button
+            href="/download.zip"
+            component="a"
+            leftSection={<IconDownload />}
+            variant="light"
+            color="orange"
+            px={32}
+            radius={256}
+            size="lg"
+            mt="xl"
+          >
+            Download
+          </Button>
+        </Group>
       </Center>
 
       <Paper shadow="xl" p={8} mih={300} my={32} bg="black" mx="auto" radius={8}>

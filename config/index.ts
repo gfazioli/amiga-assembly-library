@@ -10,7 +10,7 @@ export default {
     },
     description:
       'Documentation for the Amiga Assembly Library v41.21 — A Motorola 68020 shared library for Commodore Amiga (KickStart 3.0+). Public Domain Software.',
-    metadataBase: new URL('https://gfazioli.github.io/amiga-68020-library/'),
+    metadataBase: new URL('https://gfazioli.github.io/amiga-assembly-library/'),
     keywords: [
       'Amiga',
       'Assembly',
@@ -50,6 +50,8 @@ export default {
    * Nextra Layout component configuration
    */
   nextraLayout: {
+    docsRepositoryBase:
+      'https://github.com/gfazioli/amiga-assembly-library/tree/main/amiga-assembly-library/content/',
     sidebar: {
       defaultMenuCollapseLevel: 1,
     },
@@ -63,6 +65,23 @@ export default {
       nonce: '8IBTHwOdqNKAWeKl7plt8g==',
     },
   },
+  /**
+   * GitHub API configuration
+   */
+  gitHub: {
+    repo: 'gfazioli/amiga-assembly-library',
+    apiUrl: 'https://api.github.com',
+    releasesUrl: 'https://api.github.com/repos/gfazioli/amiga-assembly-library/releases',
+  },
+
+  /**
+   * Release notes configuration
+   */
+  releaseNotes: {
+    url: 'https://github.com/gfazioli/amiga-assembly-library/releases',
+    maxReleases: 10,
+  },
+
   /**
    * Search configuration (for pagefind)
    * @see /app/api/search/route.ts
