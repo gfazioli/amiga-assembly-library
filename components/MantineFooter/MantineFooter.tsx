@@ -10,7 +10,6 @@ import {
   Group,
   Stack,
   Text,
-  ThemeIcon,
   Title,
 } from '@mantine/core';
 import { Logo } from '@/components/Logo/Logo';
@@ -53,9 +52,7 @@ export const MantineFooter = () => {
         <Grid grow>
           <Grid.Col span={{ base: 12, sm: 4 }}>
             <Stack gap="xs">
-              <ThemeIcon>
-                <Logo />
-              </ThemeIcon>
+              <Logo />
               <Text fz={13} mr={64}>
                 The Amiga Assembly Library is a shared library for Commodore Amiga written in
                 Motorola 68020 assembly language. Version 41.21, Public Domain Software. Compatible
@@ -113,6 +110,17 @@ export const MantineFooter = () => {
               <Anchor fz={13} href="https://undolog.com/">
                 Undolog
               </Anchor>
+            </Text>
+            <Divider orientation="vertical" />
+            <Text fz={12} inline>
+              <Group gap={4} component="span">
+                Source on{' '}
+                <Anchor fz={13} href="https://github.com/gfazioli/amiga-assembly-library">
+                  <Group gap={4} component="span">
+                    <IconBrandGithubFilled size={16} /> GitHub
+                  </Group>
+                </Anchor>
+              </Group>
             </Text>
           </Group>
         </Group>
