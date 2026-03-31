@@ -214,26 +214,23 @@ function isM68kBlock(text: string): boolean {
   const lines = text.split('\n');
   const sample = lines.slice(0, 120);
 
-  // Quick reject: if first non-empty, non-comment line is a C #include, it's C
+  // Reject if it looks like C/C header code
+  let cScore = 0;
   for (const line of sample) {
-    const trimmed = line.trim();
-    if (!trimmed || /^[;*/]/.test(trimmed)) {
-      continue;
+    if (/^\s*#\s*(include|define|ifndef|ifdef|endif|pragma)\b/.test(line)) {
+      cScore++;
     }
-    if (/^#\s*include\s*</.test(trimmed)) {
-      return false;
+    if (/^\s*(void|int|char|struct|VOID|ULONG|LONG|BOOL|APTR|STRPTR)\s+\w+/.test(line)) {
+      cScore++;
     }
-    break;
-  }
-
-  // Count strong C signals (function definitions with braces)
-  let cFuncs = 0;
-  for (const line of sample) {
-    if (/^\s*(void|int|char|struct\s+\w+\s*\*?)\s+\w+\s*\([^)]*\)\s*$/.test(line)) {
-      cFuncs++;
+    if (/^\s*(if|for|while|return|else|switch|case)\s*[\s({]/.test(line)) {
+      cScore++;
+    }
+    if (/[;{}]\s*$/.test(line) && !/^\s*;/.test(line)) {
+      cScore++;
     }
   }
-  if (cFuncs >= 2) {
+  if (cScore >= 5) {
     return false;
   }
 
