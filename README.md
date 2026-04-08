@@ -101,7 +101,7 @@ yarn dev
 |---------|---------|
 | `yarn dev` | Start Next.js dev server |
 | `yarn build` | Production build |
-| `yarn test` | Full suite: typegen, prettier, lint, typecheck, jest |
+| `yarn test` | Full suite: typegen, oxfmt, lint, typecheck, jest |
 
 ## Sponsor
 
