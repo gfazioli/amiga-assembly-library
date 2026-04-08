@@ -311,7 +311,7 @@ function colorLine(text: string): string {
       if (/^\$[0-9a-fA-F]+$/.test(tok)) {
         return `<span style="color:${C.number}">${esc(tok)}</span>`;
       }
-      if (/^#/.test(tok)) {
+      if (tok.startsWith('#')) {
         return `<span style="color:${C.number}">${esc(tok)}</span>`;
       }
 
