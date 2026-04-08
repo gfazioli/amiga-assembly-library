@@ -2480,7 +2480,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gfazioli/mantine-marquee@npm:^4.0.0":
+"@gfazioli/mantine-marquee@npm:^4.0.1":
   version: 4.0.1
   resolution: "@gfazioli/mantine-marquee@npm:4.0.1"
   peerDependencies:
@@ -4184,7 +4184,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-themes@npm:^10.3.4":
+"@storybook/addon-themes@npm:^10.3.5":
   version: 10.3.5
   resolution: "@storybook/addon-themes@npm:10.3.5"
   dependencies:
@@ -4251,7 +4251,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/nextjs@npm:^10.3.4":
+"@storybook/nextjs@npm:^10.3.5":
   version: 10.3.5
   resolution: "@storybook/nextjs@npm:10.3.5"
   dependencies:
@@ -4356,7 +4356,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/react@npm:10.3.5, @storybook/react@npm:^10.3.4":
+"@storybook/react@npm:10.3.5, @storybook/react@npm:^10.3.5":
   version: 10.3.5
   resolution: "@storybook/react@npm:10.3.5"
   dependencies:
@@ -10931,16 +10931,16 @@ __metadata:
   resolution: "mantine-next-nextra-template@workspace:."
   dependencies:
     "@babel/core": "npm:^7.29.0"
-    "@gfazioli/mantine-marquee": "npm:^4.0.0"
+    "@gfazioli/mantine-marquee": "npm:^4.0.1"
     "@gfazioli/mantine-text-animate": "npm:^4.0.0"
     "@mantine/core": "npm:9.0.1"
     "@mantine/hooks": "npm:9.0.1"
     "@mdx-js/loader": "npm:^3.1.1"
     "@mdx-js/react": "npm:^3.1.1"
     "@next/bundle-analyzer": "npm:^16.2.2"
-    "@storybook/addon-themes": "npm:^10.3.4"
-    "@storybook/nextjs": "npm:^10.3.4"
-    "@storybook/react": "npm:^10.3.4"
+    "@storybook/addon-themes": "npm:^10.3.5"
+    "@storybook/nextjs": "npm:^10.3.5"
+    "@storybook/react": "npm:^10.3.5"
     "@tabler/icons-react": "npm:^3.41.1"
     "@testing-library/dom": "npm:^10.4.1"
     "@testing-library/jest-dom": "npm:^6.9.1"
@@ -10958,13 +10958,13 @@ __metadata:
     oxfmt: "npm:^0.43.0"
     oxlint: "npm:^1.59.0"
     pagefind: "npm:^1.5.0"
-    postcss: "npm:^8.5.8"
+    postcss: "npm:^8.5.9"
     postcss-import: "npm:^16.1.1"
     postcss-preset-mantine: "npm:1.18.0"
     postcss-simple-vars: "npm:^7.0.1"
     react: "npm:19.2.4"
     react-dom: "npm:19.2.4"
-    storybook: "npm:^10.3.4"
+    storybook: "npm:^10.3.5"
     stylelint: "npm:^16.26.1"
     stylelint-config-standard-scss: "npm:^16.0.0"
     swr: "npm:^2.4.1"
@@ -13466,7 +13466,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.40, postcss@npm:^8.5.8":
+"postcss@npm:^8.4.40":
   version: 8.5.8
   resolution: "postcss@npm:8.5.8"
   dependencies:
@@ -13485,6 +13485,17 @@ __metadata:
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
   checksum: 10c0/5127cc7c91ed7a133a1b7318012d8bfa112da9ef092dddf369ae699a1f10ebbd89b1b9f25f3228795b84585c72aabd5ced5fc11f2ba467eedf7b081a66fad024
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.5.9":
+  version: 8.5.9
+  resolution: "postcss@npm:8.5.9"
+  dependencies:
+    nanoid: "npm:^3.3.11"
+    picocolors: "npm:^1.1.1"
+    source-map-js: "npm:^1.2.1"
+  checksum: 10c0/7cb2b32202ea1ead03f15cfbb2756a64a0f98942378e99b3dfce33678fe5eaf93e31d675a46e3a0dfb417d7b49b82d8999d0dd42a33c3b128e71ade0f978719a
   languageName: node
   linkType: hard
 
@@ -15011,7 +15022,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"storybook@npm:^10.3.4":
+"storybook@npm:^10.3.5":
   version: 10.3.5
   resolution: "storybook@npm:10.3.5"
   dependencies:
