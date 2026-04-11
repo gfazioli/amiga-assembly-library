@@ -5,6 +5,7 @@ import '@gfazioli/mantine-text-animate/styles.css';
 // Mantine theme overrides (body background, marquee fade edges, etc.)
 import '@/theme/global.css';
 
+import { Analytics } from '@vercel/analytics/react';
 import { Layout } from 'nextra-theme-docs';
 import { Banner, Head } from 'nextra/components';
 import { getPageMap } from 'nextra/page-map';
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           >
             {children}
           </Layout>
+          <Analytics />
         </MantineProvider>
       </body>
     </html>
