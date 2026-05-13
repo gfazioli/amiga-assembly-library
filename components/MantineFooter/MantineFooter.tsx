@@ -112,7 +112,7 @@ export const MantineFooter = () => {
           <Group justify="right">
             <Text fz={12} inline>
               Made with care by{' '}
-              <Anchor fz={13} href="https://undolog.com/">
+              <Anchor fz={13} href="https://gfazioli.github.io/">
                 Undolog
               </Anchor>
             </Text>

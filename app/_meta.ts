@@ -23,6 +23,6 @@ export default {
   about: {
     type: 'page',
     title: 'About',
-    href: 'https://github.com/gfazioli',
+    href: 'https://gfazioli.github.io/',
   },
 };
