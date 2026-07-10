@@ -122,6 +122,3 @@ Open source thrives when those who benefit can give back — even a small monthl
 
 💚 [Become a sponsor](https://github.com/sponsors/gfazioli?o=esc) today and help me keep this project reliable, up-to-date, and growing for everyone.
 
----
-
-[![Star History Chart](https://api.star-history.com/svg?repos=gfazioli/amiga-assembly-library&type=Timeline)](https://www.star-history.com/#gfazioli/amiga-assembly-library&Timeline)
