@@ -1,8 +1,5 @@
 * {
-  --marquee-fade-edge-color: var(--mantine-color-gray-1);
-
   @mixin dark {
-    --marquee-fade-edge-color: var(--mantine-color-dark-9);
     --mantine-color-body: var(--mantine-color-dark-9);
   }
 }
