@@ -1,8 +1,7 @@
 import '@mantine/core/styles.css';
 // !! The order of these imports is important !!
-import '@gfazioli/mantine-marquee/styles.css';
 import '@gfazioli/mantine-text-animate/styles.css';
-// Mantine theme overrides (body background, marquee fade edges, etc.)
+// Mantine theme overrides (body background, etc.)
 import '@/theme/global.css';
 
 import { Analytics } from '@vercel/analytics/react';
