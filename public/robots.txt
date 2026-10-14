@@ -215,3 +215,5 @@ Disallow: /
 # ─────────────────────────────────────────────────────────────
 User-agent: *
 Allow: /
+
+Sitemap: https://amiga-assembly-library.vercel.app/sitemap.xml
