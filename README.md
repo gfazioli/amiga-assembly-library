@@ -14,6 +14,11 @@
 
 </div>
 
+<div align="center">
+  <p><img src="https://raw.githubusercontent.com/gfazioli/gfazioli/master/glancecard/amiga-assembly-library.svg" width="880" alt="amiga-assembly-library at a glance, refreshed daily: commits, releases, stars, issues and pull requests, a year of commit activity, the weekly rhythm, languages, latest commits and releases, contributors" /><br>
+  <sub>Made with <a href="https://github.com/gfazioli/glancecard">glancecard</a> · refreshed daily</sub></p>
+</div>
+
 ## Overview
 
 A shared library for **Commodore Amiga** written in **Motorola 68020 assembly language**. It provides 50+ high-level functions organized into specialized modules, callable from both Assembly and C programs. Compatible with **KickStart 3.0+** (AmigaOS V39 and above).
