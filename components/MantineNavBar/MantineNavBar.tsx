@@ -21,7 +21,7 @@ export const MantineNavBar = () => {
             </Text>
           </Group>
         }
-        chatLink="https://eab.abime.net/"
+        chatLink="https://discord.gg/rdWu5yFCR6"
         projectLink="https://github.com/gfazioli/amiga-assembly-library"
       >
         <Group gap="sm" wrap="nowrap">
