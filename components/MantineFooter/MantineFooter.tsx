@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  IconBrandDiscordFilled,
   IconBrandGithubFilled,
   IconBrandMantine,
   IconBrandX,
@@ -74,6 +75,14 @@ export const MantineFooter = () => {
                 </ActionIcon>
                 <ActionIcon variant="subtle" component="a" href="https://twitter.com/gfazioli">
                   <IconBrandX size={24} />
+                </ActionIcon>
+                <ActionIcon
+                  variant="subtle"
+                  component="a"
+                  href="https://discord.gg/rdWu5yFCR6"
+                  aria-label="Undolog Discord"
+                >
+                  <IconBrandDiscordFilled size={24} />
                 </ActionIcon>
                 <ActionIcon variant="subtle" component="a" href="https://undolog.com/">
                   <IconMailHeart size={24} />
