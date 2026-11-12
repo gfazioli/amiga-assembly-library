@@ -25,6 +25,7 @@ import {
 } from '@mantine/core';
 import { Logo } from '@/components/Logo/Logo';
 import { AnimateBadge } from './AnimateBadge';
+import { FooterWordmark } from './FooterWordmark';
 import { ecosystem, highlights, resources, sponsors } from './links';
 import classes from './MantineFooter.module.css';
 
@@ -257,6 +258,8 @@ export const MantineFooter = () => {
           </Group>
         </Group>
       </Container>
+
+      <FooterWordmark name="Assembly Library" />
     </div>
   );
 };

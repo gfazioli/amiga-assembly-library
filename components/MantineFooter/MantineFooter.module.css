@@ -1,4 +1,7 @@
+/* `clip`: the wordmark rises from below and its tight tracking can reach a
+   pixel past the edge; neither may make the page scroll sideways. */
 .contentFooter {
+  overflow-x: clip;
   padding-top: 32px;
   background: var(--mantine-color-body);
   box-shadow: inset 0px 4px 32px 0px #00000032;
