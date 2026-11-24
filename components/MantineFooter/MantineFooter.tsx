@@ -257,6 +257,11 @@ export const MantineFooter = () => {
             </Text>
           </Group>
         </Group>
+
+        <Text fz={12} c="dimmed" mt="md">
+          Amiga, AmigaOS and Commodore are trademarks of their respective owners. This is an
+          independent project, not affiliated with or endorsed by them.
+        </Text>
       </Container>
 
       <FooterWordmark name="Assembly Library" />

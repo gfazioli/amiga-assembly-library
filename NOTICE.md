@@ -4,6 +4,10 @@
 
 The MIT licence in [LICENCE](LICENCE) covers the source code of this website. The Amiga library itself is public domain, as the [README](README.md) says.
 
+## Trademarks
+
+Amiga, AmigaOS and Commodore are trademarks of their respective owners, and so is the Amiga checkmark logo on the home page. They appear here only to name the platform the library is written for. This is an independent project, not affiliated with or endorsed by them. Neither the MIT licence nor the library's public-domain status covers these marks.
+
 ## Third-party code
 
 This project started from [Mantine's Next.js template](https://github.com/mantinedev/next-app-template), released under the MIT licence. Parts of that template remain in the source, so its notice is reproduced here, as that licence requires:

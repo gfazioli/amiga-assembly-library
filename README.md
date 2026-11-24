@@ -127,3 +127,7 @@ Open source thrives when those who benefit can give back — even a small monthl
 
 💚 [Become a sponsor](https://github.com/sponsors/gfazioli?o=esc) today and help me keep this project reliable, up-to-date, and growing for everyone.
 
+## Trademarks
+
+Amiga, AmigaOS and Commodore are trademarks of their respective owners. This is an independent project, not affiliated with or endorsed by them. See [NOTICE.md](NOTICE.md).
+
