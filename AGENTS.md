@@ -33,7 +33,7 @@ yarn analyze          # Next.js bundle analyzer
 ## Tech Stack
 
 - **Framework**: Next.js 16 with Turbopack (SVG inline loader configured for <4KB)
-- **UI**: Mantine 9 (primary color: orange; monospace: the system stack, with "Topaz a1200" asked for by name in Amiga Mode and the home page's terminal)
+- **UI**: Mantine 9 (primary color: orange; monospace: the system stack; the pixel font "Topaz a1200" through `--aal-font-pixel`, for the display type, the window chrome and Amiga Mode)
 - **Docs**: `@next/mdx` with remark-gfm, frontmatter and rehype-slug; Shiki at build time, shown by Mantine's `CodeHighlight`; Pagefind search in Mantine's `Spotlight`
 - **Language**: TypeScript 6 (strict mode)
 - **Package Manager**: Yarn 4 (nodeLinker: node-modules)
@@ -62,7 +62,9 @@ API routes are named `route.server.ts`: the server build lists `server.ts` among
 ### Components (`components/`)
 Each component lives in its own directory. Key custom pieces:
 - **68k highlighting** (`lib/mdx/m68k.ts`) — Build-time highlighting of the ` ```asm ` blocks (Shiki's `asm` is x86). It emits Shiki's markup with light and dark colours on every token, so the browser runs nothing. Tested in `lib/mdx/m68k.test.ts`.
-- **Welcome / AmigaModeToggle** — Landing page and the header keycap; both switch Amiga Mode through `useAmigaMode` (`components/AmigaModeToggle/use-amiga-mode.ts`), and `lib/amiga-mode.ts` holds the key, the attribute and the pre-paint script.
+- **Welcome / Content** — The landing page, rendered on the server. `app/page.tsx` counts the modules' functions from `content/` and highlights the hero's code with `highlightM68k`, so the home page cannot drift from the docs; `components/Content/modules.ts` holds the module cards' copy.
+- **AmigaWindow / AmigaCheckmark / Logo** — The CSS-drawn window around the hero's code, the checkmark (the one platform mark the site shows), and the site's own pixel chip (also `public/favicon.svg`).
+- **AmigaModeToggle / AmigaModeSwitch** — The header keycap and the home page switch; both switch Amiga Mode through `useAmigaMode` (`components/AmigaModeToggle/use-amiga-mode.ts`), and `lib/amiga-mode.ts` holds the key, the attribute and the pre-paint script.
 - **MantineFooter** — The site footer with the sponsors wall (`#sponsors`), on every page.
 
 ### Configuration (`config/index.ts`)
@@ -76,6 +78,16 @@ Custom `render()` wrapper that provides MantineProvider with the project theme. 
 
 ### Storybook
 Stories go in `components/**/*.(stories|story).tsx`. Storybook preview wraps all stories in MantineProvider with theme and color scheme support.
+
+## Design
+
+The look is Workbench 1.3's palette after dark: a night-blue ground, one orange, type in white or black. It lives in two files, and the engine's copied files are not edited for it.
+
+- **`theme.ts`** — the `orange`, `dark` and `gray` tuples, the radii, `autoContrast` (black type on orange fills) and `primaryShade: { light: 6, dark: 5 }`. That dark shade applies to every colour: a `filled` or `gradient` of another colour gets lighter in the dark scheme too, so check its contrast (the footer's sponsor button names its shades for that reason).
+- **`theme/global.css`** — the tokens (`--aal-font-pixel`, `--aal-copper`, `--aal-accent`, `--aal-rule`, `--aal-screen`), the light scheme's orange text pointed at `orange.8`, the focus ring, the gadget buttons, and the engine restyled from outside through Mantine's static class names (`.mantine-AppShell-header`, `.mantine-NavLink-root`) and the engine's attributes (`[data-docs-article]`, `[data-site-banner]`).
+- **The pixel font** is crisp where font-size × device pixel ratio divides by 16, and unreadable under 16px: use 16, 32, 48, 64, 96px (40px is fine on phones, which are 2x or more). Its licence and what it asks of the site are in `NOTICE.md` (*Third-party fonts*) and `public/fonts/README.txt`; the footer credits the author, and that credit has to stay.
+- **Contrast** is WCAG AA in both schemes, the 68k token colours included (`lib/mdx/m68k.ts`). Orange as text is `--aal-accent` or `--mantine-color-anchor`, never the fill shade.
+- **Motion**: only `transform` and `opacity`, nothing that loops, nothing on the hero's text (it is the largest paint). The home page ships no animation library.
 
 ## Important Patterns
 
