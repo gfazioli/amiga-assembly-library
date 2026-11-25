@@ -16,6 +16,24 @@
   border-top: 1px solid var(--mantine-color-default-border);
 }
 
+/* The skip link: above the fixed header, and on screen only while it has focus */
+.skipLink {
+  position: fixed;
+  top: var(--mantine-spacing-xs);
+  left: var(--mantine-spacing-xs);
+  z-index: 1000;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  border-radius: var(--mantine-radius-sm);
+  background-color: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+  font-weight: 600;
+  transform: translateY(-200%);
+
+  &:focus {
+    transform: none;
+  }
+}
+
 .main {
   display: flex;
   flex-direction: column;
@@ -26,6 +44,14 @@
    tab order. Visibility switches at the end of the slide when hiding, at once when showing. */
 .navbar {
   transition-property: transform, top, height, visibility;
+}
+
+/* The same below the breakpoint: the phone's navbar, closed, slides off screen and its links
+   would still take the tab key. */
+@mixin smaller-than $mantine-breakpoint-md {
+  .navbar[data-mobile-collapsed] {
+    visibility: hidden;
+  }
 }
 
 @media (min-width: $mantine-breakpoint-md) {

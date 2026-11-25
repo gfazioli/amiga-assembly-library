@@ -61,10 +61,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script dangerouslySetInnerHTML={{ __html: AMIGA_MODE_SCRIPT }} />
       </head>
       <body>
-        {/* Off screen until a keyboard reaches it: past the header and the sidebar in one press */}
-        <a href="#main-content" className="skip-link">
-          Skip to content
-        </a>
         <MantineProvider theme={theme} defaultColorScheme={head.mantine.defaultColorScheme}>
           <SiteShell
             tree={tree}

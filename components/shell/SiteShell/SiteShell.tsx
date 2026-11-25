@@ -1,12 +1,20 @@
 'use client';
 
 import { useCallback, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSelectedLayoutSegment } from 'next/navigation';
 import { IconBrandDiscord, IconBrandGithub } from '@tabler/icons-react';
-import { ActionIcon, AppShell, Group, NavLink, ScrollArea, Tooltip } from '@mantine/core';
-import { useDisclosure, useHotkeys, useLocalStorage } from '@mantine/hooks';
+import {
+  ActionIcon,
+  AppShell,
+  Group,
+  NavLink,
+  ScrollArea,
+  Tooltip,
+  useMantineTheme,
+} from '@mantine/core';
+import { useDisclosure, useHotkeys, useLocalStorage, useMediaQuery } from '@mantine/hooks';
 import config from '@/config';
-import { isDocsRoute, normalizeRoute } from '@/lib/docs/routes';
+import { DOCS_SEGMENT } from '@/lib/docs/routes';
 import {
   isStoredCollapsed,
   SIDEBAR_COLLAPSED_ATTRIBUTE,
@@ -15,6 +23,7 @@ import {
 import { isMenu, type DocsNode, type TopNavEntry } from '@/lib/docs/types';
 import { ColorSchemeControl } from '../../ColorSchemeControl/ColorSchemeControl';
 import { MantineNavBar } from '../../MantineNavBar/MantineNavBar';
+import { SidebarToggle } from '../SidebarToggle/SidebarToggle';
 import { SidebarTree } from '../SidebarTree/SidebarTree';
 import classes from './SiteShell.module.css';
 
@@ -66,7 +75,8 @@ function MobileNav({ nav }: { nav: TopNavEntry[] }) {
  * The page frame, on Mantine's `AppShell`:
  * - the header on every page, with the release banner above the navigation, always in view;
  * - the docs sidebar on `/docs` routes (on a phone, behind the header's menu button, on every page),
- *   which the header button or ⌘B / Ctrl+B collapses on desktop, remembered across visits;
+ *   which a button (in the header, or at the foot of the sidebar: `config.docs.sidebar.toggle`) or
+ *   ⌘B / Ctrl+B collapses on desktop, remembered across visits;
  * - a compact footer under docs pages, the full site footer elsewhere.
  *
  * The table of contents is not an `AppShell.Aside`: it lives in the docs page, as a sticky column,
@@ -74,8 +84,10 @@ function MobileNav({ nav }: { nav: TopNavEntry[] }) {
  */
 export function SiteShell({ tree, nav, banner, docsFooter, siteFooter, children }: SiteShellProps) {
   const pathname = usePathname();
-  const route = normalizeRoute(pathname);
-  const isDocs = isDocsRoute(route);
+  // A docs page is one the docs route rendered, not any `/docs` path: the 404 page is prerendered
+  // once, outside the docs, and served for every missing path, so its HTML has no sidebar, and a
+  // first render with one (from the pathname) did not match it (React error #418).
+  const isDocs = useSelectedLayoutSegment() === DOCS_SEGMENT;
 
   const [opened, { toggle, close }] = useDisclosure(false);
   useEffect(() => {
@@ -104,6 +116,19 @@ export function SiteShell({ tree, nav, banner, docsFooter, siteFooter, children 
 
   const desktopCollapsed = !isDocs || sidebarCollapsed;
 
+  // Hidden (outside the docs, collapsed, the phone's closed sheet) the sidebar is still in the page,
+  // and Next prefetched its links: no prefetching then.
+  const theme = useMantineTheme();
+  const isDesktop = useMediaQuery(`(min-width: ${theme.breakpoints.md})`);
+  const sidebarVisible = isDesktop ? !desktopCollapsed : opened;
+
+  // The desktop toggle, on docs pages: in the header, or at the foot of the sidebar
+  // (`config.docs.sidebar.toggle`), where a collapsed sidebar cannot show it, so the header does.
+  const sidebarToggle = isDocs
+    ? { collapsed: sidebarCollapsed, onToggle: toggleSidebar }
+    : undefined;
+  const toggleInHeader = config.docs.sidebar.toggle === 'header' || sidebarCollapsed;
+
   return (
     <AppShell
       header={{ height: 60 }}
@@ -114,17 +139,29 @@ export function SiteShell({ tree, nav, banner, docsFooter, siteFooter, children 
       }}
       classNames={{ header: classes.header, navbar: classes.navbar }}
     >
+      {/* First in the tab order, shown only while it has focus: past the header and the sidebar
+          in one press, as Nextra's "Skip to Content" did. */}
+      <a href="#main-content" className={classes.skipLink}>
+        Skip to content
+      </a>
       <AppShell.Header>
         {banner}
         <MantineNavBar
           nav={nav}
           burgerOpened={opened}
           onBurgerClick={toggle}
-          sidebar={isDocs ? { collapsed: sidebarCollapsed, onToggle: toggleSidebar } : undefined}
+          sidebar={toggleInHeader ? sidebarToggle : undefined}
         />
       </AppShell.Header>
 
-      <AppShell.Navbar data-desktop-collapsed={desktopCollapsed || undefined}>
+      <AppShell.Navbar
+        data-desktop-collapsed={desktopCollapsed || undefined}
+        data-mobile-collapsed={!opened || undefined}
+        // A link that stays on the page (a `#` anchor, say a sponsors section) changes no
+        // pathname, and left the phone's full-width navbar open over the place it scrolled to.
+        // Any link closes it; folders and menus are buttons, so they open and close in place.
+        onClick={(event) => (event.target as HTMLElement).closest('a[href]') && close()}
+      >
         <AppShell.Section hiddenFrom="md" className={classes.mobileNav}>
           <MobileNav nav={nav} />
         </AppShell.Section>
@@ -132,6 +169,7 @@ export function SiteShell({ tree, nav, banner, docsFooter, siteFooter, children 
           <SidebarTree
             tree={tree}
             defaultMenuCollapseLevel={config.docs.sidebar.defaultMenuCollapseLevel}
+            prefetch={sidebarVisible}
           />
         </AppShell.Section>
         <AppShell.Section className={classes.navbarFooter}>
@@ -140,7 +178,7 @@ export function SiteShell({ tree, nav, banner, docsFooter, siteFooter, children 
               <Tooltip label="GitHub">
                 <ActionIcon
                   component="a"
-                  href={`https://github.com/${config.gitHub.repo}`}
+                  href={config.links.github}
                   target="_blank"
                   rel="noopener noreferrer"
                   variant="subtle"
@@ -160,18 +198,20 @@ export function SiteShell({ tree, nav, banner, docsFooter, siteFooter, children 
                   variant="subtle"
                   color="gray"
                   size="sm"
-                  aria-label="Undolog Discord"
+                  aria-label={config.links.discordLabel}
                 >
                   <IconBrandDiscord size={16} stroke={1.5} />
                 </ActionIcon>
               </Tooltip>
             </Group>
-            <ColorSchemeControl />
+            <Group gap={4}>
+              <ColorSchemeControl />
+              {sidebarToggle && !toggleInHeader && <SidebarToggle {...sidebarToggle} />}
+            </Group>
           </Group>
         </AppShell.Section>
       </AppShell.Navbar>
 
-      {/* `main-content`: the target of the skip link in app/layout.tsx */}
       <AppShell.Main id="main-content" className={classes.main}>
         {children}
         {isDocs ? docsFooter : siteFooter}

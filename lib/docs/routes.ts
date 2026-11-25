@@ -1,6 +1,9 @@
 /** Where the docs live. Shared by the server (content loader) and the client (shell). */
 export const DOCS_BASE = '/docs';
 
+/** The app router's segment for the docs, as `useSelectedLayoutSegment()` names it */
+export const DOCS_SEGMENT = DOCS_BASE.slice(1);
+
 export function toRoute(slug: string[]): string {
   return slug.length === 0 ? DOCS_BASE : `${DOCS_BASE}/${slug.join('/')}`;
 }
