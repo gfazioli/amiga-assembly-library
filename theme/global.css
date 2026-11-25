@@ -19,11 +19,28 @@
   font-display: swap;
 }
 
+/* What stands in for Topaz until it arrives: a local monospace cut to Topaz's cell. Topaz is
+   half an em wide where these are six tenths, and its em is all ascent. With the same cell, a
+   line set in the fallback breaks where the line in Topaz will, and nothing moves when the font
+   swaps: on a phone the home page's title wrapped in the fallback and unwrapped in Topaz, a
+   layout shift of 0.18. The layout also preloads the font (app/layout.tsx), so this face is
+   for the connection that drops the preload. */
+@font-face {
+  font-family: 'Topaz fallback';
+  src:
+    local('Menlo'), local('Menlo Regular'), local('Courier New'), local('Droid Sans Mono'),
+    local('DejaVu Sans Mono'), local('Liberation Mono');
+  size-adjust: 83.3%;
+  ascent-override: 100%;
+  descent-override: 0%;
+  line-gap-override: 0%;
+}
+
 :root {
   /* The display type, the window chrome and Amiga Mode. Topaz draws a cell half as wide as it
      is tall, 16 units high: it is crisp where font-size × device pixel ratio divides by 16, and
      unreadable under 16px. One variable, so another pixel font is a one-line change. */
-  --aal-font-pixel: 'Topaz a1200', ui-monospace, 'SFMono-Regular', menlo, consolas, monospace;
+  --aal-font-pixel: 'Topaz a1200', 'Topaz fallback', ui-monospace, monospace;
 
   /* The screen inside a window: the same in both schemes, like the monitor it stands for. */
   --aal-screen: #060a14;
