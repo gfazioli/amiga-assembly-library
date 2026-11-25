@@ -1,205 +1,117 @@
-'use client';
-
-import { TextAnimate } from '@gfazioli/mantine-text-animate';
-import { IconBrandGithub, IconDownload, IconExternalLink } from '@tabler/icons-react';
-import { Badge, Box, Button, Center, Group, Paper, Switch, Text, Title } from '@mantine/core';
-import { useAmigaMode } from '@/components/AmigaModeToggle/use-amiga-mode';
+import { IconArrowRight, IconBrandGithub, IconDownload } from '@tabler/icons-react';
+import { Button, Container } from '@mantine/core';
+import { AmigaCheckmark } from '@/components/AmigaCheckmark/AmigaCheckmark';
+import { AmigaWindow } from '@/components/AmigaWindow/AmigaWindow';
+import { Link } from '@/components/Link/Link';
+import config from '@/config';
+import { AmigaModeSwitch } from './AmigaModeSwitch';
 import classes from './Welcome.module.css';
 
-const LIBRARY_FUNCTIONS = [
-  'assembly.library v41.21 — Motorola 68020',
-  '',
-  '> Exec Module:',
-  '  AllocNewList()  AllocNode()  FreeList()',
-  '  ReAllocVec()    RevertMem()  FreeNode()',
-  '',
-  '> DOS Module:',
-  '  Load()  Save()  FileInfo()  CheckFile()',
-  '  UnitInfo()  CheckSum()  LineInput()',
-  '',
-  '> Graphics Module:',
-  '  AddBitPlanes()  AllocRastPort()  DrawBox()',
-  '  TextFmtRastPortArgs()  FadeColor()',
-  '',
-  '> Math Module:',
-  '  StringDecToValue()  ValueToStringDec()',
-  '  StringHexToValue()  ValueToStringHex()',
-  '  StringBinToValue()  ValueToStringBin()',
-  '',
-  '> REI Interface:',
-  '  OpenREI()  CloseREI()  WaitREIMsg()',
-  '  FindREI()  RefreshREI()  ActiveREI()',
-  '',
-  'Ready.',
-];
-
-/**
- * Official Amiga checkmark logo — rainbow stripe V/checkmark.
- */
-function AmigaCheckmark({ size = 200 }: { size?: number }) {
-  return (
-    <svg
-      clipRule="evenodd"
-      fillRule="evenodd"
-      height={size}
-      viewBox="0 0 48 48"
-      width={size}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <g clipRule="evenodd">
-        <g fillRule="evenodd">
-          <path d="m33.568 16h-5l4.216-6h5zm6 0h-5l4.216-6h5z" fill="#f36c00" />
-          <path d="m29.351 22h-5l4.217-6h5zm6 0h-5l4.217-6h5z" fill="#ff9000" />
-          <path d="m25.135 28h-5l4.216-6h5zm6 0h-5l4.216-6h5z" fill="#ffa100" />
-          <path d="m12.143 36 2.857 4-4 1-3.667-5zm6 0 2.857 4-4 1-3.667-5z" fill="#237f2d" />
-          <path d="m18.143 36h-4.81l-3.666-5h4.904z" fill="#008390" />
-          <path d="m20.919 34h-5l4.216-6h5zm6 0h-5l4.216-6h5z" fill="#fdc200" />
-          <path d="m16 41h-5l4.919-7h5zm6 0h-5l4.919-7h5z" fill="#feda0f" />
-          <path d="m37.784 10h-5l4.216-6h5zm6 0h-5l4.216-6h5z" fill="#dc4100" />
-          <path d="m12.143 36h-4.81l-3.666-5h4.904z" fill="#008390" />
-          <path d="m8.571 31h-4.904l-3.667-5h5zm6 0h-4.904l-3.667-5h5z" fill="#0075c0" />
-        </g>
-      </g>
-    </svg>
-  );
+export interface WelcomeProps {
+  /** The hero's code, highlighted at build time (`highlightM68k`): the inner HTML of `<code>` */
+  codeHtml: string;
+  /** How many functions and modules the docs hold, counted from `content/` */
+  functionCount: number;
+  moduleCount: number;
 }
 
-export function Welcome() {
-  const [amigaMode, setAmigaMode] = useAmigaMode();
+/**
+ * The home page's opening: the name in the pixel font, what the library is, where to go next,
+ * and a window showing a call in 68k. Rendered on the server; only the Amiga Mode switch runs in
+ * the browser.
+ */
+export function Welcome({ codeHtml, functionCount, moduleCount }: WelcomeProps) {
+  const facts = [
+    { value: String(functionCount), label: 'functions documented' },
+    { value: String(moduleCount), label: 'modules' },
+    { value: '68020', label: 'or any later 680x0' },
+    { value: '3.0+', label: 'KickStart (V39)' },
+  ];
 
   return (
-    <>
-      <Center my={48}>
-        <Group gap="xs">
-          <Badge size="lg" variant="gradient" gradient={{ from: 'orange', to: 'yellow' }}>
-            v41.21
-          </Badge>
-          <Badge size="lg" variant="light" color="gray">
-            Public Domain
-          </Badge>
-          <Badge size="lg" variant="light" color="gray">
-            68020
-          </Badge>
-        </Group>
-      </Center>
+    <section className={classes.hero}>
+      <Container size="lg" className={classes.inner}>
+        <p className={classes.kicker}>
+          <span>assembly.library 41.21</span>
+          <span>Public Domain</span>
+        </p>
 
-      <Center mb="md">
-        <Switch
-          checked={amigaMode}
-          onChange={(event) => setAmigaMode(event.currentTarget.checked)}
-          label="Amiga Mode"
-          size="lg"
-          color="orange"
-          labelPosition="left"
-          thumbIcon={<AmigaCheckmark size={16} />}
-          onLabel="ON"
-          offLabel="OFF"
-        />
-      </Center>
+        <h1 className={classes.title}>
+          <span className={classes.platform}>
+            <AmigaCheckmark size={40} />
+            Amiga
+          </span>{' '}
+          <span className={classes.name}>Assembly Library</span>
+        </h1>
 
-      <Title maw="90vw" mx="auto" className={classes.title} ta="center" data-amiga-logo="">
-        <Box
-          component="span"
-          style={{
-            display: 'inline-block',
-            verticalAlign: 'middle',
-            marginRight: '-0.5em',
-            marginBottom: '0.4em',
-          }}
-        >
-          <AmigaCheckmark size={140} />
-        </Box>
-        <span
-          data-amiga-logo=""
-          style={{
-            fontStyle: 'italic',
-            fontFamily: 'Garamond, "EB Garamond", "Times New Roman", serif',
-            textTransform: 'uppercase',
-            letterSpacing: '0.02em',
-            fontSize: '1.15em',
-          }}
-        >
-          Amiga
-        </span>{' '}
-        <TextAnimate
-          animate="in"
-          by="character"
-          inherit
-          variant="gradient"
-          component="span"
-          segmentDelay={0.2}
-          duration={2}
-          animation="scale"
-          animateProps={{
-            scaleAmount: 3,
-          }}
-          gradient={{ from: 'orange', to: 'yellow' }}
-        >
-          Assembly Library
-        </TextAnimate>
-      </Title>
+        <div className={classes.columns}>
+          <div className={classes.pitch}>
+            <p className={classes.lede}>
+              A shared library for Commodore Amiga, written in Motorola 68020 assembly language. It
+              adds {functionCount} functions for memory and lists, files, graphics, strings, number
+              conversion and user interfaces, callable from assembly and from C.
+            </p>
 
-      <Text c="dimmed" ta="center" size="xl" maw={620} mx="auto" mt="sm">
-        A shared library for Commodore Amiga written in Motorola 68020 assembly language. Provides
-        50+ functions for graphics, file I/O, memory management, UI, and more. Compatible with
-        KickStart 3.0+.
-      </Text>
+            <div className={classes.actions}>
+              <Button
+                component={Link}
+                href="/docs/getting-started"
+                size="md"
+                rightSection={<IconArrowRight size={18} />}
+              >
+                Get Started
+              </Button>
+              <Button
+                component="a"
+                href="/download.zip"
+                size="md"
+                variant="default"
+                leftSection={<IconDownload size={18} />}
+              >
+                Download
+              </Button>
+              <Button
+                component="a"
+                href={`https://github.com/${config.gitHub.repo}`}
+                size="md"
+                variant="subtle"
+                color="gray"
+                leftSection={<IconBrandGithub size={18} />}
+              >
+                GitHub
+              </Button>
+            </div>
 
-      <Center>
-        <Group gap="md">
-          <Button
-            href="https://github.com/gfazioli/amiga-assembly-library"
-            component="a"
-            rightSection={<IconExternalLink />}
-            leftSection={<IconBrandGithub />}
-            variant="outline"
-            color="orange"
-            px={32}
-            radius={256}
-            size="lg"
-            mt="xl"
+            <AmigaModeSwitch />
+          </div>
+
+          <AmigaWindow
+            title="RevertMem.asm"
+            caption={
+              <>
+                Opening the library and calling{' '}
+                <Link href="/docs/exec/revert-mem" className={classes.captionLink}>
+                  RevertMem()
+                </Link>
+                : the base in A6, the arguments in registers.
+              </>
+            }
           >
-            View on GitHub
-          </Button>
-          <Button
-            href="/docs/getting-started"
-            component="a"
-            variant="filled"
-            color="orange"
-            px={32}
-            radius={256}
-            size="lg"
-            mt="xl"
-          >
-            Get Started
-          </Button>
-          <Button
-            href="/download.zip"
-            component="a"
-            leftSection={<IconDownload />}
-            variant="light"
-            color="orange"
-            px={32}
-            radius={256}
-            size="lg"
-            mt="xl"
-          >
-            Download
-          </Button>
-        </Group>
-      </Center>
+            <pre className={classes.code}>
+              <code dangerouslySetInnerHTML={{ __html: codeHtml }} />
+            </pre>
+          </AmigaWindow>
+        </div>
 
-      <Paper shadow="xl" p={8} mih={300} my={32} bg="black" mx="auto" radius={8}>
-        <TextAnimate.Typewriter
-          fz={11}
-          c="green.5"
-          ff="'Topaz a1200', monospace"
-          multiline
-          delay={60}
-          loop={false}
-          value={LIBRARY_FUNCTIONS}
-        />
-      </Paper>
-    </>
+        <dl className={classes.facts}>
+          {facts.map((fact) => (
+            <div key={fact.label} className={classes.fact}>
+              <dt className={classes.factLabel}>{fact.label}</dt>
+              <dd className={classes.factValue}>{fact.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </Container>
+    </section>
   );
 }

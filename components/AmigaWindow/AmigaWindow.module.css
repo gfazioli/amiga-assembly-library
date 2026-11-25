@@ -1,0 +1,110 @@
+/* The window's own colours: orange chrome, black ink, the same in both schemes. */
+.root {
+  --win-chrome: var(--mantine-color-orange-5);
+  --win-ink: #0a0d14;
+
+  margin: 0;
+  min-width: 0;
+}
+
+.window {
+  border: 2px solid var(--win-ink);
+  background-color: var(--aal-screen);
+
+  /* A hard shadow, one step down and right: the screen's depth, not a blur. */
+  box-shadow: 6px 6px 0 rgb(0 0 0 / 28%);
+
+  @mixin dark {
+    border-color: #000;
+    box-shadow:
+      0 0 0 1px var(--mantine-color-dark-4),
+      6px 6px 0 rgb(0 0 0 / 45%);
+  }
+}
+
+.titleBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  padding-inline: 4px;
+  border-bottom: 2px solid var(--win-ink);
+  background-color: var(--win-chrome);
+  color: var(--win-ink);
+}
+
+.title {
+  flex: none;
+  max-width: 70%;
+  overflow: hidden;
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The drag bar: pinstripes, two pixels on and two off. */
+.drag {
+  flex: 1;
+  align-self: stretch;
+  margin-block: 4px;
+  background-image: repeating-linear-gradient(180deg, var(--win-ink) 0 2px, transparent 2px 4px);
+  opacity: 0.55;
+}
+
+/* Close: a square with a dot in it. */
+.close {
+  position: relative;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--win-ink);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background-color: var(--win-ink);
+  }
+}
+
+/* Depth: two squares, one in front of the other. */
+.depth {
+  position: relative;
+  flex: none;
+  width: 18px;
+  height: 16px;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 11px;
+    height: 10px;
+    border: 2px solid var(--win-ink);
+  }
+
+  &::before {
+    top: 0;
+    left: 0;
+  }
+
+  &::after {
+    right: 0;
+    bottom: 0;
+    background-color: var(--win-chrome);
+  }
+}
+
+.screen {
+  overflow-x: auto;
+  padding: 16px;
+  color: var(--aal-screen-text);
+}
+
+.caption {
+  margin-top: 14px;
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-sm);
+}

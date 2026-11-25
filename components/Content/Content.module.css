@@ -1,0 +1,231 @@
+.section {
+  padding-block: rem(56px);
+
+  & + & {
+    border-top: 1px solid var(--aal-rule);
+  }
+
+  @media (min-width: $mantine-breakpoint-md) {
+    padding-block: rem(80px);
+  }
+}
+
+.header {
+  max-width: 40em;
+  margin-bottom: rem(32px);
+}
+
+.eyebrow {
+  margin: 0 0 rem(12px);
+  color: var(--aal-accent);
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: rem(28px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+
+  @media (min-width: $mantine-breakpoint-md) {
+    font-size: rem(36px);
+  }
+}
+
+.intro {
+  margin: rem(12px) 0 0;
+  color: var(--mantine-color-dimmed);
+  font-size: rem(18px);
+  line-height: 1.6;
+}
+
+/* ---- The modules ---- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(rem(250px), 1fr));
+  gap: rem(16px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Each card's top edge takes one stripe of the checkmark, in its order: red-orange to blue. */
+.cardItem {
+  --card-stripe: #dc4100;
+
+  display: flex;
+
+  &:nth-child(2) {
+    --card-stripe: #f36c00;
+  }
+
+  &:nth-child(3) {
+    --card-stripe: #ff9000;
+  }
+
+  &:nth-child(4) {
+    --card-stripe: #fdc200;
+  }
+
+  &:nth-child(5) {
+    --card-stripe: #feda0f;
+  }
+
+  &:nth-child(6) {
+    --card-stripe: #237f2d;
+  }
+
+  &:nth-child(7) {
+    --card-stripe: #008390;
+  }
+
+  &:nth-child(8) {
+    --card-stripe: #0075c0;
+  }
+}
+
+.card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: rem(20px);
+  border: 1px solid var(--aal-rule);
+  border-top: 3px solid var(--card-stripe);
+  background-color: var(--mantine-color-default);
+  color: var(--mantine-color-text);
+  text-decoration: none;
+  transition: transform 120ms ease;
+
+  @media (hover: hover) {
+    &:hover {
+      border-color: var(--mantine-color-default-border);
+      border-top-color: var(--card-stripe);
+      transform: translateY(-3px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: rem(12px);
+}
+
+.cardCode {
+  font-family: var(--aal-font-pixel);
+  font-size: rem(32px);
+  line-height: 1;
+}
+
+.cardCount {
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-xs);
+  white-space: nowrap;
+}
+
+.cardTitle {
+  margin: rem(20px) 0 0;
+  font-size: rem(17px);
+  line-height: 1.3;
+}
+
+.cardText {
+  flex: 1;
+  margin: rem(6px) 0 0;
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.55;
+}
+
+.cardNames {
+  margin: rem(16px) 0 0;
+  padding-top: rem(12px);
+  border-top: 1px dashed var(--aal-rule);
+  color: var(--mantine-color-dimmed);
+  font-family: var(--mantine-font-family-monospace);
+  font-size: rem(12px);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+/* ---- The steps ---- */
+
+.steps {
+  display: grid;
+  gap: rem(16px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @media (min-width: $mantine-breakpoint-md) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: rem(24px);
+  }
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding-top: rem(20px);
+  border-top: 2px solid var(--mantine-color-text);
+}
+
+.stepNumber {
+  color: var(--aal-accent);
+  font-family: var(--aal-font-pixel);
+  font-size: rem(48px);
+  line-height: 1;
+}
+
+.stepTitle {
+  margin: rem(12px) 0 0;
+  font-size: rem(20px);
+  line-height: 1.3;
+}
+
+.stepText {
+  flex: 1;
+  margin: rem(6px) 0 0;
+  color: var(--mantine-color-dimmed);
+  line-height: 1.6;
+}
+
+.stepCode {
+  align-self: stretch;
+  margin-top: rem(16px);
+  padding: rem(10px) rem(12px);
+  overflow-x: auto;
+  border: 1px solid #000;
+  background-color: var(--aal-screen);
+  color: var(--aal-screen-text);
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1.25;
+  white-space: pre;
+}
+
+.stepLink {
+  display: inline-flex;
+  align-items: center;
+  gap: rem(6px);
+  margin-top: rem(16px);
+  color: var(--mantine-color-anchor);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}

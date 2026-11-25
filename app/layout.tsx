@@ -2,8 +2,7 @@ import '@mantine/core/styles.css';
 // !! The order of these imports is important !!
 import '@mantine/code-highlight/styles.css';
 import '@mantine/spotlight/styles.css';
-import '@gfazioli/mantine-text-animate/styles.css';
-// Mantine theme overrides (page background, Topaz, Amiga Mode)
+// The site's look on top of Mantine: tokens, the pixel font, the docs engine restyled, Amiga Mode
 import '@/theme/global.css';
 
 import type { Viewport } from 'next';

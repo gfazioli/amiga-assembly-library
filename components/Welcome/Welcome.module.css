@@ -1,10 +1,229 @@
-.title {
-  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
-  font-size: rem(100px);
-  font-weight: 900;
-  letter-spacing: rem(-2px);
+/*
+ * The hero. The name is set in Topaz at sizes where its pixels land on device pixels (multiples
+ * of 16px, or of 8px on the 2x screens every phone has), and filled with a copper gradient.
+ * Nothing here animates: the text is the largest paint of the page and is there on the first.
+ */
+.hero {
+  position: relative;
+  overflow: clip;
+  border-bottom: 1px solid var(--aal-rule);
 
-  @media (max-width: $mantine-breakpoint-md) {
-    font-size: rem(50px);
+  /* Scanlines, fading out towards the text's baseline: one pixel in four, barely there. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      180deg,
+      var(--hero-line) 0 1px,
+      transparent 1px 4px
+    );
+    mask-image: linear-gradient(180deg, #000, transparent 70%);
+    pointer-events: none;
   }
+
+  --hero-line: rgb(26 25 23 / 5%);
+
+  @mixin dark {
+    --hero-line: rgb(154 165 190 / 7%);
+  }
+}
+
+.inner {
+  position: relative;
+  padding-block: rem(40px) rem(48px);
+
+  @media (min-width: $mantine-breakpoint-md) {
+    padding-block: rem(72px) rem(64px);
+  }
+}
+
+.kicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: rem(4px) rem(20px);
+  margin: 0 0 rem(24px);
+  color: var(--mantine-color-dimmed);
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1.25;
+  text-transform: uppercase;
+
+  /* A pixel between the two, drawn rather than typed: Topaz has no middle dot worth using. */
+  & span + span::before {
+    content: '';
+    display: inline-block;
+    width: rem(6px);
+    height: rem(6px);
+    margin-inline-end: rem(20px);
+    background-color: var(--mantine-primary-color-filled);
+    vertical-align: 0.15em;
+  }
+}
+
+.title {
+  margin: 0;
+  font-family: var(--aal-font-pixel);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.platform {
+  display: flex;
+  align-items: center;
+  gap: rem(4px);
+  margin-left: rem(-6px);
+  font-size: rem(32px);
+  text-transform: uppercase;
+
+  /* The checkmark's own box has air under the stripes: lift it onto the baseline. */
+  & svg {
+    flex: none;
+    margin-top: rem(-8px);
+  }
+}
+
+.name {
+  display: block;
+  width: fit-content;
+  margin-top: rem(8px);
+  padding-bottom: 0.08em;
+  background-image: linear-gradient(
+    180deg,
+    var(--mantine-color-orange-7) 20%,
+    var(--mantine-color-orange-9)
+  );
+  background-clip: text;
+  color: transparent;
+  font-size: rem(40px);
+
+  @mixin dark {
+    background-image: linear-gradient(
+      180deg,
+      var(--mantine-color-orange-1) 12%,
+      var(--mantine-color-orange-5) 55%,
+      var(--mantine-color-orange-7)
+    );
+  }
+
+  @media (min-width: $mantine-breakpoint-xs) {
+    font-size: rem(64px);
+  }
+
+  @media (min-width: $mantine-breakpoint-md) {
+    font-size: rem(96px);
+  }
+
+  @media (forced-colors: active) {
+    background-image: none;
+    color: CanvasText;
+  }
+}
+
+.columns {
+  display: grid;
+  gap: rem(40px);
+  margin-top: rem(32px);
+  padding-top: rem(32px);
+  border-top: 2px solid transparent;
+  border-image: var(--aal-copper) 1;
+
+  @media (min-width: $mantine-breakpoint-md) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: rem(56px);
+    margin-top: rem(40px);
+    padding-top: rem(40px);
+  }
+}
+
+.pitch {
+  min-width: 0;
+}
+
+.lede {
+  max-width: 34em;
+  margin: 0;
+  font-size: rem(18px);
+  line-height: 1.65;
+
+  @media (min-width: $mantine-breakpoint-md) {
+    font-size: rem(20px);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: rem(12px);
+  margin-top: rem(28px);
+}
+
+.amigaMode {
+  margin-top: rem(32px);
+}
+
+/* The window's code: Topaz at its native 16px, as an editor on the machine would show it. The
+   highlighter puts a light and a dark colour on every token; the screen is always dark. */
+.code {
+  margin: 0;
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1.25;
+  tab-size: 4;
+
+  & code {
+    font-family: inherit;
+  }
+
+  & :global(.line) span {
+    color: var(--shiki-dark);
+  }
+}
+
+.captionLink {
+  color: var(--mantine-color-anchor);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* The facts: a ruled row of figures in the pixel font. A <dl> whose label comes first in the
+   source and second on screen, so a screen reader hears "functions documented, 60". */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: rem(48px) 0 0;
+  border: 1px solid var(--aal-rule);
+  background-color: var(--mantine-color-default);
+
+  @media (min-width: $mantine-breakpoint-sm) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.fact {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: rem(6px);
+  padding: rem(16px) rem(20px);
+
+  /* Hairlines between the cells, whichever way they wrap */
+  box-shadow:
+    1px 0 0 var(--aal-rule),
+    0 1px 0 var(--aal-rule);
+}
+
+.factValue {
+  margin: 0;
+  color: var(--aal-accent);
+  font-family: var(--aal-font-pixel);
+  font-size: rem(32px);
+  line-height: 1;
+}
+
+.factLabel {
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.3;
 }
