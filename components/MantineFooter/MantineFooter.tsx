@@ -1,35 +1,21 @@
-'use client';
-
 import {
   IconBrandDiscordFilled,
   IconBrandGithubFilled,
-  IconBrandMantine,
   IconBrandX,
   IconCoffee,
   IconHeartFilled,
   IconMailHeart,
   IconPlus,
 } from '@tabler/icons-react';
-import {
-  ActionIcon,
-  Anchor,
-  Avatar,
-  Button,
-  Container,
-  Divider,
-  Grid,
-  Group,
-  Stack,
-  Text,
-  Title,
-} from '@mantine/core';
+import { Anchor, Avatar, Button, Container, Group, Stack, Text } from '@mantine/core';
 import { Logo } from '@/components/Logo/Logo';
+import config from '@/config';
 import { AnimateBadge } from './AnimateBadge';
 import { FooterWordmark } from './FooterWordmark';
 import { ecosystem, highlights, resources, sponsors } from './links';
 import classes from './MantineFooter.module.css';
 
-type VerticalLink = {
+type FooterLink = {
   key: string;
   title: string;
   href: string;
@@ -37,91 +23,77 @@ type VerticalLink = {
   new?: boolean;
 };
 
-const VerticalLinks = ({ list }: { list: VerticalLink[] }) => {
-  return (
-    <>
-      {list.map((item) => (
-        <Group key={item.key}>
-          <Anchor
-            className={classes.columnAnchor}
-            href={item.href}
-            target={item.newWindow ? '_blank' : undefined}
-            rel={item.newWindow ? 'noopener noreferrer' : undefined}
-          >
-            {item.title}
-          </Anchor>
-          {item.new && <AnimateBadge />}
-        </Group>
-      ))}
-    </>
-  );
-};
+const SPONSOR_URL = 'https://github.com/sponsors/gfazioli';
+const REPOSITORY_URL = `https://github.com/${config.gitHub.repo}`;
 
+const SOCIAL = [
+  { label: 'GitHub', href: 'https://github.com/gfazioli', icon: IconBrandGithubFilled },
+  { label: 'X', href: 'https://twitter.com/gfazioli', icon: IconBrandX },
+  { label: 'Undolog Discord', href: config.links.discord, icon: IconBrandDiscordFilled },
+  { label: 'Undolog', href: 'https://undolog.com/', icon: IconMailHeart },
+];
+
+function LinkColumn({ title, list }: { title: string; list: FooterLink[] }) {
+  return (
+    <nav aria-label={title}>
+      <h2 className={classes.columnTitle}>{title}</h2>
+      <ul className={classes.columnList}>
+        {list.map((item) => (
+          <li key={item.key}>
+            <a
+              className={classes.columnLink}
+              href={item.href}
+              target={item.newWindow ? '_blank' : undefined}
+              rel={item.newWindow ? 'noopener noreferrer' : undefined}
+            >
+              {item.title}
+            </a>
+            {item.new && <AnimateBadge />}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+/**
+ * The site footer, under every page: what the library is, the link columns, the sponsors wall
+ * (`#sponsors`, the target of the header's heart), the credits with the font's, the trademark
+ * notice, and the wordmark the page closes on.
+ */
 export const MantineFooter = () => {
   return (
-    <div className={classes.contentFooter}>
-      <Container className={classes.footer} size="lg">
-        <Grid grow>
-          <Grid.Col span={{ base: 12, sm: 4 }}>
-            <Stack gap="xs">
-              <Logo />
-              <Text fz={13} mr={64}>
-                The Amiga Assembly Library is a shared library for Commodore Amiga written in
-                Motorola 68020 assembly language. Version 41.21, Public Domain Software. Compatible
-                with KickStart 3.0+.
-              </Text>
-              <Group>
-                <ActionIcon variant="subtle" component="a" href="https://github.com/gfazioli">
-                  <IconBrandGithubFilled size={24} />
-                </ActionIcon>
-                <ActionIcon variant="subtle" component="a" href="https://twitter.com/gfazioli">
-                  <IconBrandX size={24} />
-                </ActionIcon>
-                <ActionIcon
-                  variant="subtle"
-                  component="a"
-                  href="https://discord.gg/rdWu5yFCR6"
-                  aria-label="Undolog Discord"
-                >
-                  <IconBrandDiscordFilled size={24} />
-                </ActionIcon>
-                <ActionIcon variant="subtle" component="a" href="https://undolog.com/">
-                  <IconMailHeart size={24} />
-                </ActionIcon>
-              </Group>
-            </Stack>
-          </Grid.Col>
-          <Grid.Col className={classes.column} span={2}>
-            <Stack gap="xs">
-              <Title className={classes.title} order={6}>
-                DOCUMENTATION
-              </Title>
-              <VerticalLinks list={highlights} />
-            </Stack>
-          </Grid.Col>
-          <Grid.Col className={classes.column} span={2}>
-            <Stack gap="xs">
-              <Title className={classes.title} order={6}>
-                RESOURCES
-              </Title>
-              <VerticalLinks list={resources} />
-            </Stack>
-          </Grid.Col>
-          <Grid.Col className={classes.column} span={2}>
-            <Stack gap="xs">
-              <Title className={classes.title} order={6}>
-                MODULES
-              </Title>
-              <VerticalLinks list={ecosystem} />
-            </Stack>
-          </Grid.Col>
-        </Grid>
+    <footer className={classes.root}>
+      <Container className={classes.inner} size="lg">
+        <div className={classes.top}>
+          <div className={classes.about}>
+            <div className={classes.brand}>
+              <Logo size={32} />
+              <span className={classes.brandName}>Amiga Assembly Library</span>
+            </div>
+            <p className={classes.aboutText}>
+              A shared library for Commodore Amiga written in Motorola 68020 assembly language.
+              Version 41.21, Public Domain Software. Compatible with KickStart 3.0+.
+            </p>
+            {/* Plain links: a Tabler icon handed to a client component as a child, from a list
+                rendered on the server, trips React's key warning in development */}
+            <div className={classes.social}>
+              {SOCIAL.map((item) => (
+                <a key={item.label} href={item.href} aria-label={item.label}>
+                  <item.icon size={20} aria-hidden />
+                </a>
+              ))}
+            </div>
+          </div>
 
-        <Divider my="xl" className={classes.lastDivider} />
+          <LinkColumn title="Documentation" list={highlights} />
+          <LinkColumn title="Modules" list={ecosystem} />
+          <LinkColumn title="Resources" list={resources} />
+        </div>
 
-        {/* Sponsors wall */}
-        <Stack gap="md" align="center" id="sponsors" className={classes.sponsorsSection}>
-          <Title order={2} ta="center" tt="uppercase">
+        {/* Sponsors wall: the same on every site of the author's, so its pink stays pink here */}
+        <Stack gap="md" align="center" id="sponsors" className={classes.sponsors}>
+          <h2 className={classes.sponsorsTitle}>
             <Text
               inherit
               component="span"
@@ -130,7 +102,7 @@ export const MantineFooter = () => {
             >
               Sponsors
             </Text>
-          </Title>
+          </h2>
           <Text fz={15} c="dimmed" ta="center" maw={560}>
             If my open-source work saves you or your team time, consider sponsoring its development.
             Sponsors get their name or logo featured here and across all my projects' documentation
@@ -150,7 +122,10 @@ export const MantineFooter = () => {
                     src={`https://github.com/${sponsor.github}.png`}
                     alt={sponsor.name}
                     size="lg"
-                    radius="xl"
+                    radius={999}
+                    // Lazy: without it React preloads both avatars, from github.com, in the
+                    // head of every page, for a wall at the very bottom
+                    imageProps={{ loading: 'lazy' }}
                   />
                   <Text fz={12} c="dimmed">
                     {sponsor.name}
@@ -158,14 +133,9 @@ export const MantineFooter = () => {
                 </Stack>
               </Anchor>
             ))}
-            <Anchor
-              href="https://github.com/sponsors/gfazioli"
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="never"
-            >
+            <Anchor href={SPONSOR_URL} target="_blank" rel="noopener noreferrer" underline="never">
               <Stack gap={4} align="center">
-                <Avatar size="lg" radius="xl" className={classes.sponsorSlot}>
+                <Avatar size="lg" radius={999} className={classes.sponsorSlot}>
                   <IconPlus size={20} />
                 </Avatar>
                 <Text fz={12} c="dimmed">
@@ -174,97 +144,65 @@ export const MantineFooter = () => {
               </Stack>
             </Anchor>
           </Group>
-          <Group mb="xl" gap="sm" justify="center">
+          <Group gap="sm" justify="center">
             <Button
               component="a"
-              href="https://github.com/sponsors/gfazioli"
+              href={SPONSOR_URL}
               target="_blank"
               rel="noopener noreferrer"
               variant="gradient"
               gradient={{ from: 'pink', to: 'grape' }}
+              className={classes.sponsorButton}
               leftSection={<IconHeartFilled size={16} />}
-              radius="xl"
+              radius={999}
             >
               Become a sponsor
             </Button>
             <Button
               component="a"
-              href="https://donate.stripe.com/fZu4gy4Tn3b1dgudGx0co00"
+              href={config.links.coffee}
               target="_blank"
               rel="noopener noreferrer"
               variant="filled"
               color="yellow"
               leftSection={<IconCoffee size={16} />}
-              radius="xl"
-              styles={{
-                label: { color: 'var(--mantine-color-white)' },
-                section: { color: 'var(--mantine-color-white)' },
-              }}
+              radius={999}
             >
               Buy me a coffee
             </Button>
           </Group>
         </Stack>
 
-        <Divider my={16} className={classes.lastDivider} />
+        <div className={classes.credits}>
+          <p>Amiga Assembly Library v41.21 — Public Domain Software</p>
+          <p>
+            Made by <a href="https://gfazioli.github.io/">Undolog</a>
+            {' · '}
+            Built with <a href="https://mantine.dev/">Mantine</a> and{' '}
+            <a href="https://nextjs.org/">Next.js</a>
+            {' · '}
+            Hosted on <a href="https://vercel.com/">Vercel</a>
+            {' · '}
+            Source on <a href={REPOSITORY_URL}>GitHub</a>
+          </p>
+        </div>
 
-        <Group justify="space-between">
-          <Text fz={12} inline>
-            Amiga Assembly Library v41.21 — Public Domain Software
-          </Text>
-
-          <Group justify="right">
-            <Text fz={12} inline>
-              Made with ❤️ by{' '}
-              <Anchor fz={13} href="https://gfazioli.github.io/">
-                Undolog
-              </Anchor>
-            </Text>
-            <Divider orientation="vertical" />
-            <Text fz={12} inline>
-              <Group gap={4} component="span">
-                Hosted on{' '}
-                <Anchor fz={13} href="https://vercel.com/">
-                  Vercel
-                </Anchor>
-              </Group>
-            </Text>
-            <Divider orientation="vertical" />
-            <Text fz={12} inline>
-              <Group gap={4} component="span">
-                Built with{' '}
-                <Anchor fz={13} href="https://mantine.dev/">
-                  <Group gap={4} component="span">
-                    <IconBrandMantine size={16} /> Mantine
-                  </Group>
-                </Anchor>
-                {' + '}
-                <Anchor fz={13} href="https://nextjs.org/">
-                  Next.js
-                </Anchor>
-              </Group>
-            </Text>
-            <Divider orientation="vertical" />
-            <Text fz={12} inline>
-              <Group gap={4} component="span">
-                Source on{' '}
-                <Anchor fz={13} href="https://github.com/gfazioli/amiga-assembly-library">
-                  <Group gap={4} component="span">
-                    <IconBrandGithubFilled size={16} /> GitHub
-                  </Group>
-                </Anchor>
-              </Group>
-            </Text>
-          </Group>
-        </Group>
-
-        <Text fz={12} c="dimmed" mt="md">
-          Amiga, AmigaOS and Commodore are trademarks of their respective owners. This is an
-          independent project, not affiliated with or endorsed by them.
-        </Text>
+        <div className={classes.legal}>
+          <p>
+            Amiga, AmigaOS and Commodore are trademarks of their respective owners. This is an
+            independent project, not affiliated with or endorsed by them.
+          </p>
+          <p>
+            The pixel font is Topaz a600a1200a4000, from{' '}
+            <a href="https://github.com/rewtnull/amigafonts">Multi Platform Amiga Fonts</a>: the
+            TrueType version is © 2009 dMG of TrueSchool and Divine Stylers, released under the GPL
+            with the font exception; Topaz itself is © Amiga Inc. Details in the{' '}
+            <a href={`${REPOSITORY_URL}/blob/main/NOTICE.md`}>notices</a>.
+          </p>
+        </div>
       </Container>
 
       <FooterWordmark name="Assembly Library" />
-    </div>
+    </footer>
   );
 };
