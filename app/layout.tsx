@@ -47,6 +47,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           defaultColorScheme={head.mantine.defaultColorScheme}
         />
         <link rel="shortcut icon" href="/favicon.svg" />
+        {/* Topaz sets the title of every page, the home page's above all: fetched with the
+            stylesheet, its 6 KB are there for the first paint, and nothing swaps after it.
+            (React also lists the preload among its own hints: one request all the same.) */}
+        <link
+          rel="preload"
+          href="/fonts/Topaz_a1200_v1.0.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <script dangerouslySetInnerHTML={{ __html: SIDEBAR_COLLAPSED_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: AMIGA_MODE_SCRIPT }} />
       </head>
