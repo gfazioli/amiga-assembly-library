@@ -198,16 +198,18 @@ const REGISTER_RE = /^(d[0-7]|a[0-7]|sp|pc|sr|ccr|usp|vbr|sfc|dfc)$/i;
 /**
  * Token colours as [light, dark]. Dark is the Nextra site's palette (GitHub dark); light is its
  * GitHub light counterpart, which the browser enhancer never had (it drew the dark colours on the
- * light scheme too).
+ * light scheme too). Three of them are the darker shades GitHub uses today, for WCAG AA on the
+ * code block's ground (4.5:1): the light red and yellow, which were at 4.3 and 3.1, and the dark
+ * comment grey, at 3.9 where comments carry half of what an assembly listing says.
  */
 const COLORS = {
-  instruction: ['#d73a49', '#f97583'],
+  instruction: ['#cf222e', '#f97583'],
   directive: ['#6f42c1', '#b392f0'],
   register: ['#005cc5', '#79b8ff'],
-  comment: ['#6a737d', '#6a737d'],
+  comment: ['#6a737d', '#8b949e'],
   string: ['#032f62', '#9ecbff'],
   number: ['#005cc5', '#79b8ff'],
-  macro: ['#b08800', '#e3b341'],
+  macro: ['#7d5f00', '#e3b341'],
 } as const;
 
 /** The fence languages that mean 68k assembly here. */

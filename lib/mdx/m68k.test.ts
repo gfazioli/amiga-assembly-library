@@ -16,7 +16,7 @@ describe('highlightM68k', () => {
 
   it('colours instructions with a size suffix, registers and immediates', () => {
     expect(tokens(highlightM68k('\tmove.l\t#$10,d0'))).toEqual([
-      ['move.l', '#d73a49'],
+      ['move.l', '#cf222e'],
       ['#$10', '#005cc5'],
       ['d0', '#005cc5'],
     ]);
@@ -38,7 +38,7 @@ describe('highlightM68k', () => {
 
   it('reads a symbolic immediate whole, not as a hex number', () => {
     expect(tokens(highlightM68k('\tmove.l\t#fib_SIZEOF,d0'))).toEqual([
-      ['move.l', '#d73a49'],
+      ['move.l', '#cf222e'],
       ['#fib_SIZEOF', '#005cc5'],
       ['d0', '#005cc5'],
     ]);
@@ -46,8 +46,8 @@ describe('highlightM68k', () => {
 
   it('colours directives, macros and LVO offsets', () => {
     expect(tokens(highlightM68k('\tCALLEXEC _LVOAllocMem'))).toEqual([
-      ['CALLEXEC', '#b08800'],
-      ['_LVOAllocMem', '#b08800'],
+      ['CALLEXEC', '#7d5f00'],
+      ['_LVOAllocMem', '#7d5f00'],
     ]);
     expect(tokens(highlightM68k('\tXDEF\t_RevertMem'))[0]).toEqual(['XDEF', '#6f42c1']);
   });
