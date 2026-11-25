@@ -27,7 +27,7 @@ Copy `assembly.library` to the system `LIBS:` directory:
 copy assembly.library LIBS:
 ```
 
-The ZIP contains the library source (`asm/examples/lib.asm` plus the modules in `asm/zroutine/`), not a prebuilt `assembly.library`. The `OUTPUT` directive in `lib.asm` writes the assembled library to `LIBS:Assembly.Library`.
+The ZIP contains the library source (`asm/examples/lib.asm` plus the modules in `asm/zroutine/`), not a prebuilt `assembly.library`. The `OUTPUT` directive in `lib.asm` writes the assembled library to `LIBS:Assembly.Library`, but `lib.asm` also includes `assemblybase.i` and `asmprivate.i`, which the ZIP does not contain either: the library cannot be assembled from the ZIP alone.
 
 ### Copy the include files
 
