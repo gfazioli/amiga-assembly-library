@@ -1,6 +1,6 @@
 import '@mantine/core/styles.css';
 // !! The order of these imports is important !!
-import '@gfazioli/mantine-text-animate/styles.css';
+import '../theme/global.css';
 
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import { theme } from '../theme';

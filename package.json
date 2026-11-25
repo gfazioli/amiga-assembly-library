@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@gfazioli/mantine-text-animate": "^4.0.22",
     "@mantine/code-highlight": "9.8.2",
     "@mantine/core": "9.8.2",
     "@mantine/hooks": "9.8.2",

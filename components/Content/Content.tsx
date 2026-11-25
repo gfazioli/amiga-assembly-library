@@ -1,119 +1,124 @@
-'use client';
+import { IconArrowRight } from '@tabler/icons-react';
+import { Container } from '@mantine/core';
+import { Link } from '@/components/Link/Link';
+import type { ModuleDefinition } from './modules';
+import classes from './Content.module.css';
 
-import {
-  IconBrain,
-  IconCode,
-  IconCpu,
-  IconDatabase,
-  IconFileText,
-  IconMath,
-  IconPalette,
-  IconWindow,
-} from '@tabler/icons-react';
-import { Anchor, Card, Divider, SimpleGrid, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+export interface LibraryModule extends ModuleDefinition {
+  /** The module's functions, as its docs folder lists them */
+  functions: string[];
+}
 
-const modules = [
+/** How many function names a card shows before "and N more" */
+const NAMES_SHOWN = 3;
+
+/**
+ * Three steps from the archive to the first call. Each line of code is the docs' own
+ * (Getting Started; the RevertMem example), and each step links to where it is explained.
+ */
+const STEPS = [
   {
-    icon: IconCpu,
-    title: 'Exec',
-    description: 'Memory management, linked lists, and node operations.',
-    href: '/docs/exec',
-    color: 'red',
+    title: 'Install',
+    text: 'Put assembly.library in LIBS: and the include files on your include path.',
+    code: 'copy assembly.library LIBS:',
+    href: '/docs/getting-started#installation',
+    link: 'Installation',
   },
   {
-    icon: IconFileText,
-    title: 'DOS',
-    description: 'File I/O, disk info, checksums, and line input.',
-    href: '/docs/dos',
-    color: 'blue',
+    title: 'Open',
+    text: 'One OpenLibrary() call, version 41 or higher. The system libraries it uses come opened with it.',
+    code: 'jsr     _LVOOpenLibrary(a6)',
+    href: '/docs/getting-started#opening-the-library-from-assembly',
+    link: 'From assembly or C',
   },
   {
-    icon: IconPalette,
-    title: 'Graphics',
-    description: 'BitPlanes, RastPort, drawing, color maps, and formatted text.',
-    href: '/docs/graphics',
-    color: 'green',
-  },
-  {
-    icon: IconDatabase,
-    title: 'Libraries',
-    description: 'String processing, character filtering, and IFF/AIFF support.',
-    href: '/docs/libraries',
-    color: 'violet',
-  },
-  {
-    icon: IconMath,
-    title: 'Math',
-    description: 'Decimal, hexadecimal, and binary conversions.',
-    href: '/docs/math',
-    color: 'yellow',
-  },
-  {
-    icon: IconWindow,
-    title: 'Intuition & GadTools',
-    description: 'UI gadgets, custom requesters, and interface management.',
-    href: '/docs/intui-gadtools',
-    color: 'cyan',
-  },
-  {
-    icon: IconBrain,
-    title: 'REI Interface',
-    description: 'Custom windowing system with event-driven messaging.',
-    href: '/docs/rei',
-    color: 'orange',
-  },
-  {
-    icon: IconCode,
-    title: 'C Interface',
-    description: 'Full C prototypes and pragma declarations for SAS/C.',
-    href: '/docs/c-interface',
-    color: 'gray',
+    title: 'Call',
+    text: 'The library base in A6, the arguments in the registers each function page lists.',
+    code: 'jsr     _LVORevertMem(a6)',
+    href: '/docs/exec/revert-mem',
+    link: 'A function page',
   },
 ];
 
-export const Content = () => {
+function ModuleCard({ module }: { module: LibraryModule }) {
+  const shown = module.functions.slice(0, NAMES_SHOWN);
+  const more = module.functions.length - shown.length;
+
+  return (
+    <li className={classes.cardItem}>
+      <Link href={module.href} className={classes.card}>
+        <span className={classes.cardHead}>
+          <span className={classes.cardCode} aria-hidden>
+            {module.code}
+          </span>
+          <span className={classes.cardCount}>
+            {module.reference ? 'Guide' : `${module.functions.length} functions`}
+          </span>
+        </span>
+        <h3 className={classes.cardTitle}>{module.title}</h3>
+        <p className={classes.cardText}>{module.description}</p>
+        {shown.length > 0 && (
+          <p className={classes.cardNames}>
+            {shown.join(' · ')}
+            {more > 0 && ` · +${more}`}
+          </p>
+        )}
+      </Link>
+    </li>
+  );
+}
+
+/** The home page below the hero: the modules, then the way in. */
+export function Content({ modules }: { modules: LibraryModule[] }) {
   return (
     <>
-      <Divider my="md" />
-      <Stack align="center" my={32}>
-        <Title order={2} ta="center">
-          Library Modules
-        </Title>
+      <section className={classes.section} aria-labelledby="modules-title">
+        <Container size="lg">
+          <header className={classes.header}>
+            <p className={classes.eyebrow}>Reference</p>
+            <h2 id="modules-title" className={classes.title}>
+              Library modules
+            </h2>
+            <p className={classes.intro}>
+              One library, organized by the part of the system each group of functions extends.
+            </p>
+          </header>
 
-        <Text c="dimmed" ta="center" maw={500}>
-          The Assembly Library is organized into specialized modules, each providing a focused set
-          of functions.
-        </Text>
+          <ul className={classes.grid}>
+            {modules.map((module) => (
+              <ModuleCard key={module.href} module={module} />
+            ))}
+          </ul>
+        </Container>
+      </section>
 
-        <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="lg" mt="md">
-          {modules.map((mod) => (
-            <Card
-              key={mod.title}
-              component="a"
-              href={mod.href}
-              shadow="sm"
-              padding="lg"
-              radius="md"
-              withBorder
-              style={{ textDecoration: 'none', cursor: 'pointer' }}
-            >
-              <ThemeIcon size={40} radius="md" color={mod.color} variant="light">
-                <mod.icon size={24} />
-              </ThemeIcon>
-              <Text fw={600} mt="sm">
-                {mod.title}
-              </Text>
-              <Text size="sm" c="dimmed" mt={4}>
-                {mod.description}
-              </Text>
-            </Card>
-          ))}
-        </SimpleGrid>
+      <section className={classes.section} aria-labelledby="steps-title">
+        <Container size="lg">
+          <header className={classes.header}>
+            <p className={classes.eyebrow}>Getting started</p>
+            <h2 id="steps-title" className={classes.title}>
+              From the archive to the first call
+            </h2>
+          </header>
 
-        <Anchor href="/docs/getting-started" mt="md">
-          Get started with the Assembly Library →
-        </Anchor>
-      </Stack>
+          <ol className={classes.steps}>
+            {STEPS.map((step, index) => (
+              <li key={step.title} className={classes.step}>
+                <span className={classes.stepNumber} aria-hidden>
+                  {index + 1}
+                </span>
+                <h3 className={classes.stepTitle}>{step.title}</h3>
+                <p className={classes.stepText}>{step.text}</p>
+                <code className={classes.stepCode}>{step.code}</code>
+                <Link href={step.href} className={classes.stepLink}>
+                  {step.link}
+                  <IconArrowRight size={16} aria-hidden />
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </Container>
+      </section>
     </>
   );
-};
+}

@@ -2221,18 +2221,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gfazioli/mantine-text-animate@npm:^4.0.22":
-  version: 4.0.22
-  resolution: "@gfazioli/mantine-text-animate@npm:4.0.22"
-  peerDependencies:
-    "@mantine/core": ">=9.0.0"
-    "@mantine/hooks": ">=9.0.0"
-    react: ^18.x || ^19.x
-    react-dom: ^18.x || ^19.x
-  checksum: 10c0/181172cca489ea7d412be99705cc3c5b5bcbce09cb1a7789e74b4518cab292bc91e329db61c38c5443b98166b80abe169757bcf55898d27740940ea096fad6bd
-  languageName: node
-  linkType: hard
-
 "@img/colour@npm:^1.1.0":
   version: 1.1.0
   resolution: "@img/colour@npm:1.1.0"
@@ -5497,7 +5485,6 @@ __metadata:
   resolution: "amiga-assembly-library@workspace:."
   dependencies:
     "@babel/core": "npm:^7.29.13"
-    "@gfazioli/mantine-text-animate": "npm:^4.0.22"
     "@mantine/code-highlight": "npm:9.8.2"
     "@mantine/core": "npm:9.8.2"
     "@mantine/hooks": "npm:9.8.2"
