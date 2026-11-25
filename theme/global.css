@@ -128,24 +128,6 @@ summary:focus-visible {
   outline-offset: 2px;
 }
 
-/* The skip link (app/layout.tsx): above the fixed header, and only while it has focus */
-.skip-link {
-  position: fixed;
-  top: var(--mantine-spacing-xs);
-  left: var(--mantine-spacing-xs);
-  z-index: 1000;
-  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
-  border-radius: var(--mantine-radius-sm);
-  background-color: var(--mantine-color-body);
-  color: var(--mantine-color-text);
-  font-weight: 600;
-  transform: translateY(-200%);
-
-  &:focus {
-    transform: none;
-  }
-}
-
 /* Buttons are gadgets: a lit top edge and a shaded bottom one, pressed in when held. Only the
    variants with a face of their own; `subtle`, `light` and `transparent` stay flat. */
 .mantine-Button-root {

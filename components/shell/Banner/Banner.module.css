@@ -11,12 +11,12 @@
   height: var(--site-banner-height);
   padding-inline: rem(44px);
   color: var(--mantine-color-white);
-  /* The Nextra site's banner: near-black, with a soft gradient in the dark scheme */
-  background-color: #171717;
-
-  @mixin dark {
-    background-image: linear-gradient(1deg, #383838, #212121);
-  }
+  /* A site with its own colours sets --site-banner-background in its theme CSS, rather than
+     editing this file. */
+  background: var(
+    --site-banner-background,
+    linear-gradient(90deg, var(--mantine-color-blue-7), var(--mantine-color-violet-7))
+  );
 
   :global([data-banner-dismissed]) & {
     display: none;

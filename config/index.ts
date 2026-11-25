@@ -68,6 +68,12 @@ export default {
     sidebar: {
       /** Folders deeper than this open only when they hold the current page */
       defaultMenuCollapseLevel: 1,
+      /**
+       * Where the button that hides the sidebar on desktop sits (⌘B / Ctrl+B works either way):
+       * `header`, left of the logo, or `sidebar`, at its foot beside the colour scheme, as on the
+       * Nextra sites; a collapsed sidebar is then brought back from the header.
+       */
+      toggle: 'header' as 'header' | 'sidebar',
     },
   },
   /**
@@ -84,6 +90,10 @@ export default {
    */
   links: {
     discord: 'https://discord.gg/rdWu5yFCR6',
+    /** The Discord link's tooltip and accessible name, in the header and the sidebar */
+    discordLabel: 'Undolog Discord',
+    /** The GitHub icon in the header and at the foot of the sidebar: a page every visitor can open */
+    github: 'https://github.com/gfazioli/amiga-assembly-library',
     coffee: 'https://donate.stripe.com/fZu4gy4Tn3b1dgudGx0co00',
   },
 
