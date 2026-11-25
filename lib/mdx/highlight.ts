@@ -1,0 +1,90 @@
+import { transformerMetaHighlight } from '@shikijs/transformers';
+import { bundledLanguages, createHighlighter, type BundledLanguage, type Highlighter } from 'shiki';
+import { highlightM68k, M68K_LANGUAGES } from './m68k';
+
+/**
+ * Build-time syntax highlighting with Shiki, for Mantine's `CodeHighlight`.
+ *
+ * Every docs page is prerendered, so this runs once per code block during `next build` and the
+ * browser downloads no highlighter at all. (Next.js keeps `shiki` out of the server bundle by
+ * default and loads it with Node, so its WASM engine works as is.)
+ *
+ * The output carries both themes at once (`--shiki-light` / `--shiki-dark` on every token) and
+ * `components/docs/CodeBlock.module.css` picks one from Mantine's `data-mantine-color-scheme`,
+ * which `ColorSchemeScript` sets before the first paint: dark-mode readers never see the light
+ * colours flash.
+ */
+
+const THEMES = { light: 'github-light-default', dark: 'github-dark-default' } as const;
+
+const ALIASES: Record<string, BundledLanguage> = {
+  js: 'javascript',
+  ts: 'typescript',
+  sh: 'shellscript',
+  shell: 'shellscript',
+  bash: 'shellscript',
+  zsh: 'shellscript',
+  md: 'markdown',
+  yml: 'yaml',
+};
+
+let highlighter: Promise<Highlighter> | undefined;
+
+function getHighlighter() {
+  highlighter ??= createHighlighter({ themes: [THEMES.light, THEMES.dark], langs: [] });
+  return highlighter;
+}
+
+function resolveLanguage(language: string | undefined): BundledLanguage | undefined {
+  if (!language) {
+    return undefined;
+  }
+  const name = language.toLowerCase();
+  if (name in ALIASES) {
+    return ALIASES[name];
+  }
+  return name in bundledLanguages ? (name as BundledLanguage) : undefined;
+}
+
+/** The code as `CodeHighlight` shows it: no leading blank lines, no trailing whitespace. */
+export function normalizeCode(code: string): string {
+  return code.replace(/^\s*\n/, '').trimEnd();
+}
+
+/**
+ * The inner HTML of the `<code>` element for this code, or `null` for a language Shiki does not
+ * know (the block then renders as plain text). `meta` is the fence meta: `{4}` or `{2,5-7}`
+ * highlights those lines.
+ */
+export async function highlightCode(
+  code: string,
+  language: string | undefined,
+  meta?: string
+): Promise<string | null> {
+  // 68k assembly: Shiki's `asm` is x86, so these blocks get the library's own highlighter.
+  if (language && M68K_LANGUAGES.has(language.toLowerCase())) {
+    return highlightM68k(code);
+  }
+
+  const lang = resolveLanguage(language);
+  if (!lang) {
+    return null;
+  }
+
+  const shiki = await getHighlighter();
+  if (!shiki.getLoadedLanguages().includes(lang)) {
+    await shiki.loadLanguage(lang);
+  }
+
+  const html = shiki.codeToHtml(code, {
+    lang,
+    themes: THEMES,
+    defaultColor: false,
+    meta: { __raw: meta },
+    transformers: [transformerMetaHighlight()],
+  });
+
+  // Keep what is inside <code>…</code>: CodeHighlight renders its own <pre> and <code>.
+  const inner = html.match(/<code[^>]*>([\s\S]*)<\/code>/);
+  return inner ? inner[1] : null;
+}

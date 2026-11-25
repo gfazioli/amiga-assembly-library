@@ -87,7 +87,7 @@ void main(int argc, char **argv)
 
 ## Documentation Site
 
-The documentation site is built with [Next.js](https://nextjs.org/) + [Mantine](https://mantine.dev/) + [Nextra](https://nextra.site/) and features:
+The documentation site is built with [Next.js](https://nextjs.org/) + [Mantine](https://mantine.dev/) on the [Mantine Next.js docs template](https://github.com/gfazioli/next-app-mantine-docs-template) (MDX, no docs framework) and features:
 
 - Complete API reference for all 50+ functions
 - Original 68020 assembly source code with syntax highlighting
