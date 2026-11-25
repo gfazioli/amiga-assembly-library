@@ -3,10 +3,9 @@
  *
  * Shiki has no 68k grammar (its `asm` is x86), so `highlightCode` hands these blocks here. The
  * tokenizer and its word lists are the ones the Nextra site ran in the browser after the page
- * loaded (components/M68kHighlighter), with one fix noted in `colorLine`; the output now has
- * Shiki's shape, one `<span class="line">`
- * per line and `--shiki-light` / `--shiki-dark` on every token, so the code block's CSS picks the
- * colour for the scheme and the browser runs nothing.
+ * loaded (components/M68kHighlighter), with one fix noted in `colorLine`. The output now has
+ * Shiki's shape, one `<span class="line">` per line and `--shiki-light` / `--shiki-dark` on every
+ * token, so the code block's CSS picks the colour for the scheme and the browser runs nothing.
  */
 
 const INSTRUCTIONS = new Set([

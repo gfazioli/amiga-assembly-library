@@ -87,25 +87,15 @@ export default {
   },
 
   /**
-   * GitHub API configuration
+   * The GitHub repository, linked from the header and the sidebar
    */
   gitHub: {
     repo: 'gfazioli/amiga-assembly-library',
-    apiUrl: 'https://api.github.com',
-    releasesUrl: 'https://api.github.com/repos/gfazioli/amiga-assembly-library/releases',
-  },
-
-  /**
-   * Release notes configuration
-   */
-  releaseNotes: {
-    url: 'https://github.com/gfazioli/amiga-assembly-library/releases',
-    maxReleases: 10,
   },
 
   /**
    * Search configuration (for pagefind)
-   * @see /app/api/search/route.ts
+   * @see /app/api/search/route.server.ts
    */
   search: {
     queryKeyword: 'q',

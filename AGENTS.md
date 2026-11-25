@@ -66,7 +66,7 @@ Each component lives in its own directory. Key custom pieces:
 - **MantineFooter** — The site footer with the sponsors wall (`#sponsors`), on every page.
 
 ### Configuration (`config/index.ts`)
-Central config object with metadata (SEO/OG), the docs layout settings (`docs`), shared links, GitHub API URLs, and pagefind search parameters. Referenced as `@/config`.
+Central config object with metadata (SEO/OG), the docs layout settings (`docs`), shared links, the GitHub repository, and pagefind search parameters. Referenced as `@/config`.
 
 ### Test Utilities (`test-utils/`)
 Custom `render()` wrapper that provides MantineProvider with the project theme. Use this instead of raw Testing Library render.
