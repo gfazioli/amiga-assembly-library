@@ -52,3 +52,48 @@ None.
 
 - `intuition/imageclass.h`
 - `gadtools.library/DrawBevelBoxA()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+; (19-Jan-1995) --- DrawFrameStateA(rei, left, top, width, height, state, taglist) (a0,d0-d4,a1)
+_LVODrawFrameStateA
+        movem.l d2-d5/a2-a6,-(sp)
+        move.l  a0,a4                    ; Save REI...
+        move.l  sp,a5                    ; Save the stack pointer
+        move.l  a1,-(sp)                 ; Next TagList... or TAG_DONE
+        move.l  a1,d5                    ; Null Next Extra TagList?? == TAG_DONE
+        beq.s   SkipMo
+        pea     TAG_MORE                 ; Next TagList...
+SkipMo  move.l  d3,-(sp)
+        pea     IA_Height
+        move.l  d2,-(sp)
+        pea     IA_Width
+        move.l  d1,-(sp)
+        pea     IA_Top
+        move.l  d0,-(sp)
+        pea     IA_Left
+        move.l  sp,a2                    ; move the taglist...
+        lea     frameclassname(pc),a1
+        suba.l  a0,a0
+        move.l  ab_IntuiBase(a6),a6
+        jsr     _LVONewObjectA(a6)
+        move.l  a5,sp                    ; restore the stack pointer
+        move.l  d0,d5                    ; d5 = Object
+        beq.s   DFSExit
+        move.l  ([rei_Window.b,a4],wd_RPort.w),a0
+        move.l  d5,a1                    ; Object
+        move.l  ([rei_VI.w,a4],vi_DrawInfo.w),a2 ; DrawInfo
+        moveq   #0,d0
+        moveq   #0,d1
+        move.l  d4,d2
+        jsr     _LVODrawImageState(a6)
+        move.l  d5,a0
+        jsr     _LVODisposeObject(a6)
+        movem.l (sp)+,d2-d5/a2-a6
+DFSExit rts
+frameclassname
+        STRING  "frameiclass"
+```

@@ -28,3 +28,54 @@ None.
 ## See Also
 
 - `graphics.library/EraseRect()`
+
+## Implementation
+
+The original 68020 assembly implementation:
+
+```asm
+; (22-Feb-1995) --- EraseInternalRect(window) (A0)
+_LVOEraseInternalRect
+        movem.l d2-d6/a2-a6,-(sp)
+        movem.w ClearREI(pc),d0-d5
+        move.b  wd_BorderLeft(a0),d0     ; xmin
+        move.b  wd_BorderTop(a0),d1      ; ymin
+        move.b  wd_BorderRight(a0),d4
+        move.b  wd_BorderBottom(a0),d5
+        movem.w wd_Width(a0),d2-d3
+        sub.w   d4,d2                    ; xmax
+        sub.w   d5,d3                    ; ymax
+        subq.w  #1,d2
+        subq.w  #1,d3
+        move.l  wd_RPort(a0),a1          ; RastPort
+        move.l  rp_Layer(a1),d4          ; Layer
+        beq.s   EIRNLay
+        move.l  a6,a4                    ; Save AsmBase
+        move.l  d4,a5                    ; A5 = Layer
+        move.l  ab_GfxBase(a4),a6
+        jsr     _LVOLockLayerRom(a6)
+        move.l  lr_BackFill(a5),a0
+        movem.w d0-d3,-(sp)
+        move.l  sp,a2
+        move.l  ab_LayersBase(a4),a6
+        jsr     _LVODoHookClipRects(a6)
+        addq.w  #8,sp
+        move.l  ab_GfxBase(a4),a6
+        jsr     _LVOUnlockLayerRom(a6)
+        movem.l (sp)+,d2-d6/a2-a6
+        rts
+EIRNLay move.l  a1,a0
+        sub.w   d0,d2
+        addq.w  #1,d2
+        move.w  d2,d4
+        move.w  d0,d2
+        sub.w   d1,d3
+        addq.w  #1,d3
+        move.w  d3,d5
+        move.w  d1,d3
+        moveq   #0,d6
+        move.l  ab_GfxBase(a4),a6
+        jsr     _LVOClipBlit(a6)
+        movem.l (sp)+,d2-d6/a2-a6
+        rts
+```
