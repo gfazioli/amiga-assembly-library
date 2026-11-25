@@ -18,4 +18,6 @@ The Math module provides number format conversion functions. These routines conv
 | [ValueToStringHex](/docs/math/value-to-string-hex) | Convert a LONG value to a hexadecimal string |
 | [ValueToStringBin](/docs/math/value-to-string-bin) | Convert a LONG value to a binary string |
 
-All conversion functions operate on 32-bit signed LONG values and use fast lookup tables for optimal performance on the 68020 processor.
+All conversion functions operate on 32-bit LONG values.
+
+The shipped `clib/ASSEMBLY.H` (41.6) declares the math functions under other names: `Dec2Val`, `Hex2Val`, `Bin2Val`, `ConvDec`, `ConvDecZ`, `ConvHex` and `ConvBin`. The pragma file, the `assembly.lib` linker stubs and the library itself use the names documented here.

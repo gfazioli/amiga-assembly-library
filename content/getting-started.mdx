@@ -12,7 +12,7 @@ import { Callout, Steps } from '@/components/docs'
 
 ## Download
 
-Download the complete library package (includes library binary, include files, C prototypes, and example programs):
+Download the library package (include files, C prototypes, the 68020 source of the library and C example programs):
 
 **[Download Assembly Library v41.21 (ZIP)](/download.zip)**
 
@@ -26,6 +26,8 @@ Copy `assembly.library` to the system `LIBS:` directory:
 ```
 copy assembly.library LIBS:
 ```
+
+The ZIP contains the library source (`asm/examples/lib.asm` plus the modules in `asm/zroutine/`), not a prebuilt `assembly.library`. The `OUTPUT` directive in `lib.asm` writes the assembled library to `LIBS:Assembly.Library`.
 
 ### Copy the include files
 
@@ -163,6 +165,7 @@ This means you do **not** need to open them yourself -- simply read the pointers
 | `ab_IntuiBase`      | `intuition.library`      | Intuition (windows, screens, input)  |
 | `ab_AslBase`        | `asl.library`            | ASL (file/font/screen requesters)    |
 | `ab_GadToolsBase`   | `gadtools.library`       | GadTools (standard gadget toolkit)   |
+| `ab_CxBase`         | `commodities.library`    | Commodities Exchange                 |
 | `ab_IconBase`       | `icon.library`           | Icon (Workbench icon management)     |
 | `ab_WorkbenchBase`  | `workbench.library`      | Workbench (AppWindow, AppIcon)       |
 | `ab_DataTypesBase`  | `datatypes.library`      | DataTypes (multimedia file support)  |

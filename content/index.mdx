@@ -13,85 +13,85 @@ A shared library for Commodore Amiga written in Motorola 68020 assembly language
 
 ## Modules Overview
 
-The Assembly Library is organized into **8 modules**, each providing specialized functionality:
+The library's functions are organized into **7 modules**, each providing specialized functionality. The C Interface page explains how to call them from C:
 
 ### [Exec](/docs/exec)
 
 Memory and list management utilities.
 
-- `AllocNewList` -- Allocate and initialize a new Exec list
-- `AllocNode` -- Allocate and add a node to a list
-- `FreeList` / `FreeNode` -- Free lists and nodes
-- `FreeListName` / `FreeNodeName` -- Free named lists and nodes
-- `ReAllocVec` -- Reallocate a memory vector
-- `RevertMem` -- Reverse a memory region (byte, word, or longword)
+- [`AllocNewList`](/docs/exec/alloc-new-list) -- Allocate and initialize a new Exec list
+- [`AllocNode`](/docs/exec/alloc-node) -- Allocate a node and, optionally, insert it in a list by priority
+- [`FreeList`](/docs/exec/free-list) / [`FreeNode`](/docs/exec/free-node) -- Free lists and nodes
+- [`FreeListName`](/docs/exec/free-list-name) / [`FreeNodeName`](/docs/exec/free-node-name) -- Free lists and nodes together with their `LN_NAME` strings
+- [`ReAllocVec`](/docs/exec/realloc-vec) -- Resize a memory block allocated with `AllocVec()`
+- [`RevertMem`](/docs/exec/revert-mem) -- Reverse a memory region (byte, word, or longword)
 
 ### [DOS](/docs/dos)
 
 File and volume operations.
 
-- `Load` / `Save` -- Load and save files to/from memory buffers
-- `FileInfo` -- Retrieve a `FileInfoBlock` for a given file
-- `CheckFile` -- Validate a file and return error information
-- `CheckSum` -- Compute a checksum on a buffer
-- `LineInput` -- Read a single line from a file handle
-- `UnitInfo` -- Get `InfoData` for a volume (free space, disk type, etc.)
+- [`Load`](/docs/dos/load) / [`Save`](/docs/dos/save) -- Load and save files to/from memory buffers
+- [`FileInfo`](/docs/dos/file-info) -- Retrieve a `FileInfoBlock` for a given file
+- [`CheckFile`](/docs/dos/check-file) -- Validate a file and return error information
+- [`CheckSum`](/docs/dos/check-sum) -- Compute a checksum on a buffer
+- [`LineInput`](/docs/dos/line-input) -- Read input from a file handle (for example a CON window)
+- [`UnitInfo`](/docs/dos/unit-info) -- Get `InfoData` for a volume (free space, disk type, etc.)
 
 ### [Graphics](/docs/graphics)
 
 Graphics primitives and bitmap management.
 
-- `AllocRastPort` / `CloneRastPort` -- Allocate or duplicate a RastPort
-- `NewAllocRaster` -- Allocate raster memory
-- `AddBitPlanes` / `RemoveBitPlanes` -- Manage bitplanes in a BitMap
-- `DrawBox` -- Draw a filled or outlined box
-- `DrawFrameState` -- Draw a framed state element (raised, recessed, etc.)
-- `EraseInternalRect` -- Erase the interior of a window
-- `TextFmtRastPort` -- Formatted text rendering into a RastPort
+- [`AllocRastPort`](/docs/graphics/alloc-rast-port) / [`CloneRastPort`](/docs/graphics/clone-rast-port) -- Allocate or duplicate a RastPort
+- [`NewAllocRaster`](/docs/graphics/new-alloc-raster) -- Allocate a cleared bitplane in CHIP RAM
+- [`AddBitPlanes`](/docs/graphics/add-bit-planes) / [`RemoveBitPlanes`](/docs/graphics/remove-bit-planes) -- Add or remove bitplanes in a BitMap
+- [`DrawBox`](/docs/graphics/draw-box) -- Draw a rectangle outline
+- [`DrawFrameState`](/docs/graphics/draw-frame-state) -- Draw a `frameiclass` object on a REI in a given state (normal, selected, disabled, ...)
+- [`EraseInternalRect`](/docs/graphics/erase-internal-rect) -- Erase the interior of a window using its BackFill Hook
+- [`TextFmtRastPort`](/docs/graphics/text-fmt-rast-port) -- Formatted text rendering into a RastPort
+- [`TextFmtSize`](/docs/graphics/text-fmt-size) -- Measure the area a formatted string occupies
 
 ### [Libraries](/docs/libraries)
 
 String processing, IFF support, and generic utilities.
 
-- `ChangeChar` -- Replace occurrences of a character in a string
-- `FilterChars` -- Filter characters from a string by range
-- `StringToUpper` / `StringToLower` -- Case conversion (locale-aware)
-- `ReAllocVec` -- Reallocate memory vectors
-- `FindAIFFChunk` / `NextIFFChunk` / `TestAIFFChunk` -- AIFF/IFF chunk parsing
-- `UnPackerILBMBODY` / `UnPackerILBMCMAP` -- ILBM image unpacking
+- [`ChangeChar`](/docs/libraries/change-char) -- Replace occurrences of a character in a string
+- [`FilterChars`](/docs/libraries/filter-chars) -- Replace the characters outside a given range
+- [`StringToUpper`](/docs/libraries/string-to-upper) / [`StringToLower`](/docs/libraries/string-to-lower) -- Case conversion (locale-aware)
+- [`FindAIFFChunk`](/docs/libraries/find-aiff-chunk) / [`NextIFFChunk`](/docs/libraries/next-iff-chunk) / [`TestAIFFChunk`](/docs/libraries/test-aiff-chunk) -- AIFF/IFF chunk parsing
+- [`UnPackerILBMBODY`](/docs/libraries/unpacker-ilbm-body) / [`UnPackerILBMCMAP`](/docs/libraries/unpacker-ilbm-cmap) -- ILBM image unpacking
 
 ### [Math](/docs/math)
 
 Number format conversion routines.
 
-- `Dec2Val` / `Hex2Val` / `Bin2Val` -- Convert decimal, hexadecimal, or binary strings to numeric values
-- `ConvDec` / `ConvDecZ` -- Convert a value to a decimal string (with optional zero-padding)
-- `ConvHex` -- Convert a value to a hexadecimal string
-- `ConvBin` -- Convert a value to a binary string
+- [`StringDecToValue`](/docs/math/string-dec-to-value) / [`StringHexToValue`](/docs/math/string-hex-to-value) / [`StringBinToValue`](/docs/math/string-bin-to-value) -- Convert decimal, hexadecimal, or binary strings to numeric values
+- [`ValueToStringDec`](/docs/math/value-to-string-dec) -- Convert a value to a decimal string (with optional zero-padding)
+- [`ValueToStringHex`](/docs/math/value-to-string-hex) -- Convert a value to a hexadecimal string
+- [`ValueToStringBin`](/docs/math/value-to-string-bin) -- Convert a value to a binary string
 
 ### [Intuition & GadTools](/docs/intui-gadtools)
 
 High-level UI gadgets and requesters built on top of Intuition and GadTools.
 
-- `AllocAsmRequest` / `FreeAsmRequest` -- Allocate and free custom requesters
-- `AsmRequest` -- Display a formatted requester dialog
-- `ChangeAsmReqAttrs` -- Modify requester attributes
-- `FindAsmGadget` -- Find a gadget by name
-- `SetAsmGadgetAttrs` / `GetAsmGadgetAttr` -- Set and get gadget attributes
-- `InterfaceInfo` -- Retrieve information about an interface
+- [`AllocAsmRequest`](/docs/intui-gadtools/alloc-asm-request) / [`FreeAsmRequest`](/docs/intui-gadtools/free-asm-request) -- Allocate and free custom requesters
+- [`AsmRequest`](/docs/intui-gadtools/asm-request-args) -- Display a formatted requester dialog
+- [`ChangeAsmReqAttrs`](/docs/intui-gadtools/change-asm-req-attrs) -- Modify requester attributes
+- [`FindAsmGadget`](/docs/intui-gadtools/find-asm-gadget) -- Find a gadget by name
+- [`SetAsmGadgetAttrs`](/docs/intui-gadtools/set-asm-gadget-attrs) / [`GetAsmGadgetAttr`](/docs/intui-gadtools/get-asm-gadget-attr) -- Set and get gadget attributes
+- [`OpenInterface`](/docs/intui-gadtools/open-interface) / [`CloseInterface`](/docs/intui-gadtools/close-interface) -- Load and release interface definitions (`.rei` files)
 
 ### [REI Interface](/docs/rei)
 
-A custom windowing and interface management system. REI (Runtime Environment Interface) provides a structured way to manage windows, gadgets, and menus.
+A custom windowing and interface management system. REI provides a structured way to manage windows, gadgets, and menus.
 
-- `OpenREI` / `CloseREI` -- Open and close REI windows
-- `OpenInterface` / `CloseInterface` -- Load and release interface definitions
-- `ActiveREI` / `FindREI` -- Find the active REI or locate one by name
-- `LockREI` / `UnlockREI` -- Lock and unlock REI structures
-- `WaitREIMsg` -- Wait for messages from a REI window
-- `RefreshREI` -- Refresh a REI window
-- `SetREIAttrs` / `GetREIAttrs` -- Set and get REI attributes
-- `AS_MenuAddress` -- Get the address of a menu item
+- [`OpenREI`](/docs/rei/open-rei) / [`CloseREI`](/docs/rei/close-rei) -- Open and close (hide) REI windows
+- [`ActiveREI`](/docs/rei/active-rei) / [`FindREI`](/docs/rei/find-rei) -- Find the active REI or locate one by name
+- [`LockREI`](/docs/rei/lock-rei) / [`UnlockREI`](/docs/rei/unlock-rei) -- Block and restore user input on a REI
+- [`WaitREIMsg`](/docs/rei/wait-rei-msg) -- Wait for messages from a REI window
+- [`RefreshREI`](/docs/rei/refresh-rei) -- Refresh a REI window
+- [`SetREIAttrs`](/docs/rei/set-rei-attrs) / [`GetREIAttrs`](/docs/rei/get-rei-attrs) -- Set and get REI attributes
+- [`InterfaceInfo`](/docs/rei/interface-info) -- Show an information requester about the application's interface
+- `AS_MenuAddress` -- Get the address of a menu, item or sub-item of a REI
 
 ### [C Interface](/docs/c-interface)
 
@@ -101,7 +101,7 @@ How to call the Assembly Library from C programs using SAS/C or compatible compi
 
 - **Pure 68020 assembly** -- Hand-optimized for the Motorola 68020 processor
 - **Shared library architecture** -- Standard Amiga shared library (placed in `LIBS:`)
-- **Auto-opens sub-libraries** -- When you open `assembly.library`, it automatically opens and caches pointers to `graphics.library`, `intuition.library`, `dos.library`, `asl.library`, `gadtools.library`, `icon.library`, `workbench.library`, `datatypes.library`, `locale.library`, `lowlevel.library`, and `realtime.library`
+- **Auto-opens sub-libraries** -- When you open `assembly.library`, it automatically opens and caches pointers to `graphics.library`, `intuition.library`, `dos.library`, `asl.library`, `gadtools.library`, `commodities.library`, `icon.library`, `workbench.library`, `datatypes.library`, `locale.library`, `lowlevel.library`, and `realtime.library`
 - **Public Domain** -- No copyright restrictions; free to use, modify, and distribute
 - **Dual-language support** -- Callable from both 68k assembly and C
 - **KickStart 3.0+ compatible** -- Takes advantage of AmigaOS 3.0 features including locale support, datatypes, and GadTools

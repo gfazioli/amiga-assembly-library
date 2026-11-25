@@ -12,8 +12,10 @@ LONG StringBinToValue(STRPTR, WORD);
 ## C Prototype
 
 ```c
-LONG Bin2Val(STRPTR, LONG);
+LONG StringBinToValue(STRPTR string, LONG optlen);
 ```
+
+The shipped `clib/ASSEMBLY.H` declares this function as `Bin2Val()`; the pragma file and the `assembly.lib` linker stubs use the name above.
 
 ## Description
 

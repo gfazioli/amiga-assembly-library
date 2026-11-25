@@ -12,9 +12,10 @@ void ValueToStringDec(APTR, LONG, ULONG);
 ## C Prototype
 
 ```c
-void ConvDec(APTR, LONG);
-void ConvDecZ(APTR, LONG, ULONG);
+void ValueToStringDec(APTR buffer, LONG value, ULONG optlen);
 ```
+
+The shipped `clib/ASSEMBLY.H` declares this function as `ConvDec()` (no `optlen`) and `ConvDecZ()` (with `optlen`); the pragma file and the `assembly.lib` linker stubs use the name above.
 
 ## Description
 

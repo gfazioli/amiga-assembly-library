@@ -16,11 +16,11 @@ This section provides complete C example programs that demonstrate how to use th
 | **DATATYPE.C** | DataType object loading and display |
 | **SHOWREI.C** | REI interface viewer |
 | **TEST.C** | General library function tests |
-| **VERSION.C** | Library version information display |
+| **VERSION.C** | Prints all Workbench or Shell (CLI) arguments -- Commodore's PrArgs example, it does not use the Assembly Library |
 | **SETCOLOR.C** | Color manipulation utility |
 | **SETPATCH.C** | Patch management utility |
 | **GRABKICK.C** | KickStart ROM grabber |
-| **CUT.C** | Clipboard cut utility |
+| **CUT.C** | CutImage, a utility for `popper.library` images -- it does not use the Assembly Library |
 | **ARGC_WBS.C** | Workbench argument parsing |
 | **GETDEFIN.C** | Retrieves the default REI interface filename from the program icon's INTERFACE ToolType |
 | **WBSTA.C** | Retrieves the default REI interface filename from icon ToolTypes, with `updateresident.rei` as fallback |
@@ -428,13 +428,13 @@ VOID wbmain(wbmsg)
 
 2. **Interface loading** -- `OpenInterface("WindowInfo.rei")` loads a binary interface definition file that describes the window layout, gadgets, and menus. This separates the UI definition from the program logic.
 
-3. **REI window** -- `OpenREI(NULL, "main", ...)` opens the window named "main" from the loaded interface. The `REIT_ScreenFont` tag tells the REI system to use the screen's default font for gadget layout.
+3. **REI window** -- `OpenREI(NULL, "main", ...)` opens the window named "main" from the loaded interface. The `REIT_ScreenFont` tag makes the window use the screen's font for its text as well; by default only the title bar uses the screen font and the text uses the system font.
 
 4. **Gadget access by name** -- `FindAsmGadget(mainrei, "lv1")` retrieves the ListView gadget by its name (defined in the `.rei` file). This avoids hardcoded gadget IDs and makes the code more readable.
 
 5. **Dynamic list management** -- `AllocNewList()` creates a new Exec list, and `AllocNode()` adds named nodes with icon types. The list is then attached to the ListView gadget using standard GadTools calls.
 
-6. **Event loop** -- `WaitREIMsg(mainrei, 0x5F)` waits for IDCMP messages and returns them as `REIMessage` structures. The bitmask `0x5F` selects which message types to wait for.
+6. **Event loop** -- `WaitREIMsg(mainrei, 0x5F)` waits for IDCMP messages and returns them as `REIMessage` structures. The second argument, `0x5F`, is the underscore character (`_`) that marks the keyboard shortcut in gadget labels; it must never be NULL.
 
 7. **Formatted text** -- `TextFmtRastPort()` renders printf-style formatted text directly into a RastPort, combining the convenience of `printf()` with direct graphics output.
 

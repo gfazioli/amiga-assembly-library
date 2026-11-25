@@ -128,6 +128,8 @@ ULONG *ReAllocVec(ULONG *, ULONG, ULONG);
 #endif   /* CLIB_ASSEMBLY_PROTOS_H */
 ```
 
+The math section of this header declares `Dec2Val`, `Hex2Val`, `Bin2Val`, `ConvDec`, `ConvDecZ`, `ConvHex` and `ConvBin`, while the pragma file below and the `assembly.lib` stubs provide `StringDecToValue`, `StringHexToValue`, `StringBinToValue`, `ValueToStringDec`, `ValueToStringHex` and `ValueToStringBin`.
+
 ## Pragma Declarations
 
 The pragma file maps each C function call to the corresponding library vector offset and register convention. This file is used by SAS/C and compatible compilers to generate direct library calls without linker stubs.
@@ -250,7 +252,7 @@ The `assemblybase.h` header defines:
 
 ### Linking
 
-The pragma declarations allow SAS/C to generate direct library calls at compile time, so no additional link library is needed beyond the standard startup code. Simply compile and link as usual:
+The pragma declarations allow SAS/C to generate direct library calls at compile time, so the library functions need no link library. The exception is `HookEntry()` (declared in the header under *Assembly.lib C support*), which lives in `assembly.lib`, the linker-stub object built from `assembly.asm`: link it when you use hooks. Otherwise compile and link as usual:
 
 ```
 sc myprogram.c LINK

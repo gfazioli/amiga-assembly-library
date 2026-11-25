@@ -26,7 +26,7 @@ Its use is suitable for files that do not exceed 500K in size, although on syste
 ## Inputs
 
 - **filename** — Pointer to the name of the file to load.
-- **buffer** — Pointer to a buffer where the data will be loaded. If NULL, the routine will automatically allocate a buffer for the data. In this case, the type of memory to allocate must ALWAYS be specified.
+- **buffer** — Pointer to a buffer where the data will be loaded. If NULL, the routine will automatically allocate a buffer for the data. In this case, the type of memory to allocate should ALWAYS be specified (if `typeofmem` is 0, `MEMF_PUBLIC` is used).
 - **typeofmem** — Type of memory to allocate (e.g., `MEMF_PUBLIC`). This parameter is only considered when `buffer` is NULL.
 
 ## Result

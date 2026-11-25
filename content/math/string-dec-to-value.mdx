@@ -12,8 +12,10 @@ LONG StringDecToValue(STRPTR);
 ## C Prototype
 
 ```c
-LONG Dec2Val(STRPTR);
+LONG StringDecToValue(STRPTR string);
 ```
+
+The shipped `clib/ASSEMBLY.H` declares this function as `Dec2Val()`; the pragma file and the `assembly.lib` linker stubs use the name above.
 
 ## Description
 

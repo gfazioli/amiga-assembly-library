@@ -12,8 +12,10 @@ void ValueToStringBin(APTR, LONG, ULONG);
 ## C Prototype
 
 ```c
-void ConvBin(APTR, LONG, ULONG);
+void ValueToStringBin(APTR buffer, LONG value, ULONG optlen);
 ```
+
+The shipped `clib/ASSEMBLY.H` declares this function as `ConvBin()`; the pragma file and the `assembly.lib` linker stubs use the name above.
 
 ## Description
 

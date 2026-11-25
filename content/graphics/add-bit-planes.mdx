@@ -17,7 +17,7 @@ ULONG AddBitPlanes(struct BitMap *bm, ULONG num);
 
 Adds one or more bitplanes to a BitMap structure. The BitMap must already be initialized, as it must contain all the necessary data for the bitplane addition. The allocated bitplanes are cleared and placed in CHIP RAM.
 
-(V41.1) -- AddBitPlanes() now checks that the total number of planes does not exceed 8. Eight is the maximum number of planes that can be added. If a BitMap already has 6 bitplanes and you attempt to add 3 planes, NO planes will be added to the BitMap, and the function returns NULL indicating an error.
+(V41.1) -- AddBitPlanes() now checks that the total number of planes does not exceed 8. Eight is the maximum number of planes a BitMap can have. If a BitMap already has 6 bitplanes and you attempt to add 3 planes, NO planes will be added to the BitMap, and the function returns NULL indicating an error.
 
 ## Inputs
 

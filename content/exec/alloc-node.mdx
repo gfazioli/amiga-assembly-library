@@ -15,7 +15,7 @@ struct Node *AllocNode(struct List *list, STRPTR string, ULONG type, LONG pri);
 
 ## Description
 
-Allocates and initializes a `Node` structure. If `list` is not NULL, the node is inserted into the list taking the `pri` (priority) parameter into account. The insertion is performed using the `ENQUEUE` macro defined in `assembly/asmmacros.i`, which performs the same function as `exec/Enqueue()`.
+Allocates and initializes a `Node` structure. If `list` is not NULL, the node is inserted into the list taking the `pri` (priority) parameter into account. The insertion is performed using the `ENQUEUE` macro, which does the same work as `exec/Enqueue()`.
 
 If `list` is NULL, the node is only allocated and no insertion into a list is performed. In this case, the task is responsible for inserting the node into a list as it sees fit.
 
