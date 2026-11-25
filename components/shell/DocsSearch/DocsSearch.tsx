@@ -36,6 +36,23 @@ function decode(text: string) {
     .replace(/&amp;/g, '&');
 }
 
+/**
+ * Enter with no result selected opens the first one. Mantine selects the first action when the
+ * query changes, but Pagefind's results arrive later (debounce, then the search), so nothing is
+ * selected by the time they show and Enter did nothing. Marking the first action here lets
+ * Spotlight's own Enter handler, which runs right after this one and clicks the action marked
+ * `data-selected`, open it.
+ */
+function selectFirstOnEnter(event: React.KeyboardEvent<HTMLInputElement>) {
+  if (event.nativeEvent.code !== 'Enter' && event.nativeEvent.code !== 'NumpadEnter') {
+    return;
+  }
+  const scope = event.currentTarget.closest('[role="dialog"]') ?? document;
+  if (!scope.querySelector('[data-action][data-selected]')) {
+    scope.querySelector('[data-action]')?.setAttribute('data-selected', 'true');
+  }
+}
+
 type State =
   | { status: 'idle' }
   | { status: 'loading' }
@@ -92,6 +109,7 @@ export function DocsSearch() {
     >
       <Spotlight.Search
         placeholder="Search documentation..."
+        onKeyDown={selectFirstOnEnter}
         leftSection={
           state.status === 'loading' ? <Loader size={18} /> : <IconSearch size={18} stroke={1.5} />
         }
