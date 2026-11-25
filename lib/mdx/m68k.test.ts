@@ -32,6 +32,16 @@ describe('highlightM68k', () => {
     expect(registers('\tmove.l\t(a0)+,-(sp)')).toEqual(['a0', 'sp']);
     expect(registers('\tjsr\t_LVOAllocMem(a6)')).toEqual(['a6']);
     expect(registers('\tmove.w\t-4(a5),d1')).toEqual(['a5', 'd1']);
+    expect(registers('\tmovem.l\td2-d4/a3-a6,-(sp)')).toEqual(['d2', 'd4', 'a3', 'a6', 'sp']);
+    expect(registers('\tjmp\t([a0,d0.w*4])')).toEqual(['a0', 'd0.w']);
+  });
+
+  it('reads a symbolic immediate whole, not as a hex number', () => {
+    expect(tokens(highlightM68k('\tmove.l\t#fib_SIZEOF,d0'))).toEqual([
+      ['move.l', '#d73a49'],
+      ['#fib_SIZEOF', '#005cc5'],
+      ['d0', '#005cc5'],
+    ]);
   });
 
   it('colours directives, macros and LVO offsets', () => {

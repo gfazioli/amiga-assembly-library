@@ -6,8 +6,9 @@ import '@gfazioli/mantine-text-animate/styles.css';
 // Mantine theme overrides (page background, Topaz, Amiga Mode)
 import '@/theme/global.css';
 
+import type { Viewport } from 'next';
 import { Analytics } from '@vercel/analytics/react';
-import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from '@mantine/core';
+import { Box, ColorSchemeScript, mantineHtmlProps, MantineProvider } from '@mantine/core';
 // !! End of important imports !!
 
 import { MantineFooter } from '@/components/MantineFooter/MantineFooter';
@@ -23,6 +24,14 @@ import pack from '../package.json';
 import { theme } from '../theme';
 
 export const metadata = config.metadata;
+
+// The mobile browser's bar, in the colours the Nextra site gave it.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: 'rgb(250,250,250)' },
+    { media: '(prefers-color-scheme: dark)', color: 'rgb(17,17,17)' },
+  ],
+};
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { tree } = await getDocs();
@@ -40,6 +49,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script dangerouslySetInnerHTML={{ __html: AMIGA_MODE_SCRIPT }} />
       </head>
       <body>
+        {/* Off screen until a keyboard reaches it: past the header and the sidebar in one press */}
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
         <MantineProvider theme={theme} defaultColorScheme={head.mantine.defaultColorScheme}>
           <SiteShell
             tree={tree}
@@ -48,7 +61,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             siteFooter={<MantineFooter />}
             banner={
               <Banner storageKey={`amiga-asm-lib-${pack.version}`}>
-                Amiga Assembly Library v41.21 — Motorola 68020 shared library for Commodore Amiga
+                {/* One line, cut with an ellipsis: phones get the short form whole */}
+                <Box component="span" visibleFrom="md">
+                  Amiga Assembly Library v41.21 — Motorola 68020 shared library for Commodore Amiga
+                </Box>
+                <Box component="span" hiddenFrom="md">
+                  Amiga Assembly Library v41.21
+                </Box>
               </Banner>
             }
           >

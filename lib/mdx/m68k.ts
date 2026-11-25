@@ -259,11 +259,12 @@ function colorLine(text: string): string {
   const codePart = commentStart >= 0 ? text.slice(0, commentStart) : text;
   const commentPart = commentStart >= 0 ? text.slice(commentStart) : '';
 
-  // Operand punctuation is a token of its own, so what follows it is read too: the browser
-  // enhancer's catch-all `\S+` swallowed `,d0`, `(a0)` and `-4(a5)` whole, and left every
-  // register after a comma or inside an address mode uncoloured.
+  // Operand punctuation (`, ( ) + - / [ ] *`) is a token of its own, so what follows it is read
+  // too: the browser enhancer's catch-all `\S+` swallowed `,d0`, `(a0)`, `-4(a5)` and the
+  // `/a3` of a register list whole, and left those registers uncoloured. A hex immediate must
+  // end at a word boundary, or `#fib_SIZEOF` read as `#f` and a plain identifier.
   let result = codePart.replace(
-    /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\$[0-9a-fA-F]+|#-?\$?[0-9a-fA-F]+|\b[a-zA-Z_][a-zA-Z0-9_]*(?:\.[bwlsBWLS])?\b|[,()+-]|[^\s,()+-]+|\s+)/g,
+    /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\$[0-9a-fA-F]+|#-?\$?[0-9a-fA-F]+(?!\w)|\b[a-zA-Z_][a-zA-Z0-9_]*(?:\.[bwlsBWLS])?\b|[,()+\-/[\]*]|[^\s,()+\-/[\]*]+|\s+)/g,
     (tok) => {
       if (/^["']/.test(tok)) {
         return token('string', tok);
@@ -284,7 +285,8 @@ function colorLine(text: string): string {
         if (DIRECTIVES.has(base)) {
           return token('directive', tok);
         }
-        if (REGISTER_RE.test(tok)) {
+        // `base`: an index register keeps its size, as in `d0.w*4`
+        if (REGISTER_RE.test(base)) {
           return token('register', tok);
         }
 

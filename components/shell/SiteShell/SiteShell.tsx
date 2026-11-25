@@ -171,7 +171,8 @@ export function SiteShell({ tree, nav, banner, docsFooter, siteFooter, children 
         </AppShell.Section>
       </AppShell.Navbar>
 
-      <AppShell.Main className={classes.main}>
+      {/* `main-content`: the target of the skip link in app/layout.tsx */}
+      <AppShell.Main id="main-content" className={classes.main}>
         {children}
         {isDocs ? docsFooter : siteFooter}
       </AppShell.Main>
