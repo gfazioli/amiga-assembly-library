@@ -122,7 +122,8 @@ function useActiveInView(route: string) {
   useEffect(() => {
     const active = nav.current?.querySelector<HTMLElement>('a[data-active]');
     const viewport = nav.current?.closest<HTMLElement>('.mantine-ScrollArea-viewport');
-    if (!active || !viewport) {
+    // Not when the folder holding it was closed by hand: a hidden link measures as zero
+    if (!active || !viewport || active.getClientRects().length === 0) {
       return;
     }
     const top = active.getBoundingClientRect().top - viewport.getBoundingClientRect().top;

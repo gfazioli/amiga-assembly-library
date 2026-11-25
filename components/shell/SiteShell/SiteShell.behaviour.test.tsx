@@ -89,13 +89,23 @@ describe('SiteShell', () => {
   it('puts the sidebar toggle at the foot of the sidebar, and back in the header once collapsed', async () => {
     sidebarConfig.toggle = 'sidebar';
     const navbar = renderShell();
+    const header = document.querySelector<HTMLElement>('.mantine-AppShell-header')!;
+    const foot = within(navbar).getByRole('button', { name: 'Hide the sidebar' });
+    // The header's is always there, hidden by CSS while the sidebar is open
+    const headerToggle = header.querySelector<HTMLElement>('[data-sidebar-toggle="header"]')!;
+    expect(header).toHaveAttribute('data-toggle', 'sidebar');
+    expect(header).not.toHaveAttribute('data-collapsed');
 
-    const hide = screen.getByRole('button', { name: 'Hide the sidebar' });
-    expect(navbar).toContainElement(hide);
-
-    await userEvent.click(hide);
+    // Pressed, the foot's goes out of view with the sidebar: the focus moves to the header's
+    await userEvent.click(foot);
     expect(navbar).toHaveAttribute('data-desktop-collapsed');
-    const show = screen.getByRole('button', { name: 'Show the sidebar' });
-    expect(navbar).not.toContainElement(show);
+    expect(header).toHaveAttribute('data-collapsed');
+    expect(headerToggle).toHaveAccessibleName('Show the sidebar');
+    expect(headerToggle).toHaveFocus();
+
+    // And back
+    await userEvent.click(headerToggle);
+    expect(navbar).not.toHaveAttribute('data-desktop-collapsed');
+    expect(foot).toHaveFocus();
   });
 });

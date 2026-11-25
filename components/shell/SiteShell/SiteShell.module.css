@@ -80,3 +80,12 @@
   --app-shell-header-height: calc(rem(60px) + var(--site-banner-height));
   --app-shell-header-offset: calc(rem(60px) + var(--site-banner-height));
 }
+
+/* With the toggle at the foot of the sidebar, the header's button only brings a collapsed sidebar
+   back: hidden while the sidebar is open. Before React runs, the pre-paint attribute says whether
+   the stored sidebar is collapsed, so the button is there from the first paint. */
+:global(:root:not([data-sidebar-collapsed]))
+  .header[data-toggle='sidebar']:not([data-collapsed])
+  [data-sidebar-toggle='header'] {
+  display: none;
+}
