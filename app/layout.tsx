@@ -25,11 +25,11 @@ import { theme } from '../theme';
 
 export const metadata = config.metadata;
 
-// The mobile browser's bar, in the colours the Nextra site gave it.
+// The mobile browser's bar, in each scheme's page colour (gray.0 and dark.9 of theme.ts).
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'rgb(250,250,250)' },
-    { media: '(prefers-color-scheme: dark)', color: 'rgb(17,17,17)' },
+    { media: '(prefers-color-scheme: light)', color: '#faf9f6' },
+    { media: '(prefers-color-scheme: dark)', color: '#090d19' },
   ],
 };
 

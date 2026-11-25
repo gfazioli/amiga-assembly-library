@@ -1,3 +1,14 @@
+/*
+ * The site's look, on top of Mantine and the docs engine. The palette is in theme.ts; this file
+ * holds what a theme object cannot say: the pixel font, the copper rule, and the docs engine's
+ * pages restyled from outside, through Mantine's static class names and the engine's data
+ * attributes, so its copied files stay as the template ships them.
+ *
+ * Everything that moves here moves `transform` or `opacity`, and nothing loops.
+ */
+
+/* Topaz, the Amiga's system font, in dMG's TrueType recreation: licence and credits in
+   NOTICE.md and public/fonts/README.txt. The family keeps the short name the site always used. */
 @font-face {
   font-family: 'Topaz a1200';
   src:
@@ -8,8 +19,80 @@
   font-display: swap;
 }
 
-html {
-  scroll-behavior: smooth;
+:root {
+  /* The display type, the window chrome and Amiga Mode. Topaz draws a cell half as wide as it
+     is tall, 16 units high: it is crisp where font-size × device pixel ratio divides by 16, and
+     unreadable under 16px. One variable, so another pixel font is a one-line change. */
+  --aal-font-pixel: 'Topaz a1200', ui-monospace, 'SFMono-Regular', menlo, consolas, monospace;
+
+  /* The screen inside a window: the same in both schemes, like the monitor it stands for. */
+  --aal-screen: #060a14;
+  --aal-screen-text: #e6e9f2;
+
+  /* A copper bar: one hue, brightest in the middle, as the Amiga's copper drew them. */
+  --aal-copper: linear-gradient(
+    90deg,
+    transparent,
+    var(--mantine-color-orange-7) 14%,
+    var(--mantine-color-orange-4) 38%,
+    #ffe08a 50%,
+    var(--mantine-color-orange-4) 62%,
+    var(--mantine-color-orange-7) 86%,
+    transparent
+  );
+
+  /* Orange as type and as the focus ring: the shade that passes AA on each scheme's ground. */
+  --aal-accent: var(--mantine-color-orange-8);
+  --aal-rule: var(--mantine-color-gray-3);
+}
+
+/* `html:root` outranks the `:root[data-mantine-color-scheme]` rules Mantine ships and the ones
+   MantineProvider injects for the theme, whatever order the stylesheets load in. */
+html:root {
+  @mixin light-root {
+    --mantine-color-body: var(--mantine-color-gray-0);
+
+    /* Mantine's orange text in the light scheme is the fill shade, 2.8:1 on white. */
+    --mantine-color-anchor: var(--mantine-color-orange-8);
+    --mantine-color-orange-text: var(--mantine-color-orange-8);
+    --mantine-color-orange-light-color: var(--mantine-color-orange-8);
+    --mantine-color-orange-outline: var(--mantine-color-orange-8);
+  }
+
+  @mixin dark-root {
+    --mantine-color-body: var(--mantine-color-dark-9);
+    --mantine-color-orange-light: rgb(255 143 26 / 12%);
+    --mantine-color-orange-light-hover: rgb(255 143 26 / 18%);
+    --mantine-color-orange-light-color: var(--mantine-color-orange-3);
+    --aal-accent: var(--mantine-color-orange-4);
+    --aal-rule: var(--mantine-color-dark-5);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  background-color: var(--mantine-color-body);
+}
+
+::selection {
+  background-color: var(--mantine-color-orange-5);
+  color: #1a1917;
+}
+
+/* Keyboard focus: the accent that passes 3:1 on the ground, on Mantine's components and on
+   plain links and buttons alike. */
+html .mantine-focus-auto:focus-visible,
+html .mantine-focus-always:focus,
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--aal-accent);
+  outline-offset: 2px;
 }
 
 /* The skip link (app/layout.tsx): above the fixed header, and only while it has focus */
@@ -22,6 +105,7 @@ html {
   border-radius: var(--mantine-radius-sm);
   background-color: var(--mantine-color-body);
   color: var(--mantine-color-text);
+  font-weight: 600;
   transform: translateY(-200%);
 
   &:focus {
@@ -29,34 +113,146 @@ html {
   }
 }
 
-* {
-  @mixin dark {
-    --mantine-color-body: var(--mantine-color-dark-9);
-  }
-}
-
-body {
-  background-color: var(--mantine-color-gray-1);
-
-  @mixin dark {
-    background-color: var(--mantine-color-dark-9);
-  }
-}
-
+/* Buttons are gadgets: a lit top edge and a shaded bottom one, pressed in when held. Only the
+   variants with a face of their own; `subtle`, `light` and `transparent` stay flat. */
 .mantine-Button-root {
-  transition: all 0.2s ease;
-  border-radius: 256px;
+  font-weight: 600;
+
+  &:where([data-variant='filled'], [data-variant='default'], [data-variant='gradient']) {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 28%),
+      inset 0 -2px 0 rgb(0 0 0 / 22%);
+
+    &:active:not([data-disabled]) {
+      box-shadow: inset 0 2px 0 rgb(0 0 0 / 26%);
+    }
+  }
+}
+
+/* ---- The shell --------------------------------------------------------------------------- */
+
+/* The header ends on the copper bar instead of a hairline. */
+.mantine-AppShell-header {
+  border-bottom-color: transparent;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 -1px;
+    height: 2px;
+    background: var(--aal-copper);
+    pointer-events: none;
+  }
+}
+
+/* The site's name beside the logo, as a title bar would set it. */
+.mantine-AppShell-header a[aria-label='Home'] .mantine-Text-root {
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.mantine-AppShell-header a[aria-label='Home'] > .mantine-Group-root {
+  gap: rem(10px);
+}
+
+/* The announcement strip reads like a boot line: the screen's black, the pixel font. Three
+   attributes, to outrank the engine's own scheme rule. */
+:root [data-site-banner][role='region'] {
+  background: var(--aal-screen);
+  color: var(--mantine-color-orange-3);
+
+  & .mantine-Text-root {
+    font-family: var(--aal-font-pixel);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1;
+  }
+}
+
+/* The sidebar's section labels ("Modules", "Reference"), in the pixel font. */
+.mantine-AppShell-navbar nav > p.mantine-Text-root {
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+  color: var(--mantine-color-dimmed);
+}
+
+/* The page you are on, in the sidebar: the engine's tint, plus a bar on its edge. */
+.mantine-AppShell-navbar .mantine-NavLink-root[data-active] {
+  box-shadow: inset 2px 0 0 var(--mantine-primary-color-filled);
+}
+
+/* ---- A docs page -------------------------------------------------------------------------- */
+
+/* The page title in the pixel font, as an autodoc names its function. */
+[data-docs-article] h1 {
+  font-family: var(--aal-font-pixel);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.125;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Each section opens on the engine's hairline, with an orange tab at its start. */
+[data-docs-article] h2 {
+  position: relative;
+  border-top-color: var(--aal-rule);
+  font-size: 1.375rem;
+  letter-spacing: -0.01em;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 2rem;
+    height: 3px;
+    background-color: var(--mantine-primary-color-filled);
+  }
+}
+
+[data-docs-article] h3 {
+  font-size: 1.125rem;
+}
+
+/* Links in running text are underlined: colour alone does not mark a link for everyone. */
+[data-docs-article] :where(p, li, td) a {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentcolor 45%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 
   &:hover {
-    transform: scale(1.02);
+    text-decoration-color: currentcolor;
   }
 }
 
-/* Amiga Mode: while [data-amiga-mode] is on <html> (lib/amiga-mode.ts), Topaz everywhere but the
-   code blocks and the Amiga logo. */
+/* Code blocks on white in the light scheme, as the cards are: the paper under them takes the
+   highlighter's comment grey (4.55:1 on white) below AA. */
+[data-mantine-color-scheme='light'] [class*='mantine-CodeHighlight'] {
+  --ch-background: var(--mantine-color-white);
+}
+
+/* ---- Amiga Mode ---------------------------------------------------------------------------- */
+
+/* While [data-amiga-mode] is on <html> (lib/amiga-mode.ts), Topaz everywhere, code blocks
+   included: an editor on the machine showed nothing else. Inline code alone keeps the monospace
+   stack, so an identifier still stands out of a sentence that is itself in a fixed-width font. */
 [data-amiga-mode] {
   &,
-  & *:not(pre):not(code):not([data-amiga-logo]):not([data-amiga-logo] *) {
-    font-family: 'Topaz a1200', monospace !important;
+  & *:not(:not(pre) > code) {
+    font-family: var(--aal-font-pixel) !important;
+  }
+
+  /* At Topaz's native size a code block is as wide as it was (8px a character) and crisp. */
+  & pre,
+  & pre code {
+    font-size: 1rem;
+    line-height: 1.25;
   }
 }
