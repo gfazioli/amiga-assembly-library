@@ -29,7 +29,7 @@ interface TreeNodeProps {
 function TreeNode({ node, route, level, collapseLevel }: TreeNodeProps) {
   if (node.kind === 'separator') {
     return node.title ? (
-      <Text className={classes.label} mt="lg" mb={6} px="sm">
+      <Text className={classes.label} mt="lg" mb={6} px="sm" data-sidebar-label>
         {node.title}
       </Text>
     ) : (

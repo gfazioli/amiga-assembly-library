@@ -140,9 +140,10 @@ export function MantineNavBar({ nav, burgerOpened, onBurgerClick, sidebar }: Man
         />
         {sidebar && <SidebarToggle {...sidebar} />}
         <Anchor component={Link} href="/" underline="never" aria-label="Home">
-          <Group align="center" gap={4} wrap="nowrap">
+          <Group align="center" gap={10} wrap="nowrap">
             <Logo />
-            <Text size="lg" fw={600} c="orange" visibleFrom="xl">
+            {/* The site's name in the pixel font, as a title bar would set it */}
+            <Text ff="var(--aal-font-pixel)" fz="md" fw={400} lh={1} c="orange" visibleFrom="xl">
               Amiga Assembly Library
             </Text>
           </Group>
