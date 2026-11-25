@@ -12,6 +12,23 @@ html {
   scroll-behavior: smooth;
 }
 
+/* The skip link (app/layout.tsx): above the fixed header, and only while it has focus */
+.skip-link {
+  position: fixed;
+  top: var(--mantine-spacing-xs);
+  left: var(--mantine-spacing-xs);
+  z-index: 1000;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  border-radius: var(--mantine-radius-sm);
+  background-color: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+  transform: translateY(-200%);
+
+  &:focus {
+    transform: none;
+  }
+}
+
 * {
   @mixin dark {
     --mantine-color-body: var(--mantine-color-dark-9);
