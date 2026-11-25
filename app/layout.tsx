@@ -35,6 +35,9 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { tree } = await getDocs();
   const { head } = config;
+  // One element for both slots: the footer is rendered on the server, and the shell, a client
+  // component, would otherwise be sent it twice.
+  const footer = <MantineFooter />;
 
   return (
     <html lang="en" dir="ltr" {...mantineHtmlProps}>
@@ -56,8 +59,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <SiteShell
             tree={tree}
             nav={getTopNav()}
-            docsFooter={<MantineFooter />}
-            siteFooter={<MantineFooter />}
+            docsFooter={footer}
+            siteFooter={footer}
             banner={
               <Banner storageKey={`amiga-asm-lib-${pack.version}`}>
                 {/* One line, cut with an ellipsis: phones get the short form whole */}
