@@ -131,3 +131,7 @@ Open source thrives when those who benefit can give back — even a small monthl
 
 Amiga, AmigaOS and Commodore are trademarks of their respective owners. This is an independent project, not affiliated with or endorsed by them. See [NOTICE.md](NOTICE.md).
 
+## Fonts
+
+The site's pixel font is Topaz a600a1200a4000 from [Multi Platform Amiga Fonts](https://github.com/rewtnull/amigafonts): the TrueType version is © 2009 dMG of TrueSchool and Divine Stylers, released under the GPL with the font exception; Topaz itself is © Amiga Inc. The licence, its history and what remains unsettled are in [NOTICE.md](NOTICE.md#third-party-fonts).
+
