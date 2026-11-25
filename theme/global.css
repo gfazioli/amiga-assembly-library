@@ -98,7 +98,7 @@ body {
 
 ::selection {
   background-color: var(--mantine-color-orange-5);
-  color: #1a1917;
+  color: var(--mantine-color-black);
 }
 
 /* Keyboard focus: the accent that passes 3:1 on the ground, on Mantine's components and on
@@ -162,18 +162,6 @@ summary:focus-visible {
   }
 }
 
-/* The site's name beside the logo, as a title bar would set it. */
-.mantine-AppShell-header a[aria-label='Home'] .mantine-Text-root {
-  font-family: var(--aal-font-pixel);
-  font-size: 1rem;
-  font-weight: 400;
-  line-height: 1;
-}
-
-.mantine-AppShell-header a[aria-label='Home'] > .mantine-Group-root {
-  gap: rem(10px);
-}
-
 /* The announcement strip reads like a boot line: the screen's black, the pixel font. Three
    attributes, to outrank the engine's own scheme rule. */
 :root [data-site-banner][role='region'] {
@@ -188,8 +176,10 @@ summary:focus-visible {
   }
 }
 
-/* The sidebar's section labels ("Modules", "Reference"), in the pixel font. */
-.mantine-AppShell-navbar nav > p.mantine-Text-root {
+/* The sidebar's section labels ("Modules", "Reference"), in the pixel font. `data-sidebar-label`
+   is the one attribute this site adds to the engine's SidebarTree, so the rule does not hang on
+   its DOM; the static navbar class outranks the label's own CSS module. */
+.mantine-AppShell-navbar [data-sidebar-label] {
   font-family: var(--aal-font-pixel);
   font-size: 1rem;
   font-weight: 400;
@@ -251,7 +241,7 @@ summary:focus-visible {
 
 /* Code blocks on white in the light scheme, as the cards are: the paper under them takes the
    highlighter's comment grey (4.55:1 on white) below AA. */
-[data-mantine-color-scheme='light'] [class*='mantine-CodeHighlight'] {
+[data-mantine-color-scheme='light'] .mantine-CodeHighlight-codeHighlight {
   --ch-background: var(--mantine-color-white);
 }
 
