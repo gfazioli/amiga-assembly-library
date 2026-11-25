@@ -1,43 +1,38 @@
 'use client';
 
-import { useTheme } from 'next-themes';
-import { Button, Group, useMantineColorScheme } from '@mantine/core';
+import { IconDeviceDesktop, IconMoon, IconSun } from '@tabler/icons-react';
+import { Button, useMantineColorScheme } from '@mantine/core';
 
+/** Light, dark or the system's: the three ways Mantine's colour scheme can be set. */
 export function ColorSchemeToggle() {
   const { setColorScheme } = useMantineColorScheme();
-  const { setTheme } = useTheme();
-
-  /**
-   * You might improve this component. Anyway, it's a good starting point.
-   * As you can see we have to handle both the Mantine and Nextra dark mode.
-   */
 
   return (
-    <Group justify="center" mt="xl">
+    <Button.Group mt="md">
       <Button
-        onClick={() => {
-          setColorScheme('light');
-          setTheme('light');
-        }}
+        variant="default"
+        size="xs"
+        leftSection={<IconSun size={14} aria-hidden="true" />}
+        onClick={() => setColorScheme('light')}
       >
         Light
       </Button>
       <Button
-        onClick={() => {
-          setColorScheme('dark');
-          setTheme('dark');
-        }}
+        variant="default"
+        size="xs"
+        leftSection={<IconMoon size={14} aria-hidden="true" />}
+        onClick={() => setColorScheme('dark')}
       >
         Dark
       </Button>
       <Button
-        onClick={() => {
-          setColorScheme('auto');
-          setTheme('system');
-        }}
+        variant="default"
+        size="xs"
+        leftSection={<IconDeviceDesktop size={14} aria-hidden="true" />}
+        onClick={() => setColorScheme('auto')}
       >
         Auto
       </Button>
-    </Group>
+    </Button.Group>
   );
 }

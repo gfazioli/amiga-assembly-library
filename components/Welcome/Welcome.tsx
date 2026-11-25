@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { TextAnimate } from '@gfazioli/mantine-text-animate';
 import { IconBrandGithub, IconDownload, IconExternalLink } from '@tabler/icons-react';
 import { Badge, Box, Button, Center, Group, Paper, Switch, Text, Title } from '@mantine/core';
+import { useAmigaMode } from '@/components/AmigaModeToggle/use-amiga-mode';
 import classes from './Welcome.module.css';
 
 const LIBRARY_FUNCTIONS = [
@@ -65,25 +65,7 @@ function AmigaCheckmark({ size = 200 }: { size?: number }) {
 }
 
 export function Welcome() {
-  const [amigaMode, setAmigaMode] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('amiga-mode');
-    if (saved === 'true') {
-      setAmigaMode(true);
-    }
-  }, []);
-
-  const toggleAmigaMode = (checked: boolean) => {
-    setAmigaMode(checked);
-    if (checked) {
-      document.documentElement.setAttribute('data-amiga-mode', '');
-      localStorage.setItem('amiga-mode', 'true');
-    } else {
-      document.documentElement.removeAttribute('data-amiga-mode');
-      localStorage.setItem('amiga-mode', 'false');
-    }
-  };
+  const [amigaMode, setAmigaMode] = useAmigaMode();
 
   return (
     <>
@@ -104,7 +86,7 @@ export function Welcome() {
       <Center mb="md">
         <Switch
           checked={amigaMode}
-          onChange={(event) => toggleAmigaMode(event.currentTarget.checked)}
+          onChange={(event) => setAmigaMode(event.currentTarget.checked)}
           label="Amiga Mode"
           size="lg"
           color="orange"
@@ -211,7 +193,7 @@ export function Welcome() {
         <TextAnimate.Typewriter
           fz={11}
           c="green.5"
-          ff="monospace"
+          ff="'Topaz a1200', monospace"
           multiline
           delay={60}
           loop={false}

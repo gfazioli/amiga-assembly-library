@@ -1,7 +1,7 @@
 export default {
   /**
-   * Nextra metadata configuration
-   * @see https://nextra.vercel.app/docs/metadata
+   * Site metadata, merged into every page's own
+   * @see https://nextjs.org/docs/app/api-reference/functions/generate-metadata
    */
   metadata: {
     title: {
@@ -56,12 +56,16 @@ export default {
     },
   },
   /**
-   * Nextra Layout component configuration
+   * Docs layout
    */
-  nextraLayout: {
-    docsRepositoryBase:
-      'https://github.com/gfazioli/amiga-assembly-library/tree/main/amiga-assembly-library/content/',
+  docs: {
+    /**
+     * Base of each page's "Edit this page on GitHub" link: the page's path under `content/` is
+     * appended. Empty: the link is hidden, as it was on the Nextra site.
+     */
+    editUrlBase: '',
     sidebar: {
+      /** Folders deeper than this open only when they hold the current page */
       defaultMenuCollapseLevel: 1,
     },
   },
@@ -74,6 +78,14 @@ export default {
       nonce: '8IBTHwOdqNKAWeKl7plt8g==',
     },
   },
+  /**
+   * Links shared by the header, the sidebar and the footer
+   */
+  links: {
+    discord: 'https://discord.gg/rdWu5yFCR6',
+    coffee: 'https://donate.stripe.com/fZu4gy4Tn3b1dgudGx0co00',
+  },
+
   /**
    * GitHub API configuration
    */

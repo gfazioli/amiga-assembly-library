@@ -1,21 +1,64 @@
 import bundleAnalyzer from '@next/bundle-analyzer';
-import nextra from 'nextra';
+import { fileURLToPath } from 'node:url';
+import createMDX from '@next/mdx';
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const withNextra = nextra({
-  latex: true,
-  search: {
-    codeblocks: false
+/**
+ * The docs engine: plain `@next/mdx`, the MDX loader Next.js itself maintains.
+ *
+ * Turbopack runs in Rust and cannot receive JavaScript functions, so every remark and rehype
+ * plugin is named by a string (a package, or a path to a local module) with serializable options.
+ *
+ * - `remark-gfm`: tables, task lists, strikethrough, autolinks, as GitHub renders them.
+ * - `remark-frontmatter` + `remark-mdx-frontmatter`: the YAML front matter of a page becomes its
+ *   `frontmatter` export (`title`, `description`, …).
+ * - `rehype-slug`: an `id` on every heading, for the table of contents and for deep links.
+ * - `rehype-code-meta`: keeps the fence meta (`filename="…" copy {4}`) on the `<pre>`, where the
+ *   code block reads it. MDX drops it otherwise. A local plugin is given by its absolute path:
+ *   `@next/mdx` resolves plugin names from its own folder, where a relative path finds nothing.
+ */
+const withMDX = createMDX({
+  extension: /\.mdx$/,
+  options: {
+    remarkPlugins: [
+      'remark-gfm',
+      'remark-frontmatter',
+      ['remark-mdx-frontmatter', { name: 'frontmatter' }],
+    ],
+    rehypePlugins: [
+      'rehype-slug',
+      fileURLToPath(new URL('./lib/mdx/rehype-code-meta.mjs', import.meta.url)),
+    ],
   },
-  contentDirBasePath: '/docs',
-  defaultShowCopyCode: true,
-})
+});
 
-export default withNextra(
+/**
+ * Two deploy modes:
+ * - default: a server build (Vercel, any Node host), with the API routes;
+ * - NEXT_PUBLIC_STATIC_EXPORT=1: a fully static export (GitHub Pages), with an optional base path
+ *   in NEXT_PUBLIC_BASE_PATH (for example "/next-app-mantine-docs-template").
+ *
+ * The API routes are named `route.server.ts`. A server build lists `server.ts` among the page
+ * extensions, so they are routes; a static export does not, so Next.js sees `route.server` with
+ * the `ts` extension, which is no route at all, and leaves them out of the export.
+ */
+const isStaticExport = process.env.NEXT_PUBLIC_STATIC_EXPORT === '1';
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+
+export default withMDX(
   withBundleAnalyzer({
+    ...(isStaticExport
+      ? {
+          output: 'export',
+          basePath,
+          trailingSlash: true,
+          images: { unoptimized: true },
+        }
+      : {}),
+    pageExtensions: isStaticExport ? ['tsx', 'ts'] : ['tsx', 'ts', 'server.ts'],
     reactStrictMode: false,
     cleanDistDir: true,
     agentRules: false, // <-- Don't let `next dev` append its block to CLAUDE.md (since Next.js v16.3)
@@ -33,4 +76,5 @@ export default withNextra(
         },
       },
     },
-  }));
+  })
+);

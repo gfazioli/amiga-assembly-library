@@ -1,9 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Box, Tooltip, UnstyledButton } from '@mantine/core';
-
-const STORAGE_KEY = 'amiga-mode';
+import { useAmigaMode } from './use-amiga-mode';
 
 function AmigaCheckIcon({ size = 20 }: { size?: number }) {
   return (
@@ -34,27 +32,8 @@ function AmigaCheckIcon({ size = 20 }: { size?: number }) {
 }
 
 export function AmigaModeToggle() {
-  const [amigaMode, setAmigaMode] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'true') {
-      setAmigaMode(true);
-      document.documentElement.setAttribute('data-amiga-mode', '');
-    }
-  }, []);
-
-  const toggle = () => {
-    const next = !amigaMode;
-    setAmigaMode(next);
-    if (next) {
-      document.documentElement.setAttribute('data-amiga-mode', '');
-      localStorage.setItem(STORAGE_KEY, 'true');
-    } else {
-      document.documentElement.removeAttribute('data-amiga-mode');
-      localStorage.setItem(STORAGE_KEY, 'false');
-    }
-  };
+  const [amigaMode, setAmigaMode] = useAmigaMode();
+  const toggle = () => setAmigaMode(!amigaMode);
 
   return (
     <Tooltip label={amigaMode ? 'Switch to modern fonts' : 'Switch to Amiga mode'} withArrow>

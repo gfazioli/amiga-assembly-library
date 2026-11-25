@@ -1,3 +1,17 @@
+@font-face {
+  font-family: 'Topaz a1200';
+  src:
+    url('/fonts/Topaz_a1200_v1.0.woff2') format('woff2'),
+    url('/fonts/Topaz_a1200_v1.0.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   @mixin dark {
     --mantine-color-body: var(--mantine-color-dark-9);
@@ -18,5 +32,14 @@ body {
 
   &:hover {
     transform: scale(1.02);
+  }
+}
+
+/* Amiga Mode: while [data-amiga-mode] is on <html> (lib/amiga-mode.ts), Topaz everywhere but the
+   code blocks and the Amiga logo. */
+[data-amiga-mode] {
+  &,
+  & *:not(pre):not(code):not([data-amiga-logo]):not([data-amiga-logo] *) {
+    font-family: 'Topaz a1200', monospace !important;
   }
 }

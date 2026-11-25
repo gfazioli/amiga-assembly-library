@@ -239,8 +239,8 @@ export const MantineFooter = () => {
                   </Group>
                 </Anchor>
                 {' + '}
-                <Anchor fz={13} href="https://nextra.site/">
-                  Nextra
+                <Anchor fz={13} href="https://nextjs.org/">
+                  Next.js
                 </Anchor>
               </Group>
             </Text>
