@@ -74,6 +74,10 @@ html:root {
     --mantine-color-orange-text: var(--mantine-color-orange-8);
     --mantine-color-orange-light-color: var(--mantine-color-orange-8);
     --mantine-color-orange-outline: var(--mantine-color-orange-8);
+
+    /* The page is gray.0, the shade Mantine also gives inline code: one step darker, so the
+       chip still shows on the page (the table stripes and Spotlight's hover, below, likewise). */
+    --code-bg: var(--mantine-color-gray-1);
   }
 
   @mixin dark-root {
@@ -83,6 +87,18 @@ html:root {
     --mantine-color-orange-light-color: var(--mantine-color-orange-3);
     --aal-accent: var(--mantine-color-orange-4);
     --aal-rule: var(--mantine-color-dark-5);
+  }
+}
+
+/* On the gray.0 page, Mantine's gray.0 table stripes and Spotlight hover would not show. */
+[data-mantine-color-scheme='light'] .mantine-Table-table {
+  --table-striped-color: var(--mantine-color-gray-1);
+  --table-hover-color: var(--mantine-color-gray-2);
+}
+
+@media (hover: hover) {
+  [data-mantine-color-scheme='light'] .mantine-Spotlight-action:not([data-selected]):hover {
+    background-color: var(--mantine-color-gray-1);
   }
 }
 
@@ -208,7 +224,6 @@ summary:focus-visible {
 /* Each section opens on the engine's hairline, with an orange tab at its start. */
 [data-docs-article] h2 {
   position: relative;
-  border-top-color: var(--aal-rule);
   font-size: 1.375rem;
   letter-spacing: -0.01em;
 
