@@ -15,7 +15,7 @@ ULONG ChangeChar(STRPTR string, ULONG len, ULONG fchar, ULONG rchar);
 
 ## Description
 
-Searches for a character in a byte sequence, and when found, replaces it, continuing until it encounters the ASCII code 0 (null terminator). This is true if no length was passed in `len`; otherwise, the scan can be forced for a specific number of bytes.
+Scans a byte sequence for the character `fchar` and replaces every occurrence with `rchar`. If `len` is NULL, the scan stops at the first ASCII code 0 (null terminator); otherwise exactly `len` bytes are scanned.
 
 ## Inputs
 

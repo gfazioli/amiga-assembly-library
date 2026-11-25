@@ -15,11 +15,11 @@ LONG CheckFile(STRPTR filename, STRPTR errorstring);
 
 ## Description
 
-Allows checking the status of a file. The file is opened in `MODE_OLDFILE`; if everything is fine, it returns NULL as the result. Otherwise, it returns the error code from `dos.library/IoErr()`.
+Checks the status of a file. The file is opened in `MODE_OLDFILE`; if everything is fine, it returns NULL as the result. Otherwise, it returns the error code from `dos.library/IoErr()`.
 
 In addition to returning the error code, `CheckFile()` can also provide an associated error text by calling `dos.library/Fault()`. This is done by providing a buffer, which will be filled with the text of the associated error. However, you should always refer to the return error code to determine whether an error actually occurred.
 
-The buffer pointer must be at least 80 characters long. The string will be NULL-terminated. The buffer pointer is not mandatory; if left as zero, it has no effect, and it will be the task's responsibility to display the error as text.
+The buffer must be at least 80 characters long, and the string is NULL-terminated. The buffer is optional: if you pass NULL, no text is produced and your program must report the error itself.
 
 The error text is linked to the system LOCALE, so the error string is in the language chosen in the system preferences.
 
@@ -33,6 +33,8 @@ The error text is linked to the system LOCALE, so the error string is in the lan
 - **error** — NULL if no error occurred. Otherwise, an error code is returned via `dos.library/IoErr()`.
 
 ## See Also
+
+[Load](/docs/dos/load), [Save](/docs/dos/save)
 
 `dos.library/IoErr()`, `dos.library/Fault()`, `dos.library/PrintFault()`
 
