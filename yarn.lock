@@ -5541,7 +5541,6 @@ __metadata:
     storybook: "npm:^10.6.8"
     stylelint: "npm:^16.26.1"
     stylelint-config-standard-scss: "npm:^16.0.0"
-    swr: "npm:^2.5.1"
     turbopack-inline-svg-loader: "npm:^1.0.3"
     typescript: "npm:6.0.3"
   languageName: unknown
@@ -14293,18 +14292,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"swr@npm:^2.5.1":
-  version: 2.5.1
-  resolution: "swr@npm:2.5.1"
-  dependencies:
-    dequal: "npm:^2.0.3"
-    use-sync-external-store: "npm:^1.6.0"
-  peerDependencies:
-    react: ^16.11.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/46a815a8abaf38378c6febc3beacedf4d7e1fafce0656ff6ed23561cfa9e380de3831d708b36d516f70bd3d0decac824108bce96d0826f258c33cf56e1e837b6
-  languageName: node
-  linkType: hard
-
 "symbol-tree@npm:^3.2.4":
   version: 3.2.4
   resolution: "symbol-tree@npm:3.2.4"
@@ -15024,7 +15011,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:^1.5.0, use-sync-external-store@npm:^1.6.0":
+"use-sync-external-store@npm:^1.5.0":
   version: 1.6.0
   resolution: "use-sync-external-store@npm:1.6.0"
   peerDependencies:

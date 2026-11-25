@@ -33,7 +33,7 @@ export default {
     type: 'menu',
     items: {
       // Scrolls to the on-page Sponsors section (footer) — internal anchor,
-      // so Nextra shows no external arrow.
+      // so the menu shows no external arrow.
       sponsor: {
         title: (
           <Group component="span" gap={8} wrap="nowrap" align="center">
@@ -43,7 +43,7 @@ export default {
         ),
         href: '#sponsors',
       },
-      // External donation link — Nextra keeps the ↗ external indicator.
+      // External donation link — opens in a new tab, with the ↗ external indicator.
       coffee: {
         title: (
           <Group component="span" gap={8} wrap="nowrap" align="center">
