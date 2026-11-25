@@ -12,14 +12,16 @@ void ValueToStringHex(APTR, LONG, ULONG, BOOL);
 ## C Prototype
 
 ```c
-void ConvHex(APTR, LONG, LONG, BOOL);
+void ValueToStringHex(APTR buffer, LONG value, LONG optlen, BOOL prefix);
 ```
+
+The shipped `clib/ASSEMBLY.H` declares this function as `ConvHex()`; the pragma file and the `assembly.lib` linker stubs use the name above.
 
 ## Description
 
 Converts a signed 32-bit LONG value into a hexadecimal ASCII string.
 
-If the input value is negative, a `-` character is prepended to the output string. By default (when `optlen` is NULL), 8 characters are placed in the buffer. The `optlen` parameter can be used to specify a different output length.
+By default (when `optlen` is NULL), 8 characters are placed in the buffer. The `optlen` parameter can be used to specify a different output length (at most 8). The value is converted as its raw 32-bit pattern: no sign character is written.
 
 The `prefix` parameter controls whether a `$` character is prepended to the output.
 

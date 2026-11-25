@@ -39,7 +39,7 @@ An AsmRequest has all the features of `intuition.library/EasyRequest()`, with th
 
 An optional Object (image or animation loaded via `datatypes.library`) can be placed either beside or above the body text. When the `AREQ_TextUnderObject` tag is set to TRUE, the object is centered above the text.
 
-Buttons are ordered the same way as `intuition.library/EasyRequest()`: the leftmost button returns the highest value and the rightmost button returns 0.
+Buttons are ordered the same way as `intuition.library/EasyRequest()`: from left to right they return 1, 2, 3, ... n, except the rightmost button, which returns 0.
 
 **Keyboard Control** — The ESC key exits the requester with a return code of NULL by default. Buttons can be selected via keyboard if the underscore character `_` (0x5f) was included in their label string. The RETURN key selects the leftmost button (equivalent to AmigaLeft+V). The RETURN key behavior can be disabled via the `AREQ_ReturnKey` tag.
 

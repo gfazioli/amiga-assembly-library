@@ -12,8 +12,10 @@ LONG StringHexToValue(STRPTR);
 ## C Prototype
 
 ```c
-LONG Hex2Val(STRPTR);
+LONG StringHexToValue(STRPTR string);
 ```
+
+The shipped `clib/ASSEMBLY.H` declares this function as `Hex2Val()`; the pragma file and the `assembly.lib` linker stubs use the name above.
 
 ## Description
 

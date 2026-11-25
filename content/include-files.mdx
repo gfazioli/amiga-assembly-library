@@ -601,7 +601,7 @@ The `Interface` structure is returned by `OpenInterface()` when loading a `.rei`
 
 #### REI
 
-The `REI` (Runtime Environment Interface) structure represents an open window with its associated screen, menu, and gadget list. The public fields include:
+The `REI` structure represents an open window with its associated screen, menu, and gadget list. The public fields include:
 
 | Field | Description |
 |-------|-------------|
@@ -610,7 +610,7 @@ The `REI` (Runtime Environment Interface) structure represents an open window wi
 | `rei_Menu` | The menu strip attached to this window |
 | `rei_STDWindowTAG` | Standard window tag list |
 | `rei_VI` | VisualInfo for GadTools |
-| `rei_ID` | Unique REI identifier |
+| `rei_ID` | User-defined REI identifier |
 | `rei_UserData` | General-purpose user data pointer |
 
 <Callout type="warning">

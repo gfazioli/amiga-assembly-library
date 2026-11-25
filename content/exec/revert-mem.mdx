@@ -17,16 +17,16 @@ void RevertMem(APTR start, APTR end, ULONG type);
 
 This function reverses the contents of a memory area defined by `start` and `end`. It reverses the sequence of bytes, words, or longwords within the specified region. The first byte/word/longword becomes the last, the second becomes the second-to-last, and so on.
 
-The reversal granularity is controlled by the `type` parameter, which specifies the number of bits to operate on (8, 16, or 32).
+The reversal granularity is controlled by the `type` parameter, which selects bytes, words, or longwords (see Inputs).
 
 ## Inputs
 
 - **start** — Start address of the memory area to reverse.
 - **end** — End address of the memory area to reverse. This can be calculated by adding the number of bytes to operate on to `start`, regardless of whether the reversal is performed on bytes, words, or longwords.
-- **type** — Specifies the number of bits (8, 16, or 32) to operate on. The accepted values are:
-  - `TYPEF_BYTE` — operates on bytes
-  - `TYPEF_WORD` — operates on words
-  - `TYPEF_LONG` — operates on longwords
+- **type** — Selects the size of the unit to reverse. The accepted values are:
+  - `0` — operates on bytes (the include file defines no `TYPEF_BYTE` constant)
+  - `TYPEF_WORD` (1) — operates on words
+  - `TYPEF_LONG` (2) — operates on longwords
 
 ## Result
 
