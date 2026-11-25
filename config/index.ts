@@ -35,10 +35,11 @@ export default {
       type: 'website',
       images: [
         {
-          url: '/social.jpeg',
+          // Rendered by scripts/social-image.mjs
+          url: '/social.png',
           width: 1200,
           height: 630,
-          alt: 'Amiga Assembly Library — Commodore Amiga with Workbench',
+          alt: 'Amiga Assembly Library: a Motorola 68020 shared library for Commodore Amiga, with a RevertMem call in a Workbench window',
         },
       ],
     },
@@ -48,7 +49,7 @@ export default {
     twitter: {
       card: 'summary_large_image',
       site: 'https://amiga-assembly-library.vercel.app/',
-      images: ['/social.jpeg'],
+      images: ['/social.png'],
     },
     alternates: {
       // https://github.com/vercel/next.js/discussions/50189#discussioncomment-10826632

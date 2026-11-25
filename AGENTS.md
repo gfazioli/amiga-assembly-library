@@ -96,4 +96,5 @@ The look is Workbench 1.3's palette after dark: a night-blue ground, one orange,
 - **Pagefind search**: The search index is built post-`next build` and output to `public/_pagefind`. The search API route patches `global.window` and `global.document` for server-side pagefind compatibility.
 - **No smart typography**: Nextra turned `--` and straight quotes into typographic ones; this engine shows the text as written. Adding `remark-smartypants` would change the anchors of the headings that contain `--`, which deep links already use.
 - **Long code blocks open collapsed**: more than 30 lines (`components/docs/CodeBlock/CodeBlock.tsx`), with Mantine's expand button.
+- **The social card** (`public/social.png`, the Open Graph and Twitter image, 1200 × 630) is rendered by `node --no-warnings scripts/social-image.mjs` with Satori (next/og), its code through `lib/mdx/m68k.ts`. Re-run it after a design change, then put the PNG through ImageOptim.
 - **Environment variables**: none are required; `ANALYZE=true` runs the bundle analyzer.
