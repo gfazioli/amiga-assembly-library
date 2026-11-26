@@ -16,12 +16,12 @@
   background-color: var(--mantine-color-default-border);
 }
 
-.steps :global(h3) {
+.steps :global(:is(h2, h3, h4, h5, h6)) {
   counter-increment: step;
   position: relative;
 }
 
-.steps :global(h3)::before {
+.steps :global(:is(h2, h3, h4, h5, h6))::before {
   content: counter(step);
   position: absolute;
   left: rem(-44px);
