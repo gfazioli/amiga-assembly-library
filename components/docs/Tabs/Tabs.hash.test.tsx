@@ -24,12 +24,25 @@ const selected = () => screen.getByRole('tab', { selected: true }).textContent;
 describe('Tabs and location.hash', () => {
   afterEach(() => {
     window.location.hash = '';
+    // A failed expectation must not leave a spy on scrollIntoView for the next test.
+    jest.restoreAllMocks();
   });
 
-  it('opens the panel holding the hash target on mount', () => {
+  it('opens the panel holding the hash target on mount, and scrolls to it once it shows', () => {
+    const shown: boolean[] = [];
+    const scroll = jest
+      .spyOn(window.HTMLElement.prototype, 'scrollIntoView')
+      .mockImplementation(function (this: HTMLElement) {
+        // Mantine hides a closed panel with display: none on the panel element.
+        const panel = this.closest('[data-docs-tab-panel]') as HTMLElement | null;
+        shown.push(panel !== null && panel.style.display !== 'none');
+      });
     window.location.hash = '#sql-export';
     renderTabs();
     expect(selected()).toBe('yarn');
+    expect(scroll).toHaveBeenCalledTimes(1);
+    expect(shown).toEqual([true]);
+    scroll.mockRestore();
   });
 
   it('keeps the first tab when the hash points into it, or nowhere', () => {

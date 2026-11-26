@@ -23,7 +23,8 @@ const PANEL_ATTRIBUTE = 'data-docs-tab-panel';
 export function TabsClient({ items, defaultIndex, panels }: TabsClientProps) {
   const [value, setValue] = useState(String(defaultIndex));
   const rootRef = useRef<HTMLDivElement>(null);
-  const pendingScroll = useRef<HTMLElement | null>(null);
+  // The target to scroll to, and the panel that must be showing first.
+  const pendingScroll = useRef<{ target: HTMLElement; value: string } | null>(null);
 
   useEffect(() => {
     const reveal = (hash: string) => {
@@ -37,12 +38,13 @@ export function TabsClient({ items, defaultIndex, panels }: TabsClientProps) {
       if (index === -1) {
         return;
       }
+      const next = String(index);
       setValue((current) => {
-        if (current !== String(index)) {
-          // Closed until this render: the browser could not scroll to it, so do it once shown.
-          pendingScroll.current = target;
+        if (current !== next) {
+          // Closed until this panel commits: the browser could not scroll to it, so do it once shown.
+          pendingScroll.current = { target, value: next };
         }
-        return String(index);
+        return next;
       });
     };
 
@@ -64,10 +66,13 @@ export function TabsClient({ items, defaultIndex, panels }: TabsClientProps) {
   }, []);
 
   useEffect(() => {
-    const target = pendingScroll.current;
-    if (target) {
+    const pending = pendingScroll.current;
+    // Only once the panel that holds the target is the committed one. On mount React may run the
+    // state updater above eagerly, so the target is already pending when this effect first runs,
+    // with the default panel still showing and the target hidden: scrolling then does nothing.
+    if (pending && pending.value === value) {
       pendingScroll.current = null;
-      target.scrollIntoView();
+      pending.target.scrollIntoView();
     }
   }, [value]);
 
