@@ -5527,6 +5527,7 @@ __metadata:
     "@types/react-dom": "npm:19.3.0"
     "@vercel/analytics": "npm:^2.0.1"
     babel-loader: "npm:^10.1.1"
+    github-slugger: "npm:^2.0.0"
     jest: "npm:^30.5.2"
     jest-environment-jsdom: "npm:^30.5.2"
     next: "npm:16.4.6"

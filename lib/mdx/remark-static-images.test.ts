@@ -45,17 +45,23 @@ describe('remarkStaticImages', () => {
     ]);
   });
 
+  it('imports a path with no ./ as ./path, never as a bare package specifier', () => {
+    const tree = transform([image('photo.png'), image('images/photo.jpg')]);
+    expect(tree.children.slice(0, 2).map((node: any) => node.value)).toEqual([
+      'import __staticImage0 from "./photo.png"',
+      'import __staticImage1 from "./images/photo.jpg"',
+    ]);
+  });
+
   it('leaves remote, absolute and non-image URLs alone', () => {
     const tree = transform([
       image('https://example.com/a.png'),
+      image('//cdn.example.com/a.png'),
+      image('data:image/png;base64,AAAA'),
       image('/public/a.png'),
       image('./notes.pdf'),
     ]);
     expect(tree.children).toHaveLength(2);
-    expect(tree.children[0].children.map((node: any) => node.type)).toEqual([
-      'image',
-      'image',
-      'image',
-    ]);
+    expect(tree.children[0].children.every((node: any) => node.type === 'image')).toBe(true);
   });
 });
