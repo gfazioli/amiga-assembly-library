@@ -1,0 +1,14 @@
+import { copyableCode } from './copyable-code';
+
+describe('copyableCode', () => {
+  const coloured = '\u001b[1;32mOK\u001b[0m done \u001b[38;5;208mwarn\u001b[m';
+
+  it('strips SGR escape codes from an ansi block', () => {
+    expect(copyableCode(coloured, 'ansi')).toBe('OK done warn');
+  });
+
+  it('leaves every other language as written', () => {
+    expect(copyableCode(coloured, 'bash')).toBe(coloured);
+    expect(copyableCode(coloured, undefined)).toBe(coloured);
+  });
+});
