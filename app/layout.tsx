@@ -19,7 +19,6 @@ import { AMIGA_MODE_SCRIPT } from '@/lib/amiga-mode';
 import { getDocs } from '@/lib/docs/content';
 import { SIDEBAR_COLLAPSED_SCRIPT } from '@/lib/docs/sidebar';
 import { getTopNav } from '@/lib/docs/top-nav';
-import pack from '../package.json';
 import { theme } from '../theme';
 
 export const metadata = config.metadata;
@@ -68,13 +67,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             docsFooter={footer}
             siteFooter={footer}
             banner={
-              <Banner storageKey={`amiga-asm-lib-${pack.version}`}>
+              // A new key per announcement, so readers who closed the last one see this one
+              <Banner storageKey="floppeek-0.1.0">
                 {/* One line, cut with an ellipsis: phones get the short form whole */}
                 <Box component="span" visibleFrom="md">
-                  Amiga Assembly Library v41.21 — Motorola 68020 shared library for Commodore Amiga
+                  New: <a href="https://gfazioli.github.io/floppeek/">Floppeek</a>, Quick Look for
+                  Amiga disk images on the Mac. Press Space on an .adf in the Finder
                 </Box>
                 <Box component="span" hiddenFrom="md">
-                  Amiga Assembly Library v41.21
+                  New: <a href="https://gfazioli.github.io/floppeek/">Floppeek</a>, .adf on the Mac
                 </Box>
               </Banner>
             }
