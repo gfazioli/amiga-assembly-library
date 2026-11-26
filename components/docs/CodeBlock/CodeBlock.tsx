@@ -1,4 +1,5 @@
 import { isValidElement } from 'react';
+import { copyableCode } from '@/lib/docs/copyable-code';
 import { highlightCode, normalizeCode } from '@/lib/mdx/highlight';
 import { CodeBlockClient } from './CodeBlockClient';
 
@@ -42,7 +43,7 @@ export async function CodeBlock({ children, ...props }: PreProps) {
 
   return (
     <CodeBlockClient
-      code={code}
+      code={copyableCode(code, language)}
       html={html}
       language={language}
       fileName={fileName}

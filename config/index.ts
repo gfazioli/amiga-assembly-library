@@ -48,7 +48,6 @@ export default {
     },
     twitter: {
       card: 'summary_large_image',
-      site: 'https://amiga-assembly-library.vercel.app/',
       images: ['/social.png'],
     },
     alternates: {

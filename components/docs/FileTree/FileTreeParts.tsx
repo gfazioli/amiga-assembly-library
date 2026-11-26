@@ -32,7 +32,8 @@ export function FileTreeFolder({ name, defaultOpen = false, children }: FolderPr
           </Text>
         </Group>
       </UnstyledButton>
-      <Collapse expanded={open}>
+      {/* display-none, not Mantine's default Activity: a closed folder's names stay in the served HTML */}
+      <Collapse expanded={open} keepMountedMode="display-none">
         <Box className={classes.children}>{children}</Box>
       </Collapse>
     </Box>

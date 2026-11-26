@@ -1,5 +1,5 @@
 import { Children } from 'react';
-import { Tabs as MantineTabs, TabsList, TabsPanel, TabsTab } from '@mantine/core';
+import { TabsClient } from './TabsClient';
 
 export interface TabsProps {
   /** The tab labels, one per `<Tabs.Tab>` */
@@ -10,33 +10,13 @@ export interface TabsProps {
 }
 
 function TabsBase({ items, defaultIndex = 0, children }: TabsProps) {
-  const panels = Children.toArray(children);
-
-  // keepMountedMode 'display-none': every panel is in the served HTML, hidden with CSS. Mantine's
-  // default mode wraps a closed panel in React's Activity, which a server render leaves out, so
-  // the text, code blocks and headings of the other tabs were invisible to crawlers, to Pagefind
-  // and to a page read without JavaScript. The Collapse of the sidebar has the same setting.
+  // `TabsClient` sets keepMountedMode 'display-none': every panel is in the served HTML, hidden
+  // with CSS. Mantine's default mode wraps a closed panel in React's Activity, which a server
+  // render leaves out, so the text, code blocks and headings of the other tabs were invisible to
+  // crawlers, to Pagefind and to a page read without JavaScript. It also opens the panel a
+  // `#anchor` points into. The Collapse of the sidebar has the same setting.
   return (
-    <MantineTabs
-      defaultValue={String(defaultIndex)}
-      keepMountedMode="display-none"
-      my="md"
-      variant="outline"
-      radius="md"
-    >
-      <TabsList>
-        {items.map((item, index) => (
-          <TabsTab key={index} value={String(index)}>
-            {item}
-          </TabsTab>
-        ))}
-      </TabsList>
-      {panels.map((panel, index) => (
-        <TabsPanel key={index} value={String(index)} pt="sm">
-          {panel}
-        </TabsPanel>
-      ))}
-    </MantineTabs>
+    <TabsClient items={items} defaultIndex={defaultIndex} panels={Children.toArray(children)} />
   );
 }
 
@@ -54,7 +34,7 @@ function Tab({ children }: { children: React.ReactNode }) {
  * </Tabs>
  * ```
  *
- * Mantine's sub-components are imported by name (`TabsList`, not `Tabs.List`): this is a server
- * module, and a client component's statics do not cross the RSC boundary.
+ * The interactive part is the client component `TabsClient`: this is a server module, and a client
+ * component's statics (`Tabs.List`) do not cross the RSC boundary, so the compound object is built here.
  */
 export const Tabs = Object.assign(TabsBase, { Tab });
