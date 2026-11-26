@@ -237,7 +237,7 @@ export function SiteShell({ tree, nav, banner, docsFooter, siteFooter, children 
               </Tooltip>
             </Group>
             <Group gap={4}>
-              <ColorSchemeControl />
+              {config.docs.colorSchemeControl && <ColorSchemeControl />}
               {isDocs && togglePlacement === 'sidebar' && (
                 <SidebarToggle
                   collapsed={sidebarCollapsed}

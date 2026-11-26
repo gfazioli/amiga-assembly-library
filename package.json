@@ -18,6 +18,7 @@
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
     "remark-mdx-frontmatter": "^6.0.0",
+    "remark-smartypants": "^3.0.2",
     "shiki": "^4.6.0"
   },
   "devDependencies": {
