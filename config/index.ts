@@ -75,6 +75,13 @@ export default {
        */
       toggle: 'header' as 'header' | 'sidebar',
     },
+    /**
+     * The colour-scheme switch at the foot of the sidebar. A site drawn for one scheme sets
+     * `false` (and forces it on `MantineProvider`): no switch is offered, so no visitor is left
+     * on a scheme nothing is drawn for. The header's own controls belong to the site's
+     * `MantineNavBar`.
+     */
+    colorSchemeControl: true as boolean,
   },
   /**
    * Main Layout head configuration

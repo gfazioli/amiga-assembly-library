@@ -35,11 +35,21 @@ function getHighlighter() {
   return highlighter;
 }
 
-function resolveLanguage(language: string | undefined): BundledLanguage | undefined {
+/**
+ * Shiki's special `ansi` language colours a terminal's escape sequences (a command's own output,
+ * a log): it is not in `bundledLanguages`, and without it the block shows the raw `ESC[38;5;76m`
+ * characters, which Nextra's code blocks coloured.
+ */
+const ANSI = 'ansi';
+
+function resolveLanguage(language: string | undefined): BundledLanguage | typeof ANSI | undefined {
   if (!language) {
     return undefined;
   }
   const name = language.toLowerCase();
+  if (name === ANSI) {
+    return ANSI;
+  }
   if (name in ALIASES) {
     return ALIASES[name];
   }
@@ -72,7 +82,7 @@ export async function highlightCode(
   }
 
   const shiki = await getHighlighter();
-  if (!shiki.getLoadedLanguages().includes(lang)) {
+  if (lang !== ANSI && !shiki.getLoadedLanguages().includes(lang)) {
     await shiki.loadLanguage(lang);
   }
 

@@ -15,6 +15,11 @@ const withBundleAnalyzer = bundleAnalyzer({
  * - `remark-gfm`: tables, task lists, strikethrough, autolinks, as GitHub renders them.
  * - `remark-frontmatter` + `remark-mdx-frontmatter`: the YAML front matter of a page becomes its
  *   `frontmatter` export (`title`, `description`, …).
+ * - `remark-heading-ids`: every heading's `id`, from the text as written, before smartypants
+ *   changes it (`--` becomes an em dash there, and the anchor would follow).
+ * - `remark-smartypants`: curly quotes, dashes and real ellipses in the text, as Nextra set them
+ *   (code is left alone).
+ * - `remark-static-images`: a relative image, `![](./photo.png)`, becomes an import of the file.
  * - `rehype-slug`: an `id` on every heading, for the table of contents and for deep links.
  * - `rehype-code-meta`: keeps the fence meta (`filename="…" copy {4}`) on the `<pre>`, where the
  *   code block reads it. MDX drops it otherwise. A local plugin is given by its absolute path:
@@ -25,6 +30,9 @@ const withMDX = createMDX({
   options: {
     remarkPlugins: [
       'remark-gfm',
+      fileURLToPath(new URL('./lib/mdx/remark-heading-ids.mjs', import.meta.url)),
+      'remark-smartypants',
+      fileURLToPath(new URL('./lib/mdx/remark-static-images.mjs', import.meta.url)),
       'remark-frontmatter',
       ['remark-mdx-frontmatter', { name: 'frontmatter' }],
     ],

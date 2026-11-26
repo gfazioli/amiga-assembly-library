@@ -13,6 +13,8 @@ jest.mock('next/navigation', () => ({
 
 // The placement of the sidebar toggle, switched per test
 const sidebarConfig = config.docs.sidebar as { toggle: 'header' | 'sidebar' };
+// The colour-scheme switch at the foot of the sidebar, switched per test
+const docsConfig = config.docs as { colorSchemeControl: boolean };
 
 const tree: DocsNode[] = [{ kind: 'page', key: 'index', title: 'Introduction', route: '/docs' }];
 
@@ -42,6 +44,7 @@ function renderShell() {
 beforeEach(() => {
   mockSegment.mockReturnValue('docs');
   sidebarConfig.toggle = 'header';
+  docsConfig.colorSchemeControl = true;
   window.localStorage.clear();
 });
 
@@ -107,5 +110,18 @@ describe('SiteShell', () => {
     await userEvent.click(headerToggle);
     expect(navbar).not.toHaveAttribute('data-desktop-collapsed');
     expect(foot).toHaveFocus();
+  });
+
+  it('offers the colour-scheme switch at the foot of the sidebar unless the site turns it off', () => {
+    const navbar = renderShell();
+    expect(within(navbar).getByRole('button', { name: 'Toggle color scheme' })).toBeInTheDocument();
+  });
+
+  it('drops the colour-scheme switch from the sidebar when config.docs.colorSchemeControl is false', () => {
+    docsConfig.colorSchemeControl = false;
+    const navbar = renderShell();
+    expect(
+      within(navbar).queryByRole('button', { name: 'Toggle color scheme' })
+    ).not.toBeInTheDocument();
   });
 });

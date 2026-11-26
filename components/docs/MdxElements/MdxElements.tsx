@@ -1,4 +1,5 @@
 import type { MDXComponents } from 'mdx/types';
+import NextImage, { type StaticImageData } from 'next/image';
 import {
   Anchor,
   Code,
@@ -91,9 +92,22 @@ export const mdxElements: MDXComponents = {
   pre: CodeBlock,
   blockquote: GitHubAlert,
   hr: () => <Divider my="xl" />,
-  img: ({ src, alt }) => (
-    <Image src={typeof src === 'string' ? src : undefined} alt={alt ?? ''} radius="md" my="md" />
-  ),
+  // A relative image (`![](./photo.png)`) arrives as an imported file (`remark-static-images`):
+  // `next/image` takes its size from it, and `h="auto"` keeps the ratio at the column's width
+  // (Mantine's `Image` is `object-fit: cover`, which cropped it to the height attribute).
+  img: ({ src, alt }) =>
+    typeof src === 'object' && src !== null ? (
+      <Image
+        component={NextImage}
+        src={src as StaticImageData}
+        alt={alt ?? ''}
+        radius="md"
+        my="md"
+        h="auto"
+      />
+    ) : (
+      <Image src={typeof src === 'string' ? src : undefined} alt={alt ?? ''} radius="md" my="md" />
+    ),
   table: (props) => (
     <TableScrollContainer minWidth={500} my="md">
       <Table striped highlightOnHover withTableBorder withColumnBorders {...props} />
