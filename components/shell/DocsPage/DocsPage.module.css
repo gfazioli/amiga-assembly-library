@@ -29,6 +29,15 @@
   max-width: rem(860px);
   margin-inline: auto;
 
+  /* A long inline code, a bare URL or a long breadcrumb wraps instead of widening the page on a
+     phone (Nextra's article broke words too), and a raw <img> never outgrows the column. */
+  overflow-wrap: anywhere;
+
+  & img:not([class]) {
+    max-width: 100%;
+    height: auto;
+  }
+
   [data-layout='full'] & {
     max-width: none;
   }
@@ -46,6 +55,11 @@
 
 .breadcrumbs {
   flex-wrap: wrap;
+
+  /* Mantine keeps each crumb on one line; a long title wraps (the page's overflow-wrap) */
+  & > * {
+    white-space: normal;
+  }
 }
 
 .card {
