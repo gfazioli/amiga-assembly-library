@@ -12,8 +12,18 @@ export interface TabsProps {
 function TabsBase({ items, defaultIndex = 0, children }: TabsProps) {
   const panels = Children.toArray(children);
 
+  // keepMountedMode 'display-none': every panel is in the served HTML, hidden with CSS. Mantine's
+  // default mode wraps a closed panel in React's Activity, which a server render leaves out, so
+  // the text, code blocks and headings of the other tabs were invisible to crawlers, to Pagefind
+  // and to a page read without JavaScript. The Collapse of the sidebar has the same setting.
   return (
-    <MantineTabs defaultValue={String(defaultIndex)} my="md" variant="outline" radius="md">
+    <MantineTabs
+      defaultValue={String(defaultIndex)}
+      keepMountedMode="display-none"
+      my="md"
+      variant="outline"
+      radius="md"
+    >
       <TabsList>
         {items.map((item, index) => (
           <TabsTab key={index} value={String(index)}>
