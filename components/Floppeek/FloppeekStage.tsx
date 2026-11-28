@@ -96,6 +96,7 @@ export function FloppeekStage() {
       stage.getBoundingClientRect().top >= window.innerHeight * 0.85
     ) {
       stage.dataset.state = 'armed';
+      key.setAttribute('aria-expanded', 'false');
       observer = new IntersectionObserver(
         (entries) => {
           if (entries[0]?.isIntersecting) {

@@ -85,6 +85,8 @@ export function FloppeekRequester() {
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
+    // a reader may have scrolled before this ran (or the browser restored the place)
+    onScroll();
 
     // Out: the section it points to is on screen
     let observer: IntersectionObserver | undefined;
@@ -92,7 +94,8 @@ export function FloppeekRequester() {
       observer = new IntersectionObserver(
         (entries) => {
           if (entries[0]?.isIntersecting && !done) {
-            leave(false);
+            // focus inside a requester that goes away moves on, as for Cancel
+            leave(true);
           }
         },
         { threshold: 0.25 }
