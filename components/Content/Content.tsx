@@ -76,7 +76,8 @@ export function Content({ modules }: { modules: LibraryModule[] }) {
         <Container size="lg">
           <header className={classes.header}>
             <p className={classes.eyebrow}>Reference</p>
-            <h2 id="modules-title" className={classes.title}>
+            {/* tabIndex: where focus goes when the Floppeek requester is put away */}
+            <h2 id="modules-title" className={classes.title} tabIndex={-1}>
               Library modules
             </h2>
             <p className={classes.intro}>
