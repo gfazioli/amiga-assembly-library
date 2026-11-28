@@ -10,6 +10,8 @@ import { Analytics } from '@vercel/analytics/react';
 import { Box, ColorSchemeScript, mantineHtmlProps, MantineProvider } from '@mantine/core';
 // !! End of important imports !!
 
+import { DocsOnly } from '@/components/Floppeek/DocsOnly';
+import { FLOPPEEK_BANNER_KEY, FLOPPEEK_URL } from '@/components/Floppeek/floppeek';
 import { MantineFooter } from '@/components/MantineFooter/MantineFooter';
 import { Banner } from '@/components/shell/Banner/Banner';
 import { DocsSearch } from '@/components/shell/DocsSearch/DocsSearch';
@@ -67,17 +69,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             docsFooter={footer}
             siteFooter={footer}
             banner={
-              // A new key per announcement, so readers who closed the last one see this one
-              <Banner storageKey="floppeek-0.1.0">
-                {/* One line, cut with an ellipsis: phones get the short form whole */}
-                <Box component="span" visibleFrom="md">
-                  New: <a href="https://gfazioli.github.io/floppeek/">Floppeek</a>, Quick Look for
-                  Amiga disk images on the Mac. Press Space on an .adf in the Finder
-                </Box>
-                <Box component="span" hiddenFrom="md">
-                  New: <a href="https://gfazioli.github.io/floppeek/">Floppeek</a>, .adf on the Mac
-                </Box>
-              </Banner>
+              // The docs pages only: the home page announces Floppeek with its own section and
+              // requester. One key for all three (components/Floppeek/floppeek.ts): a new key per
+              // announcement, so readers who closed the last one see this one
+              <DocsOnly>
+                <Banner storageKey={FLOPPEEK_BANNER_KEY}>
+                  {/* One line, cut with an ellipsis: phones get the short form whole */}
+                  <Box component="span" visibleFrom="md">
+                    New: <a href={FLOPPEEK_URL}>Floppeek</a>, Quick Look for Amiga disk images on
+                    the Mac. Press Space on an .adf in the Finder
+                  </Box>
+                  <Box component="span" hiddenFrom="md">
+                    New: <a href={FLOPPEEK_URL}>Floppeek</a>, .adf on the Mac
+                  </Box>
+                </Banner>
+              </DocsOnly>
             }
           >
             {children}

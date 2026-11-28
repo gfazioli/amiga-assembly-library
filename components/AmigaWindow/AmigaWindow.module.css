@@ -103,6 +103,23 @@
   color: var(--aal-screen-text);
 }
 
+/* Workbench's own screen, as Floppeek draws its previews: blue, white type, the same in every
+   scheme. What it shows is laid out to fit, so it clips rather than scrolls. */
+.root[data-tone='workbench'] {
+  & .window {
+    background-color: #05a;
+  }
+
+  & .screen {
+    overflow: hidden;
+    color: #fff;
+
+    @media (max-width: em(479.98px)) {
+      padding: 12px;
+    }
+  }
+}
+
 .caption {
   margin-top: 14px;
   color: var(--mantine-color-dimmed);

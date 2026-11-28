@@ -1,5 +1,7 @@
 import { Content, type LibraryModule } from '@/components/Content/Content';
 import { MODULES } from '@/components/Content/modules';
+import { FloppeekRequester } from '@/components/Floppeek/FloppeekRequester';
+import { FloppeekSection } from '@/components/Floppeek/FloppeekSection';
 import { Welcome } from '@/components/Welcome/Welcome';
 import { getDocs } from '@/lib/docs/content';
 import type { DocsFolderNode } from '@/lib/docs/types';
@@ -49,6 +51,8 @@ export default async function HomePage() {
   const moduleCount = modules.filter((module) => !module.reference).length;
 
   // The <main> landmark comes from the site shell (AppShell.Main), on this page as on the docs.
+  // Floppeek, the author's Mac app for Amiga disks, comes last, and its requester right after
+  // the hero, so the Tab order reaches it after the hero's controls.
   return (
     <>
       <Welcome
@@ -56,7 +60,9 @@ export default async function HomePage() {
         functionCount={functionCount}
         moduleCount={moduleCount}
       />
+      <FloppeekRequester />
       <Content modules={modules} />
+      <FloppeekSection />
     </>
   );
 }

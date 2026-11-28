@@ -1,0 +1,660 @@
+/* Floppeek on the home page: the section at its foot and the requester that points to it.
+   Workbench blue (#0055aa) is the one new colour, Floppeek's own ground; everything on the
+   page's ground uses the site's tokens. Motion is Workbench's zoom boxes, in hard steps: only
+   opacity and transform, nothing loops, and nothing at all with reduced motion. */
+
+/* ---- The section ---- */
+
+.section {
+  position: relative;
+  padding-block: rem(56px);
+  border-top: 2px solid transparent;
+  border-image: var(--aal-copper) 1;
+  background-color: var(--mantine-color-gray-1);
+  scroll-margin-top: var(--app-shell-header-height, 60px);
+
+  @mixin dark {
+    background-color: var(--mantine-color-dark-8);
+  }
+
+  @media (min-width: $mantine-breakpoint-md) {
+    padding-block: rem(80px);
+  }
+}
+
+/* Source order is head, more, stage (the desktop's reading order); on a phone the stage comes
+   up between the two, so the disk is on screen before the small print. */
+.columns {
+  display: grid;
+  grid-template-areas: 'head' 'stage' 'more';
+  grid-template-columns: minmax(0, 1fr);
+  gap: rem(32px);
+  align-items: start;
+
+  @media (min-width: $mantine-breakpoint-md) {
+    grid-template-areas: 'head stage' 'more stage';
+    grid-template-rows: auto 1fr;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: rem(28px) rem(56px);
+  }
+}
+
+.head {
+  grid-area: head;
+}
+
+.more {
+  grid-area: more;
+}
+
+.brand {
+  display: flex;
+  gap: rem(16px);
+  align-items: center;
+}
+
+/* 64px is the icon's 256px at exactly 4:1 */
+.icon {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+}
+
+.eyebrow {
+  margin: 0 0 rem(8px);
+  color: var(--aal-accent);
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.name {
+  margin: 0;
+  font-family: var(--aal-font-pixel);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.tag {
+  margin: rem(24px) 0 0;
+  font-size: rem(28px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+
+  @media (min-width: $mantine-breakpoint-md) {
+    font-size: rem(36px);
+  }
+}
+
+.intro {
+  max-width: 34em;
+  margin: rem(12px) 0 0;
+  color: var(--mantine-color-dimmed);
+  font-size: rem(18px);
+  line-height: 1.6;
+}
+
+.facts {
+  margin: 0;
+  border-top: 1px solid var(--aal-rule);
+}
+
+.fact {
+  display: grid;
+  grid-template-columns: rem(64px) minmax(0, 1fr);
+  gap: rem(16px);
+  padding-block: rem(12px);
+  border-bottom: 1px dashed var(--aal-rule);
+
+  & dt {
+    padding-top: 4px;
+    color: var(--aal-accent);
+    font-family: var(--aal-font-pixel);
+    font-size: 1rem;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  & dd {
+    margin: 0;
+    line-height: 1.55;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: rem(12px) rem(16px);
+  align-items: center;
+  margin-top: rem(28px);
+}
+
+.meta {
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-sm);
+}
+
+/* The Homebrew command, at the Shell's prompt */
+.brew {
+  display: flex;
+  align-items: stretch;
+  margin-top: rem(16px);
+  border: 1px solid #000;
+  background-color: var(--aal-screen);
+
+  & code {
+    flex: 1;
+    min-width: 0;
+    padding: rem(10px) rem(12px);
+    overflow-x: auto;
+    background: none;
+    color: var(--aal-screen-text);
+    font-family: var(--aal-font-pixel);
+    font-size: 1rem;
+    line-height: 1.25;
+    white-space: pre;
+
+    &::before {
+      content: '1> ';
+      color: var(--mantine-color-orange-4);
+    }
+
+    @media (max-width: em(479.98px)) {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+.copy {
+  flex: none;
+  width: rem(72px);
+  border: 0;
+  border-left: 1px solid #000;
+  background-color: var(--aal-screen-text);
+  color: #060a14;
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--mantine-color-orange-5);
+  }
+
+  &:focus-visible {
+    outline-color: #060a14;
+    outline-offset: -4px;
+  }
+}
+
+/* Amiga Mode sets all of this in Topaz: sizes its pixels land on */
+:global([data-amiga-mode]) .tag {
+  font-size: 2rem;
+  letter-spacing: 0;
+}
+
+:global([data-amiga-mode]) .intro,
+:global([data-amiga-mode]) .fact dd,
+:global([data-amiga-mode]) .meta,
+:global([data-amiga-mode]) .hint,
+:global([data-amiga-mode]) .stage figcaption {
+  font-size: 1rem;
+}
+
+/* ---- The stage: a disk, the Space key, and the window Space opens ---- */
+
+.stage {
+  position: relative;
+  grid-area: stage;
+  margin: 0;
+  min-width: 0;
+}
+
+.desk {
+  display: flex;
+  gap: rem(16px);
+  align-items: center;
+  margin-bottom: rem(20px);
+}
+
+.disk {
+  display: block;
+  flex: none;
+  width: 128px;
+  height: 128px;
+
+  & text {
+    font-family: var(--aal-font-pixel);
+    font-size: 8px;
+  }
+}
+
+.how {
+  display: flex;
+  flex-direction: column;
+  gap: rem(12px);
+  align-items: flex-start;
+  min-width: 0;
+}
+
+/* The file's name, selected: the page's ink and paper, swapped */
+.file {
+  padding: 4px 6px;
+  background-color: var(--mantine-color-text);
+  color: var(--mantine-color-body);
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* The Space key: AmigaModeToggle's keycap, made wide */
+.key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 152px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(160deg, #fff 0%, #e4e2e2 40%, #303030 100%);
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 50%),
+    inset 0 1px 0 rgb(255 255 255 / 15%);
+  cursor: pointer;
+}
+
+.keyCap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 142px;
+  height: 30px;
+  border-radius: 5px;
+  background: linear-gradient(160deg, #959393 0%, #e2e2e2 100%);
+  box-shadow:
+    inset 0 -1px 1px rgb(245 243 243 / 20%),
+    0 1px 0 rgb(255 255 255 / 8%);
+  color: #1a1917;
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1;
+
+  .key[data-down] > &,
+  .key:active > & {
+    background: linear-gradient(160deg, #e2e2e2 0%, #959393 100%);
+    transform: translateY(2px);
+  }
+}
+
+.hint {
+  color: var(--mantine-color-dimmed);
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.3;
+}
+
+/* The listing: live text, one row a line, orange #ffc680 (the app's #ff8800 lightened to
+   4.7:1 on the blue for 16px type) */
+.list {
+  margin: 0;
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.row {
+  display: block;
+  min-height: 20px;
+  white-space: pre-wrap;
+}
+
+.orange {
+  color: #ffc680;
+}
+
+/* Phones keep the name, the size and the bits */
+@media (max-width: em(479.98px)) {
+  .date,
+  .time {
+    display: none;
+  }
+}
+
+/* The zoom boxes: outlines stepping from the disk to the window, as Workbench opened one */
+.zoom i {
+  position: absolute;
+  border: 2px solid var(--aal-accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Armed (waiting for its first opening) or closed, the window keeps its space: nothing below moves */
+.stage[data-state='armed'] .winBox,
+.stage[data-state='closed'] .winBox {
+  visibility: hidden;
+}
+
+/* ---- The requester ---- */
+
+.requester {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 90;
+  width: 336px;
+
+  @media (max-width: em(479.98px)) {
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: 16px;
+    width: auto;
+  }
+
+  @media print {
+    display: none;
+  }
+}
+
+.rqWindow {
+  --win-chrome: var(--mantine-color-orange-5);
+  --win-ink: #0a0d14;
+
+  position: relative;
+  border: 2px solid var(--win-ink);
+  background-color: #05a;
+  box-shadow: 6px 6px 0 rgb(0 0 0 / 28%);
+
+  @mixin dark {
+    border-color: #000;
+    box-shadow:
+      0 0 0 1px var(--mantine-color-dark-4),
+      6px 6px 0 rgb(0 0 0 / 45%);
+  }
+
+  .requester[data-anim='out'] & {
+    visibility: hidden;
+  }
+}
+
+.rqBar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  height: 24px;
+  padding-inline: 4px;
+  border-bottom: 2px solid var(--win-ink);
+  background-color: var(--win-chrome);
+  color: var(--win-ink);
+}
+
+/* The close gadget, a real button: a square with a dot, a 28px target around it */
+.rqClose {
+  position: relative;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 2px solid var(--win-ink);
+  background: transparent;
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background-color: var(--win-ink);
+  }
+
+  &:hover::after {
+    inset: 0;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--win-ink);
+    outline-offset: 1px;
+  }
+}
+
+.rqTitle {
+  flex: none;
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.rqDrag {
+  flex: 1;
+  align-self: stretch;
+  margin-block: 4px;
+  background-image: repeating-linear-gradient(180deg, var(--win-ink) 0 2px, transparent 2px 4px);
+  opacity: 0.55;
+}
+
+.rqDepth {
+  position: relative;
+  flex: none;
+  width: 18px;
+  height: 16px;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 11px;
+    height: 10px;
+    border: 2px solid var(--win-ink);
+  }
+
+  &::before {
+    top: 0;
+    left: 0;
+  }
+
+  &::after {
+    right: 0;
+    bottom: 0;
+    background-color: var(--win-chrome);
+  }
+}
+
+.rqCopper {
+  height: 2px;
+  background: var(--aal-copper);
+  transform-origin: 0 50%;
+}
+
+/* A window of the machine, like the hero's code: Topaz in every mode */
+.rqBody {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 16px 16px;
+  font-family: var(--aal-font-pixel);
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.rqHead {
+  margin: 0;
+  color: #fff;
+}
+
+.rqText {
+  margin: 8px 0 0;
+  color: #d3dae6;
+}
+
+.rqGadgets {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+/* Workbench's gadgets: a bevel lit from the upper left, reversed while pressed */
+.rqGadget {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 12px;
+  border: 2px solid;
+  border-color: #fff #002 #002 #fff;
+  background-color: #05a;
+  color: #fff;
+  font: inherit;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #003a78;
+  }
+
+  &:active {
+    border-color: #002 #fff #fff #002;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+}
+
+.rqGo {
+  background-color: #f80;
+  color: #002;
+
+  &:hover {
+    background-color: #ffa033;
+  }
+}
+
+.rqZoom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  & i {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: calc(var(--t) * 100%);
+    height: calc(var(--t) * 100%);
+    border: 2px solid var(--aal-accent);
+    opacity: 0;
+  }
+}
+
+/* ---- Motion, when the reader allows it ---- */
+
+@keyframes fp-show {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fp-flash {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes rq-drop {
+  from {
+    transform: translateY(-12px);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@keyframes rq-sweep {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .stage[data-anim='opening'] .winBox {
+    visibility: visible;
+    animation: fp-show 1ms steps(1, end) 420ms both;
+  }
+
+  .stage[data-anim='opening'] .row {
+    animation: fp-show 1ms steps(1, end) calc(480ms + var(--i) * 40ms) both;
+  }
+
+  .stage[data-anim='opening'] .zoom i {
+    animation: fp-flash 140ms steps(1, end) calc(120ms + var(--i) * 50ms) forwards;
+  }
+
+  .stage[data-anim='closing'] .zoom i {
+    animation: fp-flash 140ms steps(1, end) calc((5 - var(--i)) * 50ms) forwards;
+  }
+
+  .requester[data-anim='in'] .rqWindow {
+    animation: fp-show 1ms steps(1, end) 250ms both;
+  }
+
+  .requester[data-anim='in'] .rqZoom i {
+    animation: fp-flash 140ms steps(1, end) calc(var(--i) * 50ms) forwards;
+  }
+
+  .requester[data-anim='in'] .rqIcon {
+    animation: rq-drop 180ms steps(3, end) 330ms both;
+  }
+
+  .requester[data-anim='in'] .rqCopper {
+    animation: rq-sweep 480ms cubic-bezier(0.2, 0.7, 0.2, 1) 330ms both;
+  }
+
+  .requester[data-anim='in'] .rqHead {
+    animation: fp-show 1ms steps(1, end) 330ms both;
+  }
+
+  .requester[data-anim='in'] .rqText {
+    animation: fp-show 1ms steps(1, end) 410ms both;
+  }
+
+  .requester[data-anim='in'] .rqGadgets {
+    animation: fp-show 1ms steps(1, end) 490ms both;
+  }
+
+  .requester[data-anim='out'] .rqZoom i {
+    animation: fp-flash 140ms steps(1, end) calc((4 - var(--i)) * 50ms) forwards;
+  }
+}
+
+.rqIcon {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+}
