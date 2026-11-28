@@ -1,15 +1,11 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useLocalStorage } from '@mantine/hooks';
 import { FLOPPEEK_SECTION_ID, FLOPPEEK_STORAGE_KEY } from './floppeek';
+import { moving, timeouts } from './motion';
 import classes from './Floppeek.module.css';
 
 const ZOOM = [0.12, 0.34, 0.56, 0.78, 1];
-
-function moving() {
-  return window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
-}
 
 /**
  * A System Request in the corner of the home page, announcing Floppeek once the hero has gone by:
@@ -20,14 +16,6 @@ function moving() {
  */
 export function FloppeekRequester() {
   const rootRef = useRef<HTMLElement>(null);
-  const [dismissed, setDismissed] = useLocalStorage<boolean>({
-    key: FLOPPEEK_STORAGE_KEY,
-    defaultValue: false,
-    getInitialValueInEffect: true,
-  });
-  // The storage is read in an effect: until then nothing may show
-  const dismissedRef = useRef(dismissed);
-  dismissedRef.current = dismissed;
   const leaveRef = useRef<(restoreFocus: boolean) => void>(() => {});
 
   useEffect(() => {
@@ -38,17 +26,25 @@ export function FloppeekRequester() {
     }
     let shown = false;
     let done = false;
-    const timers = new Set<ReturnType<typeof setTimeout>>();
-    const later = (fn: () => void, ms: number) => {
-      const timer = setTimeout(() => {
-        timers.delete(timer);
-        fn();
-      }, ms);
-      timers.add(timer);
+    const timers = timeouts();
+    // The banner's key, as Banner (useLocalStorage) writes it: JSON `true`. Storage may be off
+    const dismissed = () => {
+      try {
+        return window.localStorage.getItem(FLOPPEEK_STORAGE_KEY) === 'true';
+      } catch {
+        return false;
+      }
+    };
+    const dismiss = () => {
+      try {
+        window.localStorage.setItem(FLOPPEEK_STORAGE_KEY, 'true');
+      } catch {
+        // nothing to remember it in: it leaves for this page only
+      }
     };
 
     const show = () => {
-      if (shown || done || dismissedRef.current || window.innerHeight < 520) {
+      if (shown || done || dismissed() || window.innerHeight < 520) {
         return;
       }
       shown = true;
@@ -61,13 +57,13 @@ export function FloppeekRequester() {
     const leave = (restoreFocus: boolean) => {
       const hadFocus = root.contains(document.activeElement);
       done = true;
-      setDismissed(true);
+      dismiss();
       if (!shown || root.hidden) {
         return;
       }
       if (moving()) {
         root.dataset.anim = 'out';
-        later(() => {
+        timers.later(() => {
           root.hidden = true;
           root.removeAttribute('data-anim');
         }, 420);
@@ -85,7 +81,7 @@ export function FloppeekRequester() {
     const onScroll = () => {
       if (window.scrollY >= window.innerHeight * 0.6) {
         window.removeEventListener('scroll', onScroll);
-        later(show, 400);
+        timers.later(show, 400);
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -95,7 +91,7 @@ export function FloppeekRequester() {
     if ('IntersectionObserver' in window) {
       observer = new IntersectionObserver(
         (entries) => {
-          if (entries[0]?.isIntersecting && !done && !dismissedRef.current) {
+          if (entries[0]?.isIntersecting && !done) {
             leave(false);
           }
         },
@@ -122,9 +118,9 @@ export function FloppeekRequester() {
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('keydown', onKey);
       observer?.disconnect();
-      timers.forEach(clearTimeout);
+      timers.clear();
     };
-  }, [setDismissed]);
+  }, []);
 
   return (
     <aside

@@ -7,6 +7,8 @@ export interface AmigaWindowProps {
   caption?: React.ReactNode;
   /** The screen: the site's dark one (default), or Workbench blue with white type */
   tone?: 'screen' | 'workbench';
+  /** The window itself, chrome and screen without the caption (to measure it) */
+  windowRef?: React.Ref<HTMLDivElement>;
   children: React.ReactNode;
 }
 
@@ -16,10 +18,16 @@ export interface AmigaWindowProps {
  * borders and gradients: no artwork of the system's is used. The chrome is decoration, hidden
  * from assistive tech; the content and the caption are not.
  */
-export function AmigaWindow({ title, caption, tone = 'screen', children }: AmigaWindowProps) {
+export function AmigaWindow({
+  title,
+  caption,
+  tone = 'screen',
+  windowRef,
+  children,
+}: AmigaWindowProps) {
   return (
     <figure className={classes.root} data-tone={tone}>
-      <div className={classes.window} data-amiga-window>
+      <div ref={windowRef} className={classes.window}>
         <div className={classes.titleBar} aria-hidden>
           <span className={classes.close} />
           <span className={classes.title}>{title}</span>

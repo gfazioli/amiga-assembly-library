@@ -3,15 +3,11 @@
 import { useEffect, useRef } from 'react';
 import { AmigaWindow } from '@/components/AmigaWindow/AmigaWindow';
 import { WORK_DISK_ROWS } from './floppeek';
+import { moving, timeouts } from './motion';
 import classes from './Floppeek.module.css';
 
 const ZOOM_BOXES = 6;
 const PREVIEW_ID = 'floppeek-preview';
-
-/** Motion is allowed: animations run, the first opening waits for the stage to come into view. */
-function moving() {
-  return window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
-}
 
 /**
  * Floppeek's trick, shown: a disk's Finder icon, the Space key, and the preview Space opens.
@@ -29,6 +25,7 @@ export function FloppeekStage() {
   const stageRef = useRef<HTMLElement>(null);
   const diskRef = useRef<SVGSVGElement>(null);
   const keyRef = useRef<HTMLButtonElement>(null);
+  const windowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -38,21 +35,13 @@ export function FloppeekStage() {
       return undefined;
     }
     const boxes = Array.from(stage.querySelectorAll<HTMLElement>(`.${classes.zoom} i`));
-    const timers = new Set<ReturnType<typeof setTimeout>>();
-    const later = (fn: () => void, ms: number) => {
-      const timer = setTimeout(() => {
-        timers.delete(timer);
-        fn();
-      }, ms);
-      timers.add(timer);
-      return timer;
-    };
+    const timers = timeouts();
     let animTimer: ReturnType<typeof setTimeout> | undefined;
 
     // Six outlines between the disk's box and the window's, in the stage's coordinates,
     // measured at play time
     const placeZoom = () => {
-      const win = stage.querySelector('[data-amiga-window]');
+      const win = windowRef.current;
       if (!win) {
         return;
       }
@@ -70,10 +59,7 @@ export function FloppeekStage() {
     };
 
     const play = (name: 'opening' | 'closing', ms: number) => {
-      if (animTimer) {
-        clearTimeout(animTimer);
-        timers.delete(animTimer);
-      }
+      timers.cancel(animTimer);
       stage.removeAttribute('data-anim');
       if (!moving()) {
         return;
@@ -81,7 +67,7 @@ export function FloppeekStage() {
       placeZoom();
       void stage.offsetWidth; // restart the animations
       stage.dataset.anim = name;
-      animTimer = later(() => stage.removeAttribute('data-anim'), ms);
+      animTimer = timers.later(() => stage.removeAttribute('data-anim'), ms);
     };
 
     const setOpen = (open: boolean) => {
@@ -92,7 +78,7 @@ export function FloppeekStage() {
 
     const pressKey = () => {
       key.setAttribute('data-down', '');
-      later(() => key.removeAttribute('data-down'), 120);
+      timers.later(() => key.removeAttribute('data-down'), 120);
     };
 
     const onClick = () => {
@@ -126,7 +112,7 @@ export function FloppeekStage() {
     return () => {
       key.removeEventListener('click', onClick);
       observer?.disconnect();
-      timers.forEach(clearTimeout);
+      timers.clear();
     };
   }, []);
 
@@ -181,6 +167,7 @@ export function FloppeekStage() {
 
       <div className={classes.winBox} id={PREVIEW_ID}>
         <AmigaWindow
+          windowRef={windowRef}
           title="Work Disk"
           tone="workbench"
           caption="What Space shows for Work Disk.adf: every drawer and file, with its size, protection bits and date."
